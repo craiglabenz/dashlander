@@ -28,7 +28,7 @@ class GameOverModal extends StatelessWidget {
             : 'Structural integrity compromised.';
 
     return Container(
-      color: Colors.black.withOpacity(0.8),
+      color: Colors.black.withValues(alpha: 0.8),
       child: Center(
         child: Container(
           width: 380,
@@ -38,7 +38,10 @@ class GameOverModal extends StatelessWidget {
             border: Border.all(color: primaryColor, width: 2),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
-              BoxShadow(color: primaryColor.withOpacity(0.3), blurRadius: 30),
+              BoxShadow(
+                color: primaryColor.withValues(alpha: 0.3),
+                blurRadius: 30,
+              ),
             ],
           ),
           child: Column(
@@ -65,7 +68,7 @@ class GameOverModal extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.cyan.shade900.withOpacity(0.3),
+                    color: Colors.cyan.shade900.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
@@ -132,7 +135,7 @@ class GameOverModal extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: onRetry,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor.withOpacity(0.2),
+                        backgroundColor: primaryColor.withValues(alpha: 0.2),
                         foregroundColor: primaryColor,
                         side: BorderSide(color: primaryColor),
                         padding: const EdgeInsets.symmetric(vertical: 16),

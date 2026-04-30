@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flame/components.dart';
+import '../physics/constants.dart';
 import '../physics/lander_state.dart';
 
 enum GameStatus { menu, playing, won, lost }
@@ -19,8 +20,13 @@ class TelemetryData {
     required this.gForce,
   });
 
-  factory TelemetryData.empty() =>
-      TelemetryData(fuel: 0, maxFuel: 100, vY: 0, vX: 0, gForce: 0);
+  factory TelemetryData.empty() => TelemetryData(
+    fuel: 0,
+    maxFuel: PhysicsConstants.defaultMaxFuel,
+    vY: 0,
+    vX: 0,
+    gForce: 0,
+  );
 }
 
 class LevelData {
@@ -28,8 +34,10 @@ class LevelData {
   final String name;
   final double initialFuel;
   final List<Vector2> terrainPoints;
-  final List<int>
-  padIndices; // pairs of indices representing landing pads e.g. [3, 4] means segment between terrainPoints[3] and [4] is a pad.
+
+  // Pairs of indices representing landing pads e.g. [3, 4] means segment
+  // between terrainPoints[3] and [4] is a pad.
+  final List<int> padIndices;
   final Vector2 startPosition;
 
   LevelData({
@@ -71,7 +79,7 @@ class GameController {
   void updateTelemetry(LanderState state) {
     telemetry.value = TelemetryData(
       fuel: state.fuelMass,
-      maxFuel: currentLevel?.initialFuel ?? 1000.0,
+      maxFuel: currentLevel?.initialFuel ?? PhysicsConstants.defaultMaxFuel,
       vY: state.velocity.y,
       vX: state.velocity.x,
       gForce: state.maxGForce,

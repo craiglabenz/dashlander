@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'package:flame/components.dart';
+import 'constants.dart';
 import 'lander_state.dart';
 
 class PhysicsEngine {
   // Lunar gravity is approx 1.625 m/s^2
-  final Vector2 gravity = Vector2(0, 1.625);
-  final double standardGravity = 9.80665; // For specific impulse calculation
+  final Vector2 gravity = Vector2(0, PhysicsConstants.lunarGravity);
 
   // Sandbox parameters
   bool infiniteFuel = false;
@@ -36,7 +36,8 @@ class PhysicsEngine {
     if (steeringTorque != 0.0 && hasFuel) {
       // Approximate RCS thrust by dividing torque by an assumed lever arm (e.g. 10 meters)
       // and applying the thrust scale.
-      rcsThrustMagnitude = (steeringTorque.abs() / 10.0) * thrustScale;
+      rcsThrustMagnitude =
+          (steeringTorque.abs() / PhysicsConstants.rcsLeverArm) * thrustScale;
     } else {
       steeringTorque = 0.0; // No fuel for RCS
     }
@@ -45,7 +46,8 @@ class PhysicsEngine {
       // dm/dt = - (T * F_max) / (I_sp * g0)
       double totalThrust = mainThrustMagnitude + rcsThrustMagnitude;
       double massFlowRate =
-          totalThrust / (state.specificImpulse * standardGravity);
+          totalThrust /
+          (state.specificImpulse * PhysicsConstants.standardGravity);
       state.fuelMass -= massFlowRate * dt;
       if (state.fuelMass < 0) state.fuelMass = 0;
     }
@@ -78,7 +80,8 @@ class PhysicsEngine {
             ? (netForce - (gravity * state.totalMass * gravityScale)) /
                 state.totalMass
             : Vector2.zero();
-    double currentG = feltAcceleration.length / standardGravity;
+    double currentG =
+        feltAcceleration.length / PhysicsConstants.standardGravity;
     if (currentG > state.maxGForce) {
       state.maxGForce = currentG;
     }
@@ -100,9 +103,13 @@ class PhysicsEngine {
     double tilt = min(angleDeg, 360 - angleDeg);
 
     bool isUpright =
-        tilt < 15.0; // lenient for gameplay, historically 6 degrees
-    bool isSlowV = state.velocity.y < 2.0; // m/s
-    bool isSlowH = state.velocity.x.abs() < 1.0; // m/s
+        tilt <
+        PhysicsConstants
+            .maxLandingTiltDegrees; // lenient for gameplay, historically 6 degrees
+    bool isSlowV =
+        state.velocity.y < PhysicsConstants.maxLandingVelocityY; // m/s
+    bool isSlowH =
+        state.velocity.x.abs() < PhysicsConstants.maxLandingVelocityX; // m/s
 
     if (isUpright && isSlowV && isSlowH) {
       state.isLanded = true;

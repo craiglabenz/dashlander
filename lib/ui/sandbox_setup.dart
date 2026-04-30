@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../game/game_state.dart';
+import '../physics/constants.dart';
 import 'level_select.dart'; // For defaultLevels
 
 class SandboxSetup extends StatefulWidget {
@@ -14,8 +15,8 @@ class SandboxSetup extends StatefulWidget {
 }
 
 class _SandboxSetupState extends State<SandboxSetup> {
-  double gravity = 0.04;
-  double thrustPower = 0.12;
+  double gravity = PhysicsConstants.sandboxBaseGravity;
+  double thrustPower = PhysicsConstants.sandboxBaseThrust;
   bool infiniteFuel = true;
 
   @override

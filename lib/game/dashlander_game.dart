@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'dart:math';
 
 import 'dart:ui' as ui;
+import '../physics/constants.dart';
 import '../physics/lander_state.dart';
 import '../physics/physics_engine.dart';
 import 'components/particle_exhaust.dart';
@@ -58,24 +59,32 @@ class DashlanderGame extends FlameGame
     // 2. Setup Physics
     physicsEngine = PhysicsEngine();
     if (gameController.sandboxConfig != null) {
-      physicsEngine.gravityScale = gameController.sandboxConfig!.gravity / 0.04;
+      physicsEngine.gravityScale =
+          gameController.sandboxConfig!.gravity /
+          PhysicsConstants.sandboxBaseGravity;
       physicsEngine.thrustScale =
-          gameController.sandboxConfig!.thrustPower / 0.12;
+          gameController.sandboxConfig!.thrustPower /
+          PhysicsConstants.sandboxBaseThrust;
       physicsEngine.infiniteFuel = gameController.sandboxConfig!.infiniteFuel;
     }
 
     final level = gameController.currentLevel!;
     landerState = LanderState(
       position: level.startPosition.clone(),
-      velocity: Vector2(2, 0), // Slight initial push
+      velocity: Vector2(
+        PhysicsConstants.initialVelocityX,
+        PhysicsConstants.initialVelocityY,
+      ), // Slight initial push
       angle: 0,
       angularVelocity: 0,
       fuelMass: level.initialFuel,
-      dryMass: 4280.0, // Apollo LM dry mass approx
-      engineMaxThrust: 45040.0, // Apollo LM max thrust N
-      specificImpulse: 311.0,
+      dryMass: PhysicsConstants.dryMass, // Apollo LM dry mass approx
+      engineMaxThrust:
+          PhysicsConstants.engineMaxThrust, // Apollo LM max thrust N
+      specificImpulse: PhysicsConstants.specificImpulse,
       baseInertia:
-          50000.0, // Arbitrary 2D moment of inertia for responsive feel
+          PhysicsConstants
+              .baseInertia, // Arbitrary 2D moment of inertia for responsive feel
     );
 
     // 3. Add Terrain
@@ -97,19 +106,22 @@ class DashlanderGame extends FlameGame
 
       // Offset ghost ships slightly so they don't perfectly overlap
       final offset = Vector2(
-        (Random().nextDouble() - 0.5) * 40,
-        (Random().nextDouble() - 0.5) * 20,
+        (Random().nextDouble() - 0.5) * PhysicsConstants.ghostOffsetXRange,
+        (Random().nextDouble() - 0.5) * PhysicsConstants.ghostOffsetYRange,
       );
       final ghostState = LanderState(
         position: level.startPosition.clone() + offset,
-        velocity: Vector2(2, 0), // Slight initial push
+        velocity: Vector2(
+          PhysicsConstants.initialVelocityX,
+          PhysicsConstants.initialVelocityY,
+        ), // Slight initial push
         angle: 0,
         angularVelocity: 0,
         fuelMass: level.initialFuel,
-        dryMass: 4280.0,
-        engineMaxThrust: 45040.0,
-        specificImpulse: 311.0,
-        baseInertia: 50000.0,
+        dryMass: PhysicsConstants.dryMass,
+        engineMaxThrust: PhysicsConstants.engineMaxThrust,
+        specificImpulse: PhysicsConstants.specificImpulse,
+        baseInertia: PhysicsConstants.baseInertia,
       );
       final hue = Random().nextDouble() * 360.0;
       final color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
@@ -138,8 +150,8 @@ class DashlanderGame extends FlameGame
 
     // Handle Input
     double steeringTorque = 0.0;
-    if (isLeftPressed) steeringTorque -= 25000.0;
-    if (isRightPressed) steeringTorque += 25000.0;
+    if (isLeftPressed) steeringTorque -= PhysicsConstants.rcsSteeringTorque;
+    if (isRightPressed) steeringTorque += PhysicsConstants.rcsSteeringTorque;
 
     landerState.isThrusting = isUpPressed;
 
@@ -268,7 +280,7 @@ class DashlanderGame extends FlameGame
   }
 
   void _checkCollisions() {
-    final shipRadius = 14.0;
+    final shipRadius = PhysicsConstants.shipRadius;
     bool crashed = false;
     bool landed = false;
 

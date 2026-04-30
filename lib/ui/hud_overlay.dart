@@ -19,12 +19,14 @@ class HudOverlay extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.cyan.shade900.withOpacity(0.3),
+              color: Colors.cyan.shade900.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.cyanAccent.withOpacity(0.3)),
+              border: Border.all(
+                color: Colors.cyanAccent.withValues(alpha: 0.3),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.cyanAccent.withOpacity(0.1),
+                  color: Colors.cyanAccent.withValues(alpha: 0.1),
                   blurRadius: 20,
                   spreadRadius: 4,
                 ),
@@ -111,7 +113,7 @@ class HudOverlay extends StatelessWidget {
         Text(
           'FUEL',
           style: GoogleFonts.shareTechMono(
-            color: Colors.cyanAccent.withOpacity(0.7),
+            color: Colors.cyanAccent.withValues(alpha: 0.7),
             fontSize: 10,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
@@ -136,7 +138,7 @@ class HudOverlay extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.cyanAccent.withOpacity(0.8),
+                  color: Colors.cyanAccent.withValues(alpha: 0.8),
                   blurRadius: 8,
                 ),
               ],
@@ -159,7 +161,7 @@ class HudOverlay extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.shareTechMono(
-            color: Colors.cyanAccent.withOpacity(0.7),
+            color: Colors.cyanAccent.withValues(alpha: 0.7),
             fontSize: 10,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
