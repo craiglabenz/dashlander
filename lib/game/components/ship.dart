@@ -26,24 +26,24 @@ class ShipComponent extends PositionComponent {
 
     _hullPaint =
         Paint()
-          ..color = const Color(0xFF111111).withOpacity(opacity)
+          ..color = const Color(0xFF111111).withValues(alpha: opacity)
           ..style = PaintingStyle.fill;
 
     _hullStrokePaint =
         Paint()
-          ..color = mainColor.withOpacity(opacity)
+          ..color = mainColor.withValues(alpha: opacity)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2.0;
 
     _legPaint =
         Paint()
-          ..color = secondaryColor.withOpacity(opacity)
+          ..color = secondaryColor.withValues(alpha: opacity)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5;
 
     _windowPaint =
         Paint()
-          ..color = secondaryColor.withOpacity(opacity)
+          ..color = secondaryColor.withValues(alpha: opacity)
           ..style = PaintingStyle.fill;
   }
 

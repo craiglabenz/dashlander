@@ -23,7 +23,7 @@ class _SandboxSetupState extends State<SandboxSetup> {
     return Material(
       type: MaterialType.transparency,
       child: Container(
-        color: Colors.black.withOpacity(0.8),
+        color: Colors.black.withValues(alpha: 0.8),
         padding: const EdgeInsets.all(32),
         child: Center(
           child: SingleChildScrollView(
@@ -39,7 +39,7 @@ class _SandboxSetupState extends State<SandboxSetup> {
                       color: Colors.pinkAccent,
                       shadows: [
                         BoxShadow(
-                          color: Colors.pinkAccent.withOpacity(0.8),
+                          color: Colors.pinkAccent.withValues(alpha: 0.8),
                           blurRadius: 8,
                         ),
                       ],
@@ -49,9 +49,9 @@ class _SandboxSetupState extends State<SandboxSetup> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.pink.shade900.withOpacity(0.1),
+                      color: Colors.pink.shade900.withValues(alpha: 0.1),
                       border: Border.all(
-                        color: Colors.pinkAccent.withOpacity(0.3),
+                        color: Colors.pinkAccent.withValues(alpha: 0.3),
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -86,7 +86,7 @@ class _SandboxSetupState extends State<SandboxSetup> {
                             ),
                             Switch(
                               value: infiniteFuel,
-                              activeColor: Colors.pinkAccent,
+                              activeThumbColor: Colors.pinkAccent,
                               onChanged:
                                   (v) => setState(() => infiniteFuel = v),
                             ),
@@ -127,8 +127,8 @@ class _SandboxSetupState extends State<SandboxSetup> {
                           ); // Just use first level terrain for sandbox
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.pink.shade900.withOpacity(
-                            0.5,
+                          backgroundColor: Colors.pink.shade900.withValues(
+                            alpha: 0.5,
                           ),
                           foregroundColor: Colors.pink.shade100,
                           side: const BorderSide(color: Colors.pinkAccent),

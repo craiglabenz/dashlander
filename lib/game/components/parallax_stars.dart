@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
-class ParallaxStars extends Component with HasGameRef {
+class ParallaxStars extends Component with HasGameReference {
   final List<_Star> _stars = [];
   final Random _rnd = Random();
 
@@ -25,7 +25,7 @@ class ParallaxStars extends Component with HasGameRef {
     super.render(canvas);
 
     // Get camera position
-    final cameraPos = gameRef.camera.viewfinder.position;
+    final cameraPos = game.camera.viewfinder.position;
 
     final Paint paint = Paint()..color = Colors.white;
 
@@ -38,7 +38,7 @@ class ParallaxStars extends Component with HasGameRef {
       sx = ((sx % 3000) + 3000) % 3000 - 500;
       sy = ((sy % 2000) + 2000) % 2000 - 500;
 
-      paint.color = Colors.white.withOpacity(s.alpha);
+      paint.color = Colors.white.withValues(alpha: s.alpha);
       canvas.drawCircle(Offset(sx, sy), s.size, paint);
     }
   }

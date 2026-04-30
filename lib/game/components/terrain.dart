@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
-class TerrainComponent extends PositionComponent with HasGameRef {
+class TerrainComponent extends PositionComponent with HasGameReference {
   final List<Vector2> points;
   final List<int> padIndices;
 
@@ -73,7 +73,7 @@ class TerrainComponent extends PositionComponent with HasGameRef {
     final Paint frontPaint = Paint();
     if (_program != null) {
       _shader ??= _program!.fragmentShader();
-      final screenSize = gameRef.size;
+      final screenSize = game.size;
       _shader!.setFloat(0, screenSize.x);
       _shader!.setFloat(1, screenSize.y);
       _shader!.setFloat(2, _time);
@@ -100,7 +100,7 @@ class TerrainComponent extends PositionComponent with HasGameRef {
         Offset(p1.x, p1.y),
         Offset(p2.x, p2.y),
         Paint()
-          ..color = baseColor.withOpacity(0.4)
+          ..color = baseColor.withValues(alpha: 0.4)
           ..strokeWidth = width * 4
           ..strokeCap = StrokeCap.round,
       );

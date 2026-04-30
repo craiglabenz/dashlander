@@ -55,7 +55,7 @@ class ParticleExhaust extends PositionComponent {
   void render(Canvas canvas) {
     final glowPaint =
         Paint()
-          ..color = color.withOpacity(life.clamp(0.0, 1.0))
+          ..color = color.withValues(alpha: life.clamp(0.0, 1.0))
           ..maskFilter = MaskFilter.blur(
             BlurStyle.normal,
             startRadius * life.clamp(0.0, 1.0),
@@ -69,7 +69,7 @@ class ParticleExhaust extends PositionComponent {
     canvas.drawCircle(
       Offset.zero,
       (startRadius / 2) * life.clamp(0.0, 1.0),
-      Paint()..color = Colors.white.withOpacity(life.clamp(0.0, 1.0)),
+      Paint()..color = Colors.white.withValues(alpha: life.clamp(0.0, 1.0)),
     );
   }
 }

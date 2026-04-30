@@ -21,7 +21,7 @@ class _MainMenuState extends State<MainMenu> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black.withOpacity(0.8),
+      color: Colors.black.withValues(alpha: 0.8),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -35,11 +35,11 @@ class _MainMenuState extends State<MainMenu> {
                 color: Colors.cyanAccent,
                 shadows: [
                   BoxShadow(
-                    color: Colors.cyanAccent.withOpacity(0.8),
+                    color: Colors.cyanAccent.withValues(alpha: 0.8),
                     blurRadius: 15,
                   ),
                   BoxShadow(
-                    color: Colors.pinkAccent.withOpacity(0.8),
+                    color: Colors.pinkAccent.withValues(alpha: 0.8),
                     blurRadius: 30,
                   ),
                 ],
@@ -132,7 +132,9 @@ class _MenuButtonState extends State<_MenuButton> {
             border: Border.all(color: widget.color, width: 2),
             borderRadius: BorderRadius.circular(4),
             color:
-                isHovered ? widget.color.withOpacity(0.2) : Colors.transparent,
+                isHovered
+                    ? widget.color.withValues(alpha: 0.2)
+                    : Colors.transparent,
             boxShadow:
                 isHovered
                     ? [BoxShadow(color: widget.color, blurRadius: 15)]

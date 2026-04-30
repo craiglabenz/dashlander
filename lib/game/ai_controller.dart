@@ -113,8 +113,12 @@ class GhostAIController {
     double angleDiff = state.angle - desiredAngle;
 
     // Normalize angle difference to [-pi, pi]
-    while (angleDiff > pi) angleDiff -= 2 * pi;
-    while (angleDiff < -pi) angleDiff += 2 * pi;
+    while (angleDiff > pi) {
+      angleDiff -= 2 * pi;
+    }
+    while (angleDiff < -pi) {
+      angleDiff += 2 * pi;
+    }
 
     // Predict where the angle will be based on current angular velocity
     double predictedAngleDiff = angleDiff + state.angularVelocity * 1.5;

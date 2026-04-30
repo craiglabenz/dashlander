@@ -65,7 +65,7 @@ class LevelSelect extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: Container(
-        color: Colors.black.withOpacity(0.8),
+        color: Colors.black.withValues(alpha: 0.8),
         padding: const EdgeInsets.all(32),
         child: Center(
           child: SingleChildScrollView(
@@ -79,7 +79,7 @@ class LevelSelect extends StatelessWidget {
                     color: Colors.cyanAccent,
                     shadows: [
                       BoxShadow(
-                        color: Colors.cyanAccent.withOpacity(0.8),
+                        color: Colors.cyanAccent.withValues(alpha: 0.8),
                         blurRadius: 8,
                       ),
                     ],
@@ -135,8 +135,8 @@ class _LevelCard extends StatelessWidget {
         width: 200,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colors.cyan.shade900.withOpacity(0.2),
-          border: Border.all(color: Colors.cyanAccent.withOpacity(0.5)),
+          color: Colors.cyan.shade900.withValues(alpha: 0.2),
+          border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.5)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
