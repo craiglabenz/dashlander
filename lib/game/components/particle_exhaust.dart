@@ -18,14 +18,25 @@ class ParticleExhaust extends PositionComponent {
   }) : super(position: position, anchor: Anchor.center) {
     // Add random spread to velocity based on angle
     velocity = Vector2(
-      shipVelocity.x + sin(emissionAngle) * 100 + (_rnd.nextDouble() - 0.5) * 50,
-      shipVelocity.y - cos(emissionAngle) * 100 + (_rnd.nextDouble() - 0.5) * 50,
+      shipVelocity.x +
+          sin(emissionAngle) * 100 +
+          (_rnd.nextDouble() - 0.5) * 50,
+      shipVelocity.y -
+          cos(emissionAngle) * 100 +
+          (_rnd.nextDouble() - 0.5) * 50,
     );
-    this.color = color ?? (_rnd.nextBool() ? const Color(0xFFFFAA00) : const Color(0xFFFF00FF));
+    this.color =
+        color ??
+        (_rnd.nextBool() ? const Color(0xFFFFAA00) : const Color(0xFFFF00FF));
   }
 
-  ParticleExhaust.explosion({required Vector2 position}) : startRadius = 6.0, super(position: position, anchor: Anchor.center) {
-    velocity = Vector2((_rnd.nextDouble() - 0.5) * 200, (_rnd.nextDouble() - 0.5) * 200);
+  ParticleExhaust.explosion({required Vector2 position})
+    : startRadius = 6.0,
+      super(position: position, anchor: Anchor.center) {
+    velocity = Vector2(
+      (_rnd.nextDouble() - 0.5) * 200,
+      (_rnd.nextDouble() - 0.5) * 200,
+    );
     color = _rnd.nextBool() ? const Color(0xFFFF00FF) : const Color(0xFF00FFFF);
     life = 1.0 + _rnd.nextDouble(); // longer life for explosion
   }
@@ -42,11 +53,23 @@ class ParticleExhaust extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
-    final glowPaint = Paint()
-      ..color = color.withOpacity(life.clamp(0.0, 1.0))
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, startRadius * life.clamp(0.0, 1.0));
-    
-    canvas.drawCircle(Offset.zero, startRadius * life.clamp(0.0, 1.0), glowPaint);
-    canvas.drawCircle(Offset.zero, (startRadius / 2) * life.clamp(0.0, 1.0), Paint()..color = Colors.white.withOpacity(life.clamp(0.0, 1.0)));
+    final glowPaint =
+        Paint()
+          ..color = color.withOpacity(life.clamp(0.0, 1.0))
+          ..maskFilter = MaskFilter.blur(
+            BlurStyle.normal,
+            startRadius * life.clamp(0.0, 1.0),
+          );
+
+    canvas.drawCircle(
+      Offset.zero,
+      startRadius * life.clamp(0.0, 1.0),
+      glowPaint,
+    );
+    canvas.drawCircle(
+      Offset.zero,
+      (startRadius / 2) * life.clamp(0.0, 1.0),
+      Paint()..color = Colors.white.withOpacity(life.clamp(0.0, 1.0)),
+    );
   }
 }

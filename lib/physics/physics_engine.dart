@@ -12,22 +12,42 @@ class PhysicsEngine {
   double gravityScale = 1.0;
   double thrustScale = 1.0;
 
-  void update(LanderState state, double dt, double throttle, double steeringTorque) {
+  void update(
+    LanderState state,
+    double dt,
+    double throttle,
+    double steeringTorque,
+  ) {
     if (state.isCrashed || state.isLanded) return;
 
     // 1. Calculate Fuel Consumption
-    double thrustMagnitude = 0.0;
-    if (state.isThrusting && (state.fuelMass > 0 || infiniteFuel)) {
-      thrustMagnitude = state.engineMaxThrust * throttle * thrustScale;
-      
-      if (!infiniteFuel) {
-        // dm/dt = - (T * F_max) / (I_sp * g0)
-        double massFlowRate = thrustMagnitude / (state.specificImpulse * standardGravity);
-        state.fuelMass -= massFlowRate * dt;
-        if (state.fuelMass < 0) state.fuelMass = 0;
-      }
+    double mainThrustMagnitude = 0.0;
+    double rcsThrustMagnitude = 0.0;
+
+    // Check if we have fuel
+    bool hasFuel = state.fuelMass > 0 || infiniteFuel;
+
+    if (state.isThrusting && hasFuel) {
+      mainThrustMagnitude = state.engineMaxThrust * throttle * thrustScale;
     } else {
       state.isThrusting = false; // Out of fuel or throttle off
+    }
+
+    if (steeringTorque != 0.0 && hasFuel) {
+      // Approximate RCS thrust by dividing torque by an assumed lever arm (e.g. 10 meters)
+      // and applying the thrust scale.
+      rcsThrustMagnitude = (steeringTorque.abs() / 10.0) * thrustScale;
+    } else {
+      steeringTorque = 0.0; // No fuel for RCS
+    }
+
+    if (!infiniteFuel && (mainThrustMagnitude > 0 || rcsThrustMagnitude > 0)) {
+      // dm/dt = - (T * F_max) / (I_sp * g0)
+      double totalThrust = mainThrustMagnitude + rcsThrustMagnitude;
+      double massFlowRate =
+          totalThrust / (state.specificImpulse * standardGravity);
+      state.fuelMass -= massFlowRate * dt;
+      if (state.fuelMass < 0) state.fuelMass = 0;
     }
 
     // 2. Accumulate Forces
@@ -37,8 +57,8 @@ class PhysicsEngine {
       // In Flame, Y down is positive. Angle 0 = pointing UP.
       // So thrust points UP, accelerating ship UP (negative Y).
       Vector2 thrustVector = Vector2(
-        sin(state.angle) * thrustMagnitude,
-        -cos(state.angle) * thrustMagnitude,
+        sin(state.angle) * mainThrustMagnitude,
+        -cos(state.angle) * mainThrustMagnitude,
       );
       netForce += thrustVector;
     }
@@ -51,9 +71,13 @@ class PhysicsEngine {
     // 4. Semi-Implicit Euler Integration
     // Translational Update
     Vector2 acceleration = netForce / state.totalMass;
-    
+
     // G-Force Calculation (magnitude of non-gravitational acceleration)
-    Vector2 feltAcceleration = state.isThrusting ? (netForce - (gravity * state.totalMass * gravityScale)) / state.totalMass : Vector2.zero();
+    Vector2 feltAcceleration =
+        state.isThrusting
+            ? (netForce - (gravity * state.totalMass * gravityScale)) /
+                state.totalMass
+            : Vector2.zero();
     double currentG = feltAcceleration.length / standardGravity;
     if (currentG > state.maxGForce) {
       state.maxGForce = currentG;
@@ -75,7 +99,8 @@ class PhysicsEngine {
     // Normalized difference from 0 (upright)
     double tilt = min(angleDeg, 360 - angleDeg);
 
-    bool isUpright = tilt < 15.0; // lenient for gameplay, historically 6 degrees
+    bool isUpright =
+        tilt < 15.0; // lenient for gameplay, historically 6 degrees
     bool isSlowV = state.velocity.y < 2.0; // m/s
     bool isSlowH = state.velocity.x.abs() < 1.0; // m/s
 

@@ -11,7 +11,10 @@ final List<LevelData> defaultLevels = [
     terrainPoints: [
       Vector2(0, 600), Vector2(200, 550), Vector2(350, 650),
       Vector2(450, 650), Vector2(600, 650), // Pad between indices 3 and 4
-      Vector2(800, 500), Vector2(1000, 700), Vector2(1200, 600), Vector2(1500, 600)
+      Vector2(800, 500),
+      Vector2(1000, 700),
+      Vector2(1200, 600),
+      Vector2(1500, 600),
     ],
     padIndices: [3],
     startPosition: Vector2(100, 100),
@@ -22,8 +25,13 @@ final List<LevelData> defaultLevels = [
     initialFuel: 800,
     terrainPoints: [
       Vector2(0, 400), Vector2(150, 300), Vector2(250, 500),
-      Vector2(400, 800), Vector2(500, 800), Vector2(600, 800), // Pads 3-4 and 4-5
-      Vector2(750, 450), Vector2(900, 350), Vector2(1100, 650), Vector2(1500, 500)
+      Vector2(400, 800),
+      Vector2(500, 800),
+      Vector2(600, 800), // Pads 3-4 and 4-5
+      Vector2(750, 450),
+      Vector2(900, 350),
+      Vector2(1100, 650),
+      Vector2(1500, 500),
     ],
     padIndices: [3, 4],
     startPosition: Vector2(100, 100),
@@ -36,7 +44,10 @@ final List<LevelData> defaultLevels = [
       Vector2(0, 700), Vector2(200, 700), Vector2(300, 400),
       Vector2(450, 300), Vector2(600, 600), Vector2(700, 750),
       Vector2(800, 750), Vector2(880, 750), // Pad 6-7
-      Vector2(950, 500), Vector2(1100, 200), Vector2(1300, 400), Vector2(1500, 800)
+      Vector2(950, 500),
+      Vector2(1100, 200),
+      Vector2(1300, 400),
+      Vector2(1500, 800),
     ],
     padIndices: [6],
     startPosition: Vector2(150, 100),
@@ -60,32 +71,48 @@ class LevelSelect extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'SELECT SECTOR',
-              style: GoogleFonts.orbitron(
-                fontSize: 32,
-                color: Colors.cyanAccent,
-                shadows: [BoxShadow(color: Colors.cyanAccent.withOpacity(0.8), blurRadius: 8)],
-              ),
+              children: [
+                Text(
+                  'SELECT SECTOR',
+                  style: GoogleFonts.orbitron(
+                    fontSize: 32,
+                    color: Colors.cyanAccent,
+                    shadows: [
+                      BoxShadow(
+                        color: Colors.cyanAccent.withOpacity(0.8),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Wrap(
+                  spacing: 24,
+                  runSpacing: 24,
+                  alignment: WrapAlignment.center,
+                  children:
+                      defaultLevels
+                          .map(
+                            (lvl) => _LevelCard(
+                              level: lvl,
+                              onSelect: () => onSelect(lvl),
+                            ),
+                          )
+                          .toList(),
+                ),
+                const SizedBox(height: 48),
+                TextButton(
+                  onPressed: onBack,
+                  child: Text(
+                    '← BACK TO MENU',
+                    style: GoogleFonts.shareTechMono(
+                      color: Colors.grey.shade400,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 32),
-            Wrap(
-              spacing: 24,
-              runSpacing: 24,
-              alignment: WrapAlignment.center,
-              children: defaultLevels.map((lvl) => _LevelCard(level: lvl, onSelect: () => onSelect(lvl))).toList(),
-            ),
-            const SizedBox(height: 48),
-            TextButton(
-              onPressed: onBack,
-              child: Text(
-                '← BACK TO MENU',
-                style: GoogleFonts.shareTechMono(color: Colors.grey.shade400, letterSpacing: 2),
-              ),
-            ),
-          ],
-        ),
           ),
         ),
       ),
@@ -116,13 +143,19 @@ class _LevelCard extends StatelessWidget {
           children: [
             Text(
               level.name,
-              style: GoogleFonts.shareTechMono(color: Colors.white, fontSize: 18),
+              style: GoogleFonts.shareTechMono(
+                color: Colors.white,
+                fontSize: 18,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(
               'Fuel: ${level.initialFuel} kg',
-              style: GoogleFonts.shareTechMono(color: Colors.cyan.shade300, fontSize: 14),
+              style: GoogleFonts.shareTechMono(
+                color: Colors.cyan.shade300,
+                fontSize: 14,
+              ),
             ),
           ],
         ),

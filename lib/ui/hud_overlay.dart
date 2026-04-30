@@ -31,7 +31,10 @@ class HudOverlay extends StatelessWidget {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 children: [
                   // Pause / Exit button
@@ -47,12 +50,16 @@ class HudOverlay extends StatelessWidget {
                           border: Border.all(color: Colors.grey.shade600),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.close, color: Colors.white70, size: 24),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white70,
+                          size: 24,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 16),
-                  
+
                   Expanded(
                     child: ValueListenableBuilder<TelemetryData>(
                       valueListenable: controller.telemetry,
@@ -61,9 +68,27 @@ class HudOverlay extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             _buildFuelGauge(data.fuel, data.maxFuel),
-                            _buildTelemetryItem('V.SPD', '${(data.vY * 10).toStringAsFixed(1)} m/s', data.vY > 15 ? Colors.redAccent : Colors.cyanAccent),
-                            _buildTelemetryItem('H.SPD', '${(data.vX * 10).toStringAsFixed(1)} m/s', data.vX.abs() > 8 ? Colors.redAccent : Colors.cyanAccent),
-                            _buildTelemetryItem('G-FORCE', '${data.gForce.toStringAsFixed(1)} G', data.gForce > 3.0 ? Colors.orangeAccent : Colors.white),
+                            _buildTelemetryItem(
+                              'V.SPD',
+                              '${(data.vY * 10).toStringAsFixed(1)} m/s',
+                              data.vY > 15
+                                  ? Colors.redAccent
+                                  : Colors.cyanAccent,
+                            ),
+                            _buildTelemetryItem(
+                              'H.SPD',
+                              '${(data.vX * 10).toStringAsFixed(1)} m/s',
+                              data.vX.abs() > 8
+                                  ? Colors.redAccent
+                                  : Colors.cyanAccent,
+                            ),
+                            _buildTelemetryItem(
+                              'G-FORCE',
+                              '${data.gForce.toStringAsFixed(1)} G',
+                              data.gForce > 3.0
+                                  ? Colors.orangeAccent
+                                  : Colors.white,
+                            ),
                           ],
                         );
                       },
@@ -85,7 +110,12 @@ class HudOverlay extends StatelessWidget {
       children: [
         Text(
           'FUEL',
-          style: GoogleFonts.shareTechMono(color: Colors.cyanAccent.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+          style: GoogleFonts.shareTechMono(
+            color: Colors.cyanAccent.withOpacity(0.7),
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
         ),
         const SizedBox(height: 4),
         Container(
@@ -128,12 +158,21 @@ class HudOverlay extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.shareTechMono(color: Colors.cyanAccent.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+          style: GoogleFonts.shareTechMono(
+            color: Colors.cyanAccent.withOpacity(0.7),
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.shareTechMono(color: valueColor, fontSize: 16, fontWeight: FontWeight.bold),
+          style: GoogleFonts.shareTechMono(
+            color: valueColor,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

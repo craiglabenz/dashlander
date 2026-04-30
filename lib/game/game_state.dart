@@ -19,7 +19,8 @@ class TelemetryData {
     required this.gForce,
   });
 
-  factory TelemetryData.empty() => TelemetryData(fuel: 0, maxFuel: 100, vY: 0, vX: 0, gForce: 0);
+  factory TelemetryData.empty() =>
+      TelemetryData(fuel: 0, maxFuel: 100, vY: 0, vX: 0, gForce: 0);
 }
 
 class LevelData {
@@ -27,7 +28,8 @@ class LevelData {
   final String name;
   final double initialFuel;
   final List<Vector2> terrainPoints;
-  final List<int> padIndices; // pairs of indices representing landing pads e.g. [3, 4] means segment between terrainPoints[3] and [4] is a pad.
+  final List<int>
+  padIndices; // pairs of indices representing landing pads e.g. [3, 4] means segment between terrainPoints[3] and [4] is a pad.
   final Vector2 startPosition;
 
   LevelData({
@@ -53,9 +55,11 @@ class SandboxConfig {
 }
 
 class GameController {
-  final ValueNotifier<TelemetryData> telemetry = ValueNotifier(TelemetryData.empty());
+  final ValueNotifier<TelemetryData> telemetry = ValueNotifier(
+    TelemetryData.empty(),
+  );
   final ValueNotifier<GameStatus> status = ValueNotifier(GameStatus.menu);
-  
+
   // Game results
   int finalScore = 0;
   LanderState? finalState;
@@ -77,11 +81,13 @@ class GameController {
   void setGameOver(GameStatus newStatus, LanderState state) {
     status.value = newStatus;
     finalState = state;
-    
+
     if (newStatus == GameStatus.won) {
       double fuelScore = state.fuelMass * 2;
-      double velocityPenalty = (state.velocity.y.abs() + state.velocity.x.abs()) * 100;
-      double score = 10000 + fuelScore - velocityPenalty - (state.maxGForce * 50);
+      double velocityPenalty =
+          (state.velocity.y.abs() + state.velocity.x.abs()) * 100;
+      double score =
+          10000 + fuelScore - velocityPenalty - (state.maxGForce * 50);
       finalScore = score > 0 ? score.toInt() : 0;
     } else {
       finalScore = 0;

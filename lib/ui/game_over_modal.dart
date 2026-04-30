@@ -22,7 +22,10 @@ class GameOverModal extends StatelessWidget {
 
     final Color primaryColor = isWin ? Colors.cyanAccent : Colors.redAccent;
     final String title = isWin ? 'TOUCHDOWN' : 'CATASTROPHE';
-    final String subtitle = isWin ? 'Flawless execution, Commander.' : 'Structural integrity compromised.';
+    final String subtitle =
+        isWin
+            ? 'Flawless execution, Commander.'
+            : 'Structural integrity compromised.';
 
     return Container(
       color: Colors.black.withOpacity(0.8),
@@ -67,16 +70,44 @@ class GameOverModal extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      Text('MISSION SCORE', style: GoogleFonts.shareTechMono(color: Colors.cyan.shade200, fontSize: 12)),
-                      Text('${controller.finalScore}', style: GoogleFonts.shareTechMono(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold, letterSpacing: 4)),
+                      Text(
+                        'MISSION SCORE',
+                        style: GoogleFonts.shareTechMono(
+                          color: Colors.cyan.shade200,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        '${controller.finalScore}',
+                        style: GoogleFonts.shareTechMono(
+                          color: Colors.white,
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 4,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
               ],
-              _buildStatRow('Impact Velocity', '${(state.velocity.y.abs() * 10).toStringAsFixed(1)} m/s', state.velocity.y.abs() > 2.0 ? Colors.redAccent : Colors.greenAccent),
-              _buildStatRow('Max G-Force', '${state.maxGForce.toStringAsFixed(1)} G', Colors.orangeAccent),
-              _buildStatRow('Remaining Fuel', '${state.fuelMass.floor()} kg', Colors.cyanAccent),
+              _buildStatRow(
+                'Impact Velocity',
+                '${(state.velocity.y.abs() * 10).toStringAsFixed(1)} m/s',
+                state.velocity.y.abs() > 2.0
+                    ? Colors.redAccent
+                    : Colors.greenAccent,
+              ),
+              _buildStatRow(
+                'Max G-Force',
+                '${state.maxGForce.toStringAsFixed(1)} G',
+                Colors.orangeAccent,
+              ),
+              _buildStatRow(
+                'Remaining Fuel',
+                '${state.fuelMass.floor()} kg',
+                Colors.cyanAccent,
+              ),
               const SizedBox(height: 32),
               Row(
                 children: [
@@ -88,7 +119,12 @@ class GameOverModal extends StatelessWidget {
                         side: BorderSide(color: Colors.grey.shade600),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      child: Text('MENU', style: GoogleFonts.shareTechMono(fontWeight: FontWeight.bold)),
+                      child: Text(
+                        'MENU',
+                        style: GoogleFonts.shareTechMono(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -102,7 +138,12 @@ class GameOverModal extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         elevation: 0,
                       ),
-                      child: Text('RETRY', style: GoogleFonts.shareTechMono(fontWeight: FontWeight.bold)),
+                      child: Text(
+                        'RETRY',
+                        style: GoogleFonts.shareTechMono(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -120,7 +161,10 @@ class GameOverModal extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.shareTechMono(color: Colors.grey.shade400)),
+          Text(
+            label,
+            style: GoogleFonts.shareTechMono(color: Colors.grey.shade400),
+          ),
           Text(value, style: GoogleFonts.shareTechMono(color: valueColor)),
         ],
       ),

@@ -9,12 +9,14 @@ class ParallaxStars extends Component with HasGameRef {
   @override
   Future<void> onLoad() async {
     for (int i = 0; i < 150; i++) {
-      _stars.add(_Star(
-        x: _rnd.nextDouble() * 3000 - 500,
-        y: _rnd.nextDouble() * 2000 - 500,
-        size: _rnd.nextDouble() * 1.5,
-        alpha: _rnd.nextDouble(),
-      ));
+      _stars.add(
+        _Star(
+          x: _rnd.nextDouble() * 3000 - 500,
+          y: _rnd.nextDouble() * 2000 - 500,
+          size: _rnd.nextDouble() * 1.5,
+          alpha: _rnd.nextDouble(),
+        ),
+      );
     }
   }
 
@@ -44,5 +46,10 @@ class ParallaxStars extends Component with HasGameRef {
 
 class _Star {
   double x, y, size, alpha;
-  _Star({required this.x, required this.y, required this.size, required this.alpha});
+  _Star({
+    required this.x,
+    required this.y,
+    required this.size,
+    required this.alpha,
+  });
 }

@@ -9,11 +9,13 @@ class GhostAIController {
   final double targetDistanceThreshold;
   final double descentSpeedMultiplier;
 
-  GhostAIController({required int seed}) 
+  GhostAIController({required int seed})
     : maxHorizontalSpeed = 20.0 + Random(seed).nextDouble() * 25.0, // 20 to 45
       maxTiltAngle = 0.3 + Random(seed).nextDouble() * 0.4, // 0.3 to 0.7
-      targetDistanceThreshold = 60.0 + Random(seed).nextDouble() * 60.0, // 60 to 120
-      descentSpeedMultiplier = 0.8 + Random(seed).nextDouble() * 0.6; // 0.8x to 1.4x
+      targetDistanceThreshold =
+          60.0 + Random(seed).nextDouble() * 60.0, // 60 to 120
+      descentSpeedMultiplier =
+          0.8 + Random(seed).nextDouble() * 0.6; // 0.8x to 1.4x
 
   double update(LanderState state, double dt, LevelData level) {
     if (state.isCrashed || state.isLanded) return 0.0;
@@ -25,8 +27,10 @@ class GhostAIController {
         final p1 = level.terrainPoints[padIndex];
         final p2 = level.terrainPoints[padIndex + 1];
         final center = (p1 + p2) / 2;
-        
-        if (targetPad == null || (center.x - state.position.x).abs() < (targetPad.x - state.position.x).abs()) {
+
+        if (targetPad == null ||
+            (center.x - state.position.x).abs() <
+                (targetPad.x - state.position.x).abs()) {
           targetPad = center;
         }
       }
@@ -37,10 +41,10 @@ class GhostAIController {
     // 2. Navigation logic
     double dx = targetPad.x - state.position.x;
     double dy = targetPad.y - state.position.y;
-    
+
     // Determine desired angle based on horizontal distance
     double desiredAngle = 0.0;
-    
+
     // Braking logic scale based on speed
     if (dx > targetDistanceThreshold) {
       if (state.velocity.x < maxHorizontalSpeed) {
@@ -71,10 +75,10 @@ class GhostAIController {
 
     // 3. Throttle logic (Vertical)
     double desiredVy;
-    
+
     if (dx.abs() > 100) {
       // Far from pad: maintain a high safe altitude to clear terrain
-      double safeY = targetPad.y - 300; 
+      double safeY = targetPad.y - 300;
       if (state.position.y > safeY) {
         desiredVy = -15.0; // Climb
       } else {
@@ -107,14 +111,14 @@ class GhostAIController {
 
     // 4. Steering (PD-like Controller)
     double angleDiff = state.angle - desiredAngle;
-    
+
     // Normalize angle difference to [-pi, pi]
     while (angleDiff > pi) angleDiff -= 2 * pi;
     while (angleDiff < -pi) angleDiff += 2 * pi;
 
     // Predict where the angle will be based on current angular velocity
-    double predictedAngleDiff = angleDiff + state.angularVelocity * 1.5; 
-    
+    double predictedAngleDiff = angleDiff + state.angularVelocity * 1.5;
+
     double steeringTorque = 0.0;
     if (predictedAngleDiff > 0.05) {
       steeringTorque = -25000.0; // Rotate left to correct

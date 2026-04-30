@@ -20,9 +20,7 @@ class DashlanderApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Dashlander',
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: Colors.black,
-      ),
+      theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: Colors.black),
       debugShowCheckedModeBanner: false,
       home: const GameCoordinator(),
     );
@@ -65,16 +63,17 @@ class _GameCoordinatorState extends State<GameCoordinator> {
     showDialog(
       context: context,
       barrierColor: Colors.black,
-      builder: (_) => LevelSelect(
-        onBack: () {
-          Navigator.pop(context);
-          _controller.reset();
-        },
-        onSelect: (lvl) {
-          Navigator.pop(context);
-          _startGame(lvl);
-        },
-      ),
+      builder:
+          (_) => LevelSelect(
+            onBack: () {
+              Navigator.pop(context);
+              _controller.reset();
+            },
+            onSelect: (lvl) {
+              Navigator.pop(context);
+              _startGame(lvl);
+            },
+          ),
     );
   }
 
@@ -87,16 +86,17 @@ class _GameCoordinatorState extends State<GameCoordinator> {
     showDialog(
       context: context,
       barrierColor: Colors.black,
-      builder: (_) => SandboxSetup(
-        onBack: () {
-          Navigator.pop(context);
-          _controller.reset();
-        },
-        onStart: (config, lvl) {
-          Navigator.pop(context);
-          _startGame(lvl, config: config);
-        },
-      ),
+      builder:
+          (_) => SandboxSetup(
+            onBack: () {
+              Navigator.pop(context);
+              _controller.reset();
+            },
+            onStart: (config, lvl) {
+              Navigator.pop(context);
+              _startGame(lvl, config: config);
+            },
+          ),
     );
   }
 
@@ -108,8 +108,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
       body: Stack(
         children: [
           // 1. The Flame Game Layer
-          if (_game != null)
-            GameWidget(game: _game!),
+          if (_game != null) GameWidget(game: _game!),
 
           // 2. UI Overlays
           if (status == GameStatus.menu)
@@ -117,8 +116,11 @@ class _GameCoordinatorState extends State<GameCoordinator> {
               onPlayCampaign: _showCampaignMenu,
               onPlaySandbox: _showSandboxMenu,
             ),
-            
-          if ((status == GameStatus.playing || status == GameStatus.won || status == GameStatus.lost) && _game != null)
+
+          if ((status == GameStatus.playing ||
+                  status == GameStatus.won ||
+                  status == GameStatus.lost) &&
+              _game != null)
             HudOverlay(
               controller: _controller,
               onExit: () {
@@ -127,10 +129,15 @@ class _GameCoordinatorState extends State<GameCoordinator> {
               },
             ),
 
-          if ((status == GameStatus.won || status == GameStatus.lost) && _game != null)
+          if ((status == GameStatus.won || status == GameStatus.lost) &&
+              _game != null)
             GameOverModal(
               controller: _controller,
-              onRetry: () => _startGame(_controller.currentLevel!, config: _controller.sandboxConfig),
+              onRetry:
+                  () => _startGame(
+                    _controller.currentLevel!,
+                    config: _controller.sandboxConfig,
+                  ),
               onMenu: () {
                 _game = null;
                 _controller.reset();

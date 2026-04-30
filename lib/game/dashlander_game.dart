@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 
+import 'dart:ui' as ui;
 import '../physics/lander_state.dart';
 import '../physics/physics_engine.dart';
 import 'components/particle_exhaust.dart';
@@ -14,24 +15,28 @@ import 'components/terrain.dart';
 import 'game_state.dart';
 import 'ai_controller.dart';
 
-class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetection {
+class DashlanderGame extends FlameGame
+    with KeyboardEvents, HasCollisionDetection {
   final GameController gameController;
-  
+
   late PhysicsEngine physicsEngine;
   late LanderState landerState;
-  
+
   late ShipComponent ship;
   late TerrainComponent terrain;
-  
+
   final List<LanderState> ghostStates = [];
   final List<ShipComponent> ghostShips = [];
   final List<GhostAIController> ghostAIs = [];
-  
+
   bool isLeftPressed = false;
   bool isRightPressed = false;
   bool isUpPressed = false;
-  
+
   bool _gameOverTriggered = false;
+
+  ui.FragmentProgram? _bloomProgram;
+  ui.FragmentShader? _bloomShader;
 
   DashlanderGame({required this.gameController});
 
@@ -42,14 +47,21 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
   Future<void> onLoad() async {
     await super.onLoad();
 
+    try {
+      _bloomProgram = await ui.FragmentProgram.fromAsset('shaders/bloom.frag');
+    } catch (e) {
+      debugPrint("Failed to load bloom shader: $e");
+    }
+
     // 1. Add background
-    add(ParallaxStars());
+    add(ParallaxStars()..priority = -9);
 
     // 2. Setup Physics
     physicsEngine = PhysicsEngine();
     if (gameController.sandboxConfig != null) {
       physicsEngine.gravityScale = gameController.sandboxConfig!.gravity / 0.04;
-      physicsEngine.thrustScale = gameController.sandboxConfig!.thrustPower / 0.12;
+      physicsEngine.thrustScale =
+          gameController.sandboxConfig!.thrustPower / 0.12;
       physicsEngine.infiniteFuel = gameController.sandboxConfig!.infiniteFuel;
     }
 
@@ -63,11 +75,15 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
       dryMass: 4280.0, // Apollo LM dry mass approx
       engineMaxThrust: 45040.0, // Apollo LM max thrust N
       specificImpulse: 311.0,
-      baseInertia: 50000.0, // Arbitrary 2D moment of inertia for responsive feel
+      baseInertia:
+          50000.0, // Arbitrary 2D moment of inertia for responsive feel
     );
 
     // 3. Add Terrain
-    terrain = TerrainComponent(points: level.terrainPoints, padIndices: level.padIndices);
+    terrain = TerrainComponent(
+      points: level.terrainPoints,
+      padIndices: level.padIndices,
+    );
     add(terrain);
 
     // 4. Add Ship
@@ -81,7 +97,10 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
       ghostAIs.add(ai);
 
       // Offset ghost ships slightly so they don't perfectly overlap
-      final offset = Vector2((Random().nextDouble() - 0.5) * 40, (Random().nextDouble() - 0.5) * 20);
+      final offset = Vector2(
+        (Random().nextDouble() - 0.5) * 40,
+        (Random().nextDouble() - 0.5) * 20,
+      );
       final ghostState = LanderState(
         position: level.startPosition.clone() + offset,
         velocity: Vector2(2, 0), // Slight initial push
@@ -95,7 +114,11 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
       );
       final hue = Random().nextDouble() * 360.0;
       final color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
-      final ghostShip = ShipComponent(state: ghostState, isGhost: true, tintColor: color);
+      final ghostShip = ShipComponent(
+        state: ghostState,
+        isGhost: true,
+        tintColor: color,
+      );
       ghostStates.add(ghostState);
       ghostShips.add(ghostShip);
       add(ghostShip);
@@ -103,7 +126,7 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
 
     // Set camera to follow ship
     camera.follow(ship);
-    
+
     // Set initial state
     gameController.status.value = GameStatus.playing;
   }
@@ -118,7 +141,7 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
     double steeringTorque = 0.0;
     if (isLeftPressed) steeringTorque -= 25000.0;
     if (isRightPressed) steeringTorque += 25000.0;
-    
+
     landerState.isThrusting = isUpPressed;
 
     // Physics Step
@@ -127,43 +150,52 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
     // Sync Ship Component
     ship.position = landerState.position;
     ship.angle = landerState.angle;
-    ship.isThrusting = landerState.isThrusting && (landerState.fuelMass > 0 || physicsEngine.infiniteFuel);
+    ship.isThrusting =
+        landerState.isThrusting &&
+        (landerState.fuelMass > 0 || physicsEngine.infiniteFuel);
 
     // Exhaust Particles (Main Thruster)
     if (ship.isThrusting) {
       final mainExhaustOffset = Vector2(0, 12)..rotate(ship.angle);
       for (int i = 0; i < 3; i++) {
-        add(ParticleExhaust(
-          position: ship.position + mainExhaustOffset,
-          emissionAngle: ship.angle + pi,
-          shipVelocity: landerState.velocity,
-          startRadius: 4.0,
-        )..priority = 10);
+        add(
+          ParticleExhaust(
+            position: ship.position + mainExhaustOffset,
+            emissionAngle: ship.angle + pi,
+            shipVelocity: landerState.velocity,
+            startRadius: 4.0,
+          )..priority = 10,
+        );
       }
     }
 
     // RCS Particles (Rotation)
-    if (isLeftPressed) {
+    bool hasFuel = landerState.fuelMass > 0 || physicsEngine.infiniteFuel;
+    if (isLeftPressed && hasFuel) {
       // Rotating left (CCW): Fire left RCS outward to the left
       final rcsOffset = Vector2(-10, 8)..rotate(ship.angle);
-      add(ParticleExhaust(
-        position: ship.position + rcsOffset,
-        emissionAngle: ship.angle - pi / 2,
-        shipVelocity: landerState.velocity,
-        color: Colors.white,
-        startRadius: 2.0,
-      )..priority = 10);
+      add(
+        ParticleExhaust(
+          position: ship.position + rcsOffset,
+          emissionAngle: ship.angle - pi / 2,
+          shipVelocity: landerState.velocity,
+          color: Colors.white,
+          startRadius: 2.0,
+        )..priority = 10,
+      );
     }
-    if (isRightPressed) {
+    if (isRightPressed && hasFuel) {
       // Rotating right (CW): Fire right RCS outward to the right
       final rcsOffset = Vector2(10, 8)..rotate(ship.angle);
-      add(ParticleExhaust(
-        position: ship.position + rcsOffset,
-        emissionAngle: ship.angle + pi / 2,
-        shipVelocity: landerState.velocity,
-        color: Colors.white,
-        startRadius: 2.0,
-      )..priority = 10);
+      add(
+        ParticleExhaust(
+          position: ship.position + rcsOffset,
+          emissionAngle: ship.angle + pi / 2,
+          shipVelocity: landerState.velocity,
+          color: Colors.white,
+          startRadius: 2.0,
+        )..priority = 10,
+      );
     }
 
     // Ghost Ships Update
@@ -171,46 +203,60 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
       final ghostState = ghostStates[i];
       final ghostShip = ghostShips[i];
       final ghostAI = ghostAIs[i];
-      
+
       if (!ghostState.isCrashed && !ghostState.isLanded) {
-        double ghostTorque = ghostAI.update(ghostState, dt, gameController.currentLevel!);
+        double ghostTorque = ghostAI.update(
+          ghostState,
+          dt,
+          gameController.currentLevel!,
+        );
         physicsEngine.update(ghostState, dt, 1.0, ghostTorque);
-        
+
         ghostShip.position = ghostState.position;
         ghostShip.angle = ghostState.angle;
-        ghostShip.isThrusting = ghostState.isThrusting && (ghostState.fuelMass > 0 || physicsEngine.infiniteFuel);
-        
+        ghostShip.isThrusting =
+            ghostState.isThrusting &&
+            (ghostState.fuelMass > 0 || physicsEngine.infiniteFuel);
+
         if (ghostShip.isThrusting) {
           final mainExhaustOffset = Vector2(0, 12)..rotate(ghostShip.angle);
           for (int j = 0; j < 3; j++) {
-            add(ParticleExhaust(
-              position: ghostShip.position + mainExhaustOffset,
-              emissionAngle: ghostShip.angle + pi,
-              shipVelocity: ghostState.velocity,
-              startRadius: 4.0,
-            )..priority = 9);
+            add(
+              ParticleExhaust(
+                position: ghostShip.position + mainExhaustOffset,
+                emissionAngle: ghostShip.angle + pi,
+                shipVelocity: ghostState.velocity,
+                startRadius: 4.0,
+              )..priority = 9,
+            );
           }
         }
-        if (ghostTorque < 0) {
+        bool ghostHasFuel =
+            ghostState.fuelMass > 0 || physicsEngine.infiniteFuel;
+        if (ghostTorque < 0 && ghostHasFuel) {
           // Negative torque (CCW) -> Fire left RCS leftward
           final rcsOffset = Vector2(-10, 8)..rotate(ghostShip.angle);
-          add(ParticleExhaust(
-            position: ghostShip.position + rcsOffset,
-            emissionAngle: ghostShip.angle - pi / 2, // Exhaust points left
-            shipVelocity: ghostState.velocity,
-            color: Colors.white,
-            startRadius: 2.0,
-          )..priority = 9);
-        } else if (ghostTorque > 0) {
+          add(
+            ParticleExhaust(
+              position: ghostShip.position + rcsOffset,
+              emissionAngle: ghostShip.angle - pi / 2, // Exhaust points left
+              shipVelocity: ghostState.velocity,
+              color: Colors.white,
+              startRadius: 2.0,
+            )..priority = 9,
+          );
+        } else if (ghostTorque > 0 && ghostHasFuel) {
           // Positive torque (CW) -> Fire right RCS rightward
           final rcsOffset = Vector2(10, 8)..rotate(ghostShip.angle);
-          add(ParticleExhaust(
-            position: ghostShip.position + rcsOffset,
-            emissionAngle: ghostShip.angle + pi / 2, // Exhaust points right
-            shipVelocity: ghostState.velocity,
-            color: Colors.white,
-            startRadius: 2.0,
-          )..priority = 9);
+          add(
+            ParticleExhaust(
+              position: ghostShip.position + rcsOffset,
+              emissionAngle: ghostShip.angle + pi / 2, // Exhaust points right
+              shipVelocity: ghostState.velocity,
+              color: Colors.white,
+              startRadius: 2.0,
+            )..priority = 9,
+          );
         }
       }
     }
@@ -249,6 +295,15 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
       }
     }
 
+    // Out of bounds check
+    final minX = terrain.points.first.x;
+    final maxX = terrain.points.last.x;
+    if (landerState.position.x < minX ||
+        landerState.position.x > maxX ||
+        landerState.position.y < -2000) {
+      crashed = true;
+    }
+
     if (crashed || landed) {
       if (!_gameOverTriggered) {
         _gameOverTriggered = true;
@@ -261,7 +316,10 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
         }
         Future.delayed(const Duration(seconds: 2), () {
           if (isMounted) {
-            gameController.setGameOver(landed ? GameStatus.won : GameStatus.lost, landerState);
+            gameController.setGameOver(
+              landed ? GameStatus.won : GameStatus.lost,
+              landerState,
+            );
           }
         });
       }
@@ -271,9 +329,9 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
     for (int g = 0; g < ghostStates.length; g++) {
       final ghostState = ghostStates[g];
       final ghostShip = ghostShips[g];
-      
+
       if (ghostState.isCrashed || ghostState.isLanded) continue;
-      
+
       bool ghostCrashed = false;
       bool ghostLanded = false;
 
@@ -295,6 +353,12 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
             ghostCrashed = true;
           }
         }
+      }
+
+      if (ghostState.position.x < minX ||
+          ghostState.position.x > maxX ||
+          ghostState.position.y < -2000) {
+        ghostCrashed = true;
       }
 
       if (ghostCrashed || ghostLanded) {
@@ -321,15 +385,57 @@ class DashlanderGame extends FlameGame with KeyboardEvents, HasCollisionDetectio
   void _createExplosion(Vector2 pos) {
     // Generate many particles
     for (int i = 0; i < 50; i++) {
-       add(ParticleExhaust.explosion(position: pos));
+      add(ParticleExhaust.explosion(position: pos));
     }
   }
 
   @override
-  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    isLeftPressed = keysPressed.contains(LogicalKeyboardKey.arrowLeft) || keysPressed.contains(LogicalKeyboardKey.keyA);
-    isRightPressed = keysPressed.contains(LogicalKeyboardKey.arrowRight) || keysPressed.contains(LogicalKeyboardKey.keyD);
-    isUpPressed = keysPressed.contains(LogicalKeyboardKey.arrowUp) || keysPressed.contains(LogicalKeyboardKey.keyW) || keysPressed.contains(LogicalKeyboardKey.space);
+  KeyEventResult onKeyEvent(
+    KeyEvent event,
+    Set<LogicalKeyboardKey> keysPressed,
+  ) {
+    isLeftPressed =
+        keysPressed.contains(LogicalKeyboardKey.arrowLeft) ||
+        keysPressed.contains(LogicalKeyboardKey.keyA);
+    isRightPressed =
+        keysPressed.contains(LogicalKeyboardKey.arrowRight) ||
+        keysPressed.contains(LogicalKeyboardKey.keyD);
+    isUpPressed =
+        keysPressed.contains(LogicalKeyboardKey.arrowUp) ||
+        keysPressed.contains(LogicalKeyboardKey.keyW) ||
+        keysPressed.contains(LogicalKeyboardKey.space);
     return super.onKeyEvent(event, keysPressed);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    if (_bloomProgram == null || size.x <= 0 || size.y <= 0) {
+      super.render(canvas);
+      return;
+    }
+
+    // Render game tree to picture
+    final recorder = ui.PictureRecorder();
+    final offscreenCanvas = Canvas(recorder);
+    super.render(offscreenCanvas);
+    final picture = recorder.endRecording();
+
+    try {
+      // Synchronously rasterize picture to image
+      final image = picture.toImageSync(size.x.toInt(), size.y.toInt());
+
+      _bloomShader ??= _bloomProgram!.fragmentShader();
+      _bloomShader!.setFloat(0, size.x);
+      _bloomShader!.setFloat(1, size.y);
+      _bloomShader!.setImageSampler(0, image);
+
+      final paint = Paint()..shader = _bloomShader;
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.x, size.y), paint);
+
+      image.dispose();
+    } catch (e) {
+      // Fallback if toImageSync fails (e.g. on unsupported platforms)
+      canvas.drawPicture(picture);
+    }
   }
 }

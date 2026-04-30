@@ -5,7 +5,11 @@ class MainMenu extends StatefulWidget {
   final Function(int) onPlayCampaign;
   final Function(int) onPlaySandbox;
 
-  const MainMenu({super.key, required this.onPlayCampaign, required this.onPlaySandbox});
+  const MainMenu({
+    super.key,
+    required this.onPlayCampaign,
+    required this.onPlaySandbox,
+  });
 
   @override
   State<MainMenu> createState() => _MainMenuState();
@@ -30,8 +34,14 @@ class _MainMenuState extends State<MainMenu> {
                 letterSpacing: 8,
                 color: Colors.cyanAccent,
                 shadows: [
-                  BoxShadow(color: Colors.cyanAccent.withOpacity(0.8), blurRadius: 15),
-                  BoxShadow(color: Colors.pinkAccent.withOpacity(0.8), blurRadius: 30),
+                  BoxShadow(
+                    color: Colors.cyanAccent.withOpacity(0.8),
+                    blurRadius: 15,
+                  ),
+                  BoxShadow(
+                    color: Colors.pinkAccent.withOpacity(0.8),
+                    blurRadius: 30,
+                  ),
                 ],
               ),
             ),
@@ -46,9 +56,17 @@ class _MainMenuState extends State<MainMenu> {
             const SizedBox(height: 48),
             _buildGhostShipsSelector(),
             const SizedBox(height: 48),
-            _MenuButton(label: 'CAMPAIGN MODE', color: Colors.cyanAccent, onTap: () => widget.onPlayCampaign(ghostShipsCount)),
+            _MenuButton(
+              label: 'CAMPAIGN MODE',
+              color: Colors.cyanAccent,
+              onTap: () => widget.onPlayCampaign(ghostShipsCount),
+            ),
             const SizedBox(height: 24),
-            _MenuButton(label: 'SANDBOX MODE', color: Colors.pinkAccent, onTap: () => widget.onPlaySandbox(ghostShipsCount)),
+            _MenuButton(
+              label: 'SANDBOX MODE',
+              color: Colors.pinkAccent,
+              onTap: () => widget.onPlaySandbox(ghostShipsCount),
+            ),
           ],
         ),
       ),
@@ -60,7 +78,10 @@ class _MainMenuState extends State<MainMenu> {
       children: [
         Text(
           'GHOST SHIPS: $ghostShipsCount',
-          style: GoogleFonts.shareTechMono(color: Colors.purpleAccent, fontSize: 18),
+          style: GoogleFonts.shareTechMono(
+            color: Colors.purpleAccent,
+            fontSize: 18,
+          ),
         ),
         SizedBox(
           width: 300,
@@ -84,7 +105,11 @@ class _MenuButton extends StatefulWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _MenuButton({required this.label, required this.color, required this.onTap});
+  const _MenuButton({
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   State<_MenuButton> createState() => _MenuButtonState();
@@ -106,8 +131,12 @@ class _MenuButtonState extends State<_MenuButton> {
           decoration: BoxDecoration(
             border: Border.all(color: widget.color, width: 2),
             borderRadius: BorderRadius.circular(4),
-            color: isHovered ? widget.color.withOpacity(0.2) : Colors.transparent,
-            boxShadow: isHovered ? [BoxShadow(color: widget.color, blurRadius: 15)] : [],
+            color:
+                isHovered ? widget.color.withOpacity(0.2) : Colors.transparent,
+            boxShadow:
+                isHovered
+                    ? [BoxShadow(color: widget.color, blurRadius: 15)]
+                    : [],
           ),
           child: Text(
             widget.label,

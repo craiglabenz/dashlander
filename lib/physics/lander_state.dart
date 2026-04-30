@@ -8,7 +8,7 @@ class LanderState {
 
   double fuelMass; // Variable mass
   final double dryMass;
-  
+
   final double engineMaxThrust;
   final double specificImpulse;
   final double baseInertia; // Simplified 2D moment of inertia
