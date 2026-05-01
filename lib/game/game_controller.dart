@@ -57,6 +57,8 @@ class GameController {
       vY: fallingSpeed / PhysicsConstants.pixelsPerMeter,
       vX: horizontalSpeed / PhysicsConstants.pixelsPerMeter,
       tilt: tilt,
+      x: state.position.x,
+      y: state.position.y,
     );
   }
 

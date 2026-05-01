@@ -12,6 +12,8 @@ sealed class TelemetryData with _$TelemetryData {
     required double vY, // Vertical velocity
     required double vX, // Horizontal velocity
     required double tilt, // Replaces gForce
+    required double x,
+    required double y,
   }) = _TelemetryData;
 
   factory TelemetryData.empty() => TelemetryData(
@@ -20,6 +22,8 @@ sealed class TelemetryData with _$TelemetryData {
     vY: 0,
     vX: 0,
     tilt: 0,
+    x: 0,
+    y: PhysicsConstants.moonRadius,
   );
 }
 

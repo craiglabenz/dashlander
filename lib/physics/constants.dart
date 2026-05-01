@@ -21,22 +21,22 @@ class PhysicsConstants {
   /// This defines the overall size of the world. A larger radius creates a
   /// flatter-feeling surface curvature, while a smaller radius creates a tiny,
   /// asteroid-like world.
-  static const double moonRadius = 5000.0;
+  static const double moonRadius = 1000.0;
 
   /// The number of discrete geometric line segments used to draw the moon.
   /// Higher values create a smoother circle but cost more performance to render
   /// and perform collision checks against.
-  static const int terrainSegments = 400;
+  static const int terrainSegments = 80;
 
   /// The maximum vertical height (in meters) of mountains and craters added
   /// on top of the base `moonRadius`. Higher values create more jagged,
   /// extreme terrain that is harder to navigate.
-  static const double maxTerrainHeight = 400.0;
+  static const double maxTerrainHeight = 100.0;
 
   /// A multiplier applied to the sine wave generators that produce hills.
   /// Higher values mean more frequent, narrower hills. Lower values mean
   /// fewer, wider, rolling hills.
-  static const double noiseFrequency = 8.0;
+  static const double noiseFrequency = 4.0;
 
   /// The total number of perfectly flat landing pads carved out of the terrain.
   /// More pads make the level easier to complete.
@@ -142,7 +142,7 @@ class PhysicsConstants {
   static const double shipRealHeightMeters = 3.0;
 
   /// The conversion factor between real-world physics and Flame screen units.
-  /// Used by the physics engine to scale gravity, thrust, and velocity limits 
+  /// Used by the physics engine to scale gravity, thrust, and velocity limits
   /// so that the visual game acts exactly like the mathematical simulation.
   static const double pixelsPerMeter = shipVisualHeight / shipRealHeightMeters;
 

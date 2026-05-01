@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../game/game_state.dart';
 import '../physics/constants.dart';
+import 'minimap.dart';
 
 class HudOverlay extends StatelessWidget {
   final GameController controller;
@@ -11,96 +12,108 @@ class HudOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.cyan.shade900.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.cyanAccent.withValues(alpha: 0.3),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.cyanAccent.withValues(alpha: 0.1),
-                  blurRadius: 20,
-                  spreadRadius: 4,
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 12.0,
-              ),
-              child: Row(
-                children: [
-                  // Pause / Exit button
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: onExit,
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          border: Border.all(color: Colors.grey.shade600),
-                          borderRadius: BorderRadius.circular(8),
+    return Positioned.fill(
+      child: ValueListenableBuilder<TelemetryData>(
+        valueListenable: controller.telemetry,
+        builder: (context, data, child) {
+          return Stack(
+            children: [
+              Align(
+                alignment: Alignment.topCenter,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.cyan.shade900.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.cyanAccent.withValues(alpha: 0.3),
                         ),
-                        child: const Icon(
-                          Icons.close,
-                          color: Colors.white70,
-                          size: 24,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.cyanAccent.withValues(alpha: 0.1),
+                            blurRadius: 20,
+                            spreadRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 12.0,
+                        ),
+                        child: Row(
+                          children: [
+                            // Pause / Exit button
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: onExit,
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    border: Border.all(color: Colors.grey.shade600),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white70,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Expanded(flex: 3, child: _buildFuelGauge(data.fuel, data.maxFuel)),
+                                  Expanded(flex: 2, child: _buildTelemetryItem(
+                                    'V.SPD',
+                                    '${data.vY.toStringAsFixed(1)} m/s',
+                                    data.vY > PhysicsConstants.maxLandingVelocityY
+                                        ? Colors.redAccent
+                                        : Colors.cyanAccent,
+                                  )),
+                                  Expanded(flex: 2, child: _buildTelemetryItem(
+                                    'H.SPD',
+                                    '${data.vX.abs().toStringAsFixed(1)} m/s',
+                                    data.vX.abs() > PhysicsConstants.maxLandingVelocityX
+                                        ? Colors.redAccent
+                                        : Colors.cyanAccent,
+                                  )),
+                                  Expanded(flex: 2, child: _buildTelemetryItem(
+                                    'TILT',
+                                    '${data.tilt.toStringAsFixed(1)}°',
+                                    data.tilt > PhysicsConstants.maxLandingTiltDegrees
+                                        ? Colors.redAccent
+                                        : Colors.cyanAccent,
+                                  )),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-
-                  Expanded(
-                    child: ValueListenableBuilder<TelemetryData>(
-                      valueListenable: controller.telemetry,
-                      builder: (context, data, child) {
-                        return Row(
-                          children: [
-                            Expanded(flex: 3, child: _buildFuelGauge(data.fuel, data.maxFuel)),
-                            Expanded(flex: 2, child: _buildTelemetryItem(
-                              'V.SPD',
-                              '${data.vY.toStringAsFixed(1)} m/s',
-                              data.vY > PhysicsConstants.maxLandingVelocityY
-                                  ? Colors.redAccent
-                                  : Colors.cyanAccent,
-                            )),
-                            Expanded(flex: 2, child: _buildTelemetryItem(
-                              'H.SPD',
-                              '${data.vX.abs().toStringAsFixed(1)} m/s',
-                              data.vX.abs() > PhysicsConstants.maxLandingVelocityX
-                                  ? Colors.redAccent
-                                  : Colors.cyanAccent,
-                            )),
-                            Expanded(flex: 2, child: _buildTelemetryItem(
-                              'TILT',
-                              '${data.tilt.toStringAsFixed(1)}°',
-                              data.tilt > PhysicsConstants.maxLandingTiltDegrees
-                                  ? Colors.redAccent
-                                  : Colors.cyanAccent,
-                            )),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: SafeArea(
+                  child: Minimap(
+                    telemetry: data,
+                    levelData: controller.currentLevel!,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
