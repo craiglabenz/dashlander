@@ -1,11 +1,11 @@
 import 'package:flame/components.dart';
+import 'package:flame_behaviors/flame_behaviors.dart';
 import 'package:flutter/material.dart';
 import '../../physics/lander_state.dart';
 
-class ShipComponent extends PositionComponent {
+class ShipComponent extends PositionedEntity {
   final LanderState state;
   final bool isGhost;
-  bool isThrusting = false;
 
   late final Paint _hullPaint;
   late final Paint _hullStrokePaint;
@@ -16,8 +16,15 @@ class ShipComponent extends PositionComponent {
 
   final Color? tintColor;
 
-  ShipComponent({required this.state, this.isGhost = false, this.tintColor})
-    : super(anchor: Anchor.center, size: Vector2(36, 36)) {
+  ShipComponent({
+    required this.state,
+    this.isGhost = false,
+    this.tintColor,
+    super.behaviors,
+  }) : super(
+         anchor: Anchor.center,
+         size: Vector2(36, 36),
+       ) {
     final opacity =
         isGhost ? 0.4 : 1.0; // Slightly higher opacity for visibility
 

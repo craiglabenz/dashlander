@@ -16,9 +16,10 @@ class PhysicsEngine {
     LanderState state,
     double dt,
     double throttle,
-    double steeringTorque,
   ) {
     if (state.isCrashed || state.isLanded) return;
+    
+    double steeringTorque = state.steeringTorque;
 
     // 1. Calculate Fuel Consumption
     double mainThrustMagnitude = 0.0;

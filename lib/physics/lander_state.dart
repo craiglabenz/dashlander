@@ -14,6 +14,8 @@ class LanderState {
   final double baseInertia; // Simplified 2D moment of inertia
 
   bool isThrusting;
+  double steeringTorque;
+
   bool isCrashed;
   bool isLanded;
 
@@ -30,6 +32,7 @@ class LanderState {
     required this.specificImpulse,
     required this.baseInertia,
     this.isThrusting = false,
+    this.steeringTorque = 0.0,
     this.isCrashed = false,
     this.isLanded = false,
     this.maxGForce = 0.0,
