@@ -1,16 +1,24 @@
 import 'dart:ui' as ui;
+import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class TerrainComponent extends PositionComponent with HasGameReference {
   final List<Vector2> points;
   final List<int> padIndices;
+  final Map<int, double> padAngles;
+  final Map<int, double> padAngleDeltas;
 
   ui.FragmentProgram? _program;
   ui.FragmentShader? _shader;
   double _time = 0;
 
-  TerrainComponent({required this.points, required this.padIndices});
+  TerrainComponent({
+    required this.points,
+    required this.padIndices,
+    required this.padAngles,
+    required this.padAngleDeltas,
+  });
 
   @override
   Future<void> onLoad() async {
@@ -125,6 +133,44 @@ class TerrainComponent extends PositionComponent with HasGameReference {
           ..strokeWidth = width
           ..strokeCap = StrokeCap.round,
       );
+    }
+
+    // 4. Draw Pad Angles
+    for (int segmentIdx in padIndices) {
+      Vector2 p1 = points[segmentIdx];
+      Vector2 p2 = points[(segmentIdx + 1) % (points.length - 1)];
+      Vector2 mid = (p1 + p2) / 2;
+      
+      double absoluteAngleDeg = padAngles[segmentIdx] ?? 0;
+      double deltaDeg = padAngleDeltas[segmentIdx] ?? 0;
+      double absoluteAngleRad = absoluteAngleDeg * pi / 180;
+      
+      // Vector pointing OUT from the moon
+      Vector2 normal = Vector2(sin(absoluteAngleRad), -cos(absoluteAngleRad));
+      
+      // Push text outward by 40 physics units so it sits directly below the line
+      Vector2 textPos = mid - normal * 30;
+      
+      final textSpan = TextSpan(
+        text: '${deltaDeg > 0 ? '+' : ''}${deltaDeg.toStringAsFixed(1)}°',
+        style: const TextStyle(
+          color: Colors.greenAccent,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
+      );
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      
+      canvas.save();
+      canvas.translate(textPos.x, textPos.y);
+      canvas.rotate(absoluteAngleRad);
+      textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
+      canvas.restore();
     }
   }
 }

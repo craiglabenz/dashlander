@@ -30,15 +30,22 @@ class GameOverModal extends StatelessWidget {
             ? 'Flawless execution, Commander.'
             : state.crashReason ?? 'Structural integrity compromised.';
 
-    Vector2 surfaceNormal = state.position.normalized();
-    double fallingSpeedPixels = -state.velocity.dot(surfaceNormal);
-    double fallingSpeedMeters = fallingSpeedPixels / PhysicsConstants.pixelsPerMeter;
+    Vector2 sphericalNormal = state.position.normalized();
+    double fallingSpeedPixels = -state.velocity.dot(sphericalNormal);
+    double fallingSpeedMeters =
+        fallingSpeedPixels / PhysicsConstants.pixelsPerMeter;
 
     double angleDeg = (state.angle * 180 / pi) % 360;
     if (angleDeg < 0) angleDeg += 360;
-    double surfaceAngle = atan2(surfaceNormal.x, -surfaceNormal.y);
-    double surfaceAngleDeg = (surfaceAngle * 180 / pi) % 360;
-    if (surfaceAngleDeg < 0) surfaceAngleDeg += 360;
+
+    double surfaceAngleDeg;
+    if (state.padAngleDeg != null) {
+      surfaceAngleDeg = state.padAngleDeg!;
+    } else {
+      double surfaceAngle = atan2(sphericalNormal.x, -sphericalNormal.y);
+      surfaceAngleDeg = (surfaceAngle * 180 / pi) % 360;
+      if (surfaceAngleDeg < 0) surfaceAngleDeg += 360;
+    }
     double diffDeg = (angleDeg - surfaceAngleDeg).abs();
     double tilt = min(diffDeg, 360 - diffDeg);
 
@@ -75,7 +82,8 @@ class GameOverModal extends StatelessWidget {
               Text(
                 subtitle,
                 style: GoogleFonts.shareTechMono(
-                  color: isWin ? Colors.grey.shade400 : Colors.redAccent.shade100,
+                  color:
+                      isWin ? Colors.grey.shade400 : Colors.redAccent.shade100,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -117,7 +125,10 @@ class GameOverModal extends StatelessWidget {
                 fallingSpeedMeters > PhysicsConstants.maxLandingVelocityY
                     ? Colors.redAccent
                     : Colors.greenAccent,
-                impactText: isWin ? '-${controller.finalScoreBreakdown?.velocityPenalty ?? 0}' : null,
+                impactText:
+                    isWin
+                        ? '${controller.finalScoreBreakdown?.velocityPenalty ?? 0}'
+                        : null,
                 impactColor: Colors.redAccent,
               ),
               _buildStatRow(
@@ -126,12 +137,20 @@ class GameOverModal extends StatelessWidget {
                 tilt > PhysicsConstants.maxLandingTiltDegrees
                     ? Colors.redAccent
                     : Colors.greenAccent,
+                impactText:
+                    isWin
+                        ? '${controller.finalScoreBreakdown?.tiltPenalty ?? 0}'
+                        : null,
+                impactColor: Colors.redAccent,
               ),
               _buildStatRow(
                 'Remaining Fuel',
                 '${state.fuelMass.floor()} kg',
                 Colors.cyanAccent,
-                impactText: isWin ? '+${controller.finalScoreBreakdown?.fuelScore ?? 0}' : null,
+                impactText:
+                    isWin
+                        ? '+${controller.finalScoreBreakdown?.fuelScore ?? 0}'
+                        : null,
                 impactColor: Colors.greenAccent,
               ),
               const SizedBox(height: 32),

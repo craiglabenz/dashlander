@@ -48,6 +48,7 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
 
         if (terrain.padIndices.contains(i)) {
           // The ship touched a designated landing pad. We must validate the physics of the touch.
+          state.padAngleDeg = game.gameController.currentLevel!.padAngles[i];
           physicsEngine.validateLanding(state);
           if (state.isLanded) {
             landed = true; // Safe landing!

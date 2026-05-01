@@ -139,15 +139,13 @@ class PhysicsEngine {
     double angleDeg = (state.angle * 180 / pi) % 360;
     if (angleDeg < 0) angleDeg += 360;
 
-    // The surface normal is the vector pointing straight OUT from the moon's center
-    // passing through the ship's current position.
-    Vector2 surfaceNormal = state.position.normalized();
+    // The exact angle of the landing pad the ship collided with.
+    double surfaceAngleDeg = state.padAngleDeg!;
+    double surfaceAngleRad = surfaceAngleDeg * pi / 180;
 
-    // Calculate the angle of the surface normal.
-    // In Flame (angle 0 is -Y), we use atan2(x, -y) to get the equivalent angle.
-    double surfaceAngle = atan2(surfaceNormal.x, -surfaceNormal.y);
-    double surfaceAngleDeg = (surfaceAngle * 180 / pi) % 360;
-    if (surfaceAngleDeg < 0) surfaceAngleDeg += 360;
+    // Convert the angle back to a normal vector to calculate relative velocities.
+    // In Flame, angle 0 points UP (0, -1).
+    Vector2 surfaceNormal = Vector2(sin(surfaceAngleRad), -cos(surfaceAngleRad));
 
     // The tilt is the absolute difference between the ship's angle and the surface angle.
     // We use min(diff, 360 - diff) to find the shortest angular distance (e.g. 359 and 1 are 2 degrees apart).

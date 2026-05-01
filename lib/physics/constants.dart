@@ -101,7 +101,7 @@ class PhysicsConstants {
   // ---------------------------------------------------------------------------
 
   /// The starting fuel mass for the lander (in kg).
-  static const double defaultMaxFuel = 1000.0;
+  static const double defaultMaxFuel = 200.0;
 
   /// The radius of the ship's collision hitbox (in meters).
   /// This invisible circle is used to calculate collisions against the terrain's
@@ -161,4 +161,5 @@ class PhysicsConstants {
   // ---------------------------------------------------------------------------
   static const double fuelScoreMultiplier = 45;
   static const double velocityScoreMultiplier = -1000;
+  static const double tiltScoreMultiplier = -500;
 }

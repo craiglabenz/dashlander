@@ -13,6 +13,8 @@ sealed class LevelData with _$LevelData {
     // Pairs of indices representing landing pads e.g. [3, 4] means segment
     // between terrainPoints[3] and [4] is a pad.
     required List<int> padIndices,
+    required Map<int, double> padAngles,
+    required Map<int, double> padAngleDeltas,
     required Vector2 startPosition,
   }) = _LevelData;
 }

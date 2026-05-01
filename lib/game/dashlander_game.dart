@@ -92,6 +92,8 @@ class DashlanderGame extends FlameGame
     terrain = TerrainComponent(
       points: level.terrainPoints,
       padIndices: level.padIndices,
+      padAngles: level.padAngles,
+      padAngleDeltas: level.padAngleDeltas,
     );
     world.add(terrain);
 

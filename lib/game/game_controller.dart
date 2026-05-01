@@ -11,11 +11,13 @@ import 'models/telemetry_data.dart';
 class ScoreBreakdown {
   final int fuelScore;
   final int velocityPenalty;
+  final int tiltPenalty;
   final int totalScore;
 
   ScoreBreakdown({
     required this.fuelScore,
     required this.velocityPenalty,
+    required this.tiltPenalty,
     required this.totalScore,
   });
 }
@@ -77,12 +79,32 @@ class GameController {
       int velocityPenalty =
           (speedMeters * PhysicsConstants.velocityScoreMultiplier).toInt();
 
-      int score = fuelScore - velocityPenalty;
+      // Penalty based on tilt relative to surface
+      double surfaceAngleDeg;
+      if (state.padAngleDeg != null) {
+        surfaceAngleDeg = state.padAngleDeg!;
+      } else {
+        Vector2 surfaceNormal = state.position.normalized();
+        double surfaceAngle = atan2(surfaceNormal.x, -surfaceNormal.y);
+        surfaceAngleDeg = (surfaceAngle * 180 / pi) % 360;
+        if (surfaceAngleDeg < 0) surfaceAngleDeg += 360;
+      }
+      
+      double angleDeg = (state.angle * 180 / pi) % 360;
+      if (angleDeg < 0) angleDeg += 360;
+      
+      double diffDeg = (angleDeg - surfaceAngleDeg).abs();
+      double tilt = min(diffDeg, 360 - diffDeg);
+      
+      int tiltPenalty = (tilt * PhysicsConstants.tiltScoreMultiplier).toInt();
+
+      int score = fuelScore + velocityPenalty + tiltPenalty;
       finalScore = score > 0 ? score : 0;
 
       finalScoreBreakdown = ScoreBreakdown(
         fuelScore: fuelScore,
         velocityPenalty: velocityPenalty,
+        tiltPenalty: tiltPenalty,
         totalScore: finalScore,
       );
     } else {
