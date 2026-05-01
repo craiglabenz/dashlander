@@ -16,7 +16,7 @@ mixin _$TelemetryData {
 
  double get fuel; double get maxFuel; double get vY;// Vertical velocity
  double get vX;// Horizontal velocity
- double get gForce;
+ double get tilt;
 /// Create a copy of TelemetryData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,16 +27,16 @@ $TelemetryDataCopyWith<TelemetryData> get copyWith => _$TelemetryDataCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TelemetryData&&(identical(other.fuel, fuel) || other.fuel == fuel)&&(identical(other.maxFuel, maxFuel) || other.maxFuel == maxFuel)&&(identical(other.vY, vY) || other.vY == vY)&&(identical(other.vX, vX) || other.vX == vX)&&(identical(other.gForce, gForce) || other.gForce == gForce));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TelemetryData&&(identical(other.fuel, fuel) || other.fuel == fuel)&&(identical(other.maxFuel, maxFuel) || other.maxFuel == maxFuel)&&(identical(other.vY, vY) || other.vY == vY)&&(identical(other.vX, vX) || other.vX == vX)&&(identical(other.tilt, tilt) || other.tilt == tilt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,fuel,maxFuel,vY,vX,gForce);
+int get hashCode => Object.hash(runtimeType,fuel,maxFuel,vY,vX,tilt);
 
 @override
 String toString() {
-  return 'TelemetryData(fuel: $fuel, maxFuel: $maxFuel, vY: $vY, vX: $vX, gForce: $gForce)';
+  return 'TelemetryData(fuel: $fuel, maxFuel: $maxFuel, vY: $vY, vX: $vX, tilt: $tilt)';
 }
 
 
@@ -47,7 +47,7 @@ abstract mixin class $TelemetryDataCopyWith<$Res>  {
   factory $TelemetryDataCopyWith(TelemetryData value, $Res Function(TelemetryData) _then) = _$TelemetryDataCopyWithImpl;
 @useResult
 $Res call({
- double fuel, double maxFuel, double vY, double vX, double gForce
+ double fuel, double maxFuel, double vY, double vX, double tilt
 });
 
 
@@ -64,13 +64,13 @@ class _$TelemetryDataCopyWithImpl<$Res>
 
 /// Create a copy of TelemetryData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? fuel = null,Object? maxFuel = null,Object? vY = null,Object? vX = null,Object? gForce = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? fuel = null,Object? maxFuel = null,Object? vY = null,Object? vX = null,Object? tilt = null,}) {
   return _then(_self.copyWith(
 fuel: null == fuel ? _self.fuel : fuel // ignore: cast_nullable_to_non_nullable
 as double,maxFuel: null == maxFuel ? _self.maxFuel : maxFuel // ignore: cast_nullable_to_non_nullable
 as double,vY: null == vY ? _self.vY : vY // ignore: cast_nullable_to_non_nullable
 as double,vX: null == vX ? _self.vX : vX // ignore: cast_nullable_to_non_nullable
-as double,gForce: null == gForce ? _self.gForce : gForce // ignore: cast_nullable_to_non_nullable
+as double,tilt: null == tilt ? _self.tilt : tilt // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }
@@ -153,10 +153,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double fuel,  double maxFuel,  double vY,  double vX,  double gForce)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double fuel,  double maxFuel,  double vY,  double vX,  double tilt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TelemetryData() when $default != null:
-return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.gForce);case _:
+return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt);case _:
   return orElse();
 
 }
@@ -174,10 +174,10 @@ return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.gForce);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double fuel,  double maxFuel,  double vY,  double vX,  double gForce)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double fuel,  double maxFuel,  double vY,  double vX,  double tilt)  $default,) {final _that = this;
 switch (_that) {
 case _TelemetryData():
-return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.gForce);}
+return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -191,10 +191,10 @@ return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.gForce);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double fuel,  double maxFuel,  double vY,  double vX,  double gForce)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double fuel,  double maxFuel,  double vY,  double vX,  double tilt)?  $default,) {final _that = this;
 switch (_that) {
 case _TelemetryData() when $default != null:
-return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.gForce);case _:
+return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt);case _:
   return null;
 
 }
@@ -206,7 +206,7 @@ return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.gForce);case _:
 
 
 class _TelemetryData extends TelemetryData {
-   _TelemetryData({required this.fuel, required this.maxFuel, required this.vY, required this.vX, required this.gForce}): super._();
+   _TelemetryData({required this.fuel, required this.maxFuel, required this.vY, required this.vX, required this.tilt}): super._();
   
 
 @override final  double fuel;
@@ -215,7 +215,7 @@ class _TelemetryData extends TelemetryData {
 // Vertical velocity
 @override final  double vX;
 // Horizontal velocity
-@override final  double gForce;
+@override final  double tilt;
 
 /// Create a copy of TelemetryData
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +227,16 @@ _$TelemetryDataCopyWith<_TelemetryData> get copyWith => __$TelemetryDataCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TelemetryData&&(identical(other.fuel, fuel) || other.fuel == fuel)&&(identical(other.maxFuel, maxFuel) || other.maxFuel == maxFuel)&&(identical(other.vY, vY) || other.vY == vY)&&(identical(other.vX, vX) || other.vX == vX)&&(identical(other.gForce, gForce) || other.gForce == gForce));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TelemetryData&&(identical(other.fuel, fuel) || other.fuel == fuel)&&(identical(other.maxFuel, maxFuel) || other.maxFuel == maxFuel)&&(identical(other.vY, vY) || other.vY == vY)&&(identical(other.vX, vX) || other.vX == vX)&&(identical(other.tilt, tilt) || other.tilt == tilt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,fuel,maxFuel,vY,vX,gForce);
+int get hashCode => Object.hash(runtimeType,fuel,maxFuel,vY,vX,tilt);
 
 @override
 String toString() {
-  return 'TelemetryData(fuel: $fuel, maxFuel: $maxFuel, vY: $vY, vX: $vX, gForce: $gForce)';
+  return 'TelemetryData(fuel: $fuel, maxFuel: $maxFuel, vY: $vY, vX: $vX, tilt: $tilt)';
 }
 
 
@@ -247,7 +247,7 @@ abstract mixin class _$TelemetryDataCopyWith<$Res> implements $TelemetryDataCopy
   factory _$TelemetryDataCopyWith(_TelemetryData value, $Res Function(_TelemetryData) _then) = __$TelemetryDataCopyWithImpl;
 @override @useResult
 $Res call({
- double fuel, double maxFuel, double vY, double vX, double gForce
+ double fuel, double maxFuel, double vY, double vX, double tilt
 });
 
 
@@ -264,13 +264,13 @@ class __$TelemetryDataCopyWithImpl<$Res>
 
 /// Create a copy of TelemetryData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? fuel = null,Object? maxFuel = null,Object? vY = null,Object? vX = null,Object? gForce = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? fuel = null,Object? maxFuel = null,Object? vY = null,Object? vX = null,Object? tilt = null,}) {
   return _then(_TelemetryData(
 fuel: null == fuel ? _self.fuel : fuel // ignore: cast_nullable_to_non_nullable
 as double,maxFuel: null == maxFuel ? _self.maxFuel : maxFuel // ignore: cast_nullable_to_non_nullable
 as double,vY: null == vY ? _self.vY : vY // ignore: cast_nullable_to_non_nullable
 as double,vX: null == vX ? _self.vX : vX // ignore: cast_nullable_to_non_nullable
-as double,gForce: null == gForce ? _self.gForce : gForce // ignore: cast_nullable_to_non_nullable
+as double,tilt: null == tilt ? _self.tilt : tilt // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }

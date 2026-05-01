@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../game/game_state.dart';
+import '../physics/constants.dart';
 
 class HudOverlay extends StatelessWidget {
   final GameController controller;
@@ -67,30 +68,29 @@ class HudOverlay extends StatelessWidget {
                       valueListenable: controller.telemetry,
                       builder: (context, data, child) {
                         return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _buildFuelGauge(data.fuel, data.maxFuel),
-                            _buildTelemetryItem(
+                            Expanded(flex: 3, child: _buildFuelGauge(data.fuel, data.maxFuel)),
+                            Expanded(flex: 2, child: _buildTelemetryItem(
                               'V.SPD',
-                              '${(data.vY * 10).toStringAsFixed(1)} m/s',
-                              data.vY > 15
+                              '${data.vY.toStringAsFixed(1)} m/s',
+                              data.vY > PhysicsConstants.maxLandingVelocityY
                                   ? Colors.redAccent
                                   : Colors.cyanAccent,
-                            ),
-                            _buildTelemetryItem(
+                            )),
+                            Expanded(flex: 2, child: _buildTelemetryItem(
                               'H.SPD',
-                              '${(data.vX * 10).toStringAsFixed(1)} m/s',
-                              data.vX.abs() > 8
+                              '${data.vX.abs().toStringAsFixed(1)} m/s',
+                              data.vX.abs() > PhysicsConstants.maxLandingVelocityX
                                   ? Colors.redAccent
                                   : Colors.cyanAccent,
-                            ),
-                            _buildTelemetryItem(
-                              'G-FORCE',
-                              '${data.gForce.toStringAsFixed(1)} G',
-                              data.gForce > 3.0
-                                  ? Colors.orangeAccent
-                                  : Colors.white,
-                            ),
+                            )),
+                            Expanded(flex: 2, child: _buildTelemetryItem(
+                              'TILT',
+                              '${data.tilt.toStringAsFixed(1)}°',
+                              data.tilt > PhysicsConstants.maxLandingTiltDegrees
+                                  ? Colors.redAccent
+                                  : Colors.cyanAccent,
+                            )),
                           ],
                         );
                       },

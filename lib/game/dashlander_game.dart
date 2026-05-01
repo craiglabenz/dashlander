@@ -73,8 +73,8 @@ class DashlanderGame extends FlameGame
     landerState = LanderState(
       position: level.startPosition.clone(),
       velocity: Vector2(
-        PhysicsConstants.initialVelocityX,
-        PhysicsConstants.initialVelocityY,
+        PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
+        PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
       ), // Slight initial push
       angle: 0,
       angularVelocity: 0,
@@ -121,8 +121,8 @@ class DashlanderGame extends FlameGame
       final ghostState = LanderState(
         position: level.startPosition.clone() + offset,
         velocity: Vector2(
-          PhysicsConstants.initialVelocityX,
-          PhysicsConstants.initialVelocityY,
+          PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
+          PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
         ), // Slight initial push
         angle: 0,
         angularVelocity: 0,

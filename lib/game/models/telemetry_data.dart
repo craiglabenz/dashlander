@@ -11,7 +11,7 @@ sealed class TelemetryData with _$TelemetryData {
     required double maxFuel,
     required double vY, // Vertical velocity
     required double vX, // Horizontal velocity
-    required double gForce,
+    required double tilt, // Replaces gForce
   }) = _TelemetryData;
 
   factory TelemetryData.empty() => TelemetryData(
@@ -19,7 +19,7 @@ sealed class TelemetryData with _$TelemetryData {
     maxFuel: PhysicsConstants.defaultMaxFuel,
     vY: 0,
     vX: 0,
-    gForce: 0,
+    tilt: 0,
   );
 }
 

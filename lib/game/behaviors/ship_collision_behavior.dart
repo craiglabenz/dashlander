@@ -34,6 +34,18 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
 
       // If the ship's bounding circle overlaps the line segment, a collision has occurred.
       if (dist < shipRadius) {
+        
+        // Calculate the literal G-force of instantly hitting the ground in 1 frame (dt).
+        // Since we go from current velocity to 0 in dt seconds, a = v / dt.
+        double speedMetersPerSecond = state.velocity.length / PhysicsConstants.pixelsPerMeter;
+        double impactAcceleration = speedMetersPerSecond / dt;
+        double impactG = impactAcceleration / PhysicsConstants.standardGravity;
+        
+        state.currentGForce = impactG;
+        if (impactG > state.maxGForce) {
+          state.maxGForce = impactG;
+        }
+
         if (terrain.padIndices.contains(i)) {
           // The ship touched a designated landing pad. We must validate the physics of the touch.
           physicsEngine.validateLanding(state);
@@ -45,6 +57,7 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
         } else {
           // The ship touched raw, jagged lunar terrain. Instant explosion.
           crashed = true;
+          state.crashReason = 'Impacted raw jagged terrain. You missed the landing pad.';
         }
       }
     }
@@ -54,13 +67,18 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
     // If it flies higher than an arbitrary outer boundary (+3000), it is lost in deep space.
     // If it glitches completely through the solid crust (-1000), it has fatally clipped the world.
     final double distance = state.position.length;
-    if (distance > PhysicsConstants.moonRadius + 3000 || distance < PhysicsConstants.moonRadius - 1000) {
+    if (distance > PhysicsConstants.moonRadius + 3000) {
       crashed = true;
+      state.crashReason = 'Lost in deep space. You flew too high.';
+    } else if (distance < PhysicsConstants.moonRadius - 1000) {
+      crashed = true;
+      state.crashReason = 'Clipped through the solid crust. The ship was crushed.';
     }
 
     if (crashed || landed) {
       if (crashed) {
         state.isCrashed = true;
+        state.isLanded = false; // Crash always overrides a simultaneous landing
         _createExplosion(game, state.position);
         parent.isVisible = false;
       } else {
@@ -68,7 +86,7 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
       }
       
       if (!parent.isGhost) {
-        game.triggerGameOver(landed);
+        game.triggerGameOver(landed && !crashed);
       }
     }
   }

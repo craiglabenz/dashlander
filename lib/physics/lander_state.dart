@@ -18,7 +18,9 @@ class LanderState {
 
   bool isCrashed;
   bool isLanded;
+  String? crashReason;
 
+  double currentGForce; // Track current frame's G-force for the HUD
   double maxGForce; // Track maximum G-force for scoring
 
   LanderState({
@@ -35,6 +37,8 @@ class LanderState {
     this.steeringTorque = 0.0,
     this.isCrashed = false,
     this.isLanded = false,
+    this.crashReason,
+    this.currentGForce = 0.0,
     this.maxGForce = 0.0,
   });
 
