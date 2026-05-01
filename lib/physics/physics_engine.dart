@@ -4,13 +4,25 @@ import 'constants.dart';
 import 'lander_state.dart';
 
 class PhysicsEngine {
-  // Lunar gravity is approx 1.625 m/s^2
-  final Vector2 gravity = Vector2(0, PhysicsConstants.lunarGravity);
+  /// The absolute magnitude of lunar gravity in m/s^2.
+  /// On the real moon, this is approximately 1.625 m/s^2.
+  /// Because we operate on a spherical moon, this force is always applied 
+  /// pointing toward the coordinate origin (0, 0).
+  // Lunar gravity magnitude
+  final double lunarGravity = PhysicsConstants.lunarGravity;
 
-  // Sandbox parameters
+  // Sandbox parameters for tweaking physics live in the UI
   bool infiniteFuel = false;
   double gravityScale = 1.0;
   double thrustScale = 1.0;
+
+  /// The main physics step, called every frame.
+  /// Uses a semi-implicit Euler integration method to calculate forces, 
+  /// update velocity, and then update position.
+  ///
+  /// [state] - The current kinematic state of the ship (position, velocity, etc.)
+  /// [dt] - Delta time since the last frame (in seconds)
+  /// [throttle] - The current throttle percentage [0.0, 1.0] from player input
 
   void update(
     LanderState state,
@@ -54,11 +66,23 @@ class PhysicsEngine {
     }
 
     // 2. Accumulate Forces
-    Vector2 netForce = gravity * state.totalMass * gravityScale;
+    // For a spherical moon centered at (0, 0), the vector pointing from the 
+    // ship to the center of the moon is simply the negative of its position.
+    // Normalized, this gives us a pure directional unit vector for gravity.
+    Vector2 gravityDirection = -state.position.normalized();
+    Vector2 gravityForce = gravityDirection * lunarGravity * state.totalMass * gravityScale;
+    
+    // Start our net force calculation with the continuous pull of gravity
+    Vector2 netForce = gravityForce;
 
     if (state.isThrusting) {
-      // In Flame, Y down is positive. Angle 0 = pointing UP.
-      // So thrust points UP, accelerating ship UP (negative Y).
+      // In Flame's coordinate system, angle 0 points directly "UP" (towards negative Y).
+      // A positive angle rotates clockwise.
+      // Therefore, the forward vector is:
+      // X = sin(angle)
+      // Y = -cos(angle)
+      // 
+      // This calculates the thrust vector pointing opposite the engine nozzle.
       Vector2 thrustVector = Vector2(
         sin(state.angle) * mainThrustMagnitude,
         -cos(state.angle) * mainThrustMagnitude,
@@ -67,19 +91,21 @@ class PhysicsEngine {
     }
 
     // 3. Accumulate Torques
-    // Simple 2D rotational physics
+    // In our simplified 2D physics, torque is directly applied by the RCS thrusters
+    // without worrying about off-axis mass distribution.
     double netTorque = steeringTorque;
+    
+    // Angular Acceleration = Torque / Moment of Inertia (τ = I * α)
     double angularAcceleration = netTorque / state.baseInertia;
 
     // 4. Semi-Implicit Euler Integration
-    // Translational Update
+    // First, find the linear acceleration (a = F / m)
     Vector2 acceleration = netForce / state.totalMass;
 
     // G-Force Calculation (magnitude of non-gravitational acceleration)
     Vector2 feltAcceleration =
         state.isThrusting
-            ? (netForce - (gravity * state.totalMass * gravityScale)) /
-                state.totalMass
+            ? (netForce - gravityForce) / state.totalMass
             : Vector2.zero();
     double currentG =
         feltAcceleration.length / PhysicsConstants.standardGravity;
@@ -95,23 +121,57 @@ class PhysicsEngine {
     state.angle += state.angularVelocity * dt;
   }
 
-  // Helper for landing validation
+  /// Validates whether a collision with the ground is a successful landing or a fatal crash.
+  /// 
+  /// Because our moon is spherical, "down" changes depending on where the ship is.
+  /// We must calculate everything (tilt, horizontal speed, vertical speed) relative 
+  /// to the curved surface directly beneath the ship.
   void validateLanding(LanderState state) {
-    // Convert angle to degrees and normalize between 0 and 360
+    // Convert the ship's internal radians to degrees and clamp to [0, 360)
     double angleDeg = (state.angle * 180 / pi) % 360;
     if (angleDeg < 0) angleDeg += 360;
-    // Normalized difference from 0 (upright)
-    double tilt = min(angleDeg, 360 - angleDeg);
+    
+    // The surface normal is the vector pointing straight OUT from the moon's center
+    // passing through the ship's current position.
+    Vector2 surfaceNormal = state.position.normalized();
+    
+    // Calculate the angle of the surface normal.
+    // In Flame (angle 0 is -Y), we use atan2(x, -y) to get the equivalent angle.
+    double surfaceAngle = atan2(surfaceNormal.x, -surfaceNormal.y);
+    double surfaceAngleDeg = (surfaceAngle * 180 / pi) % 360;
+    if (surfaceAngleDeg < 0) surfaceAngleDeg += 360;
+    
+    // The tilt is the absolute difference between the ship's angle and the surface angle.
+    // We use min(diff, 360 - diff) to find the shortest angular distance (e.g. 359 and 1 are 2 degrees apart).
+    double diffDeg = (angleDeg - surfaceAngleDeg).abs();
+    double tilt = min(diffDeg, 360 - diffDeg);
 
-    bool isUpright =
-        tilt <
-        PhysicsConstants
-            .maxLandingTiltDegrees; // lenient for gameplay, historically 6 degrees
-    bool isSlowV =
-        state.velocity.y < PhysicsConstants.maxLandingVelocityY; // m/s
-    bool isSlowH =
-        state.velocity.x.abs() < PhysicsConstants.maxLandingVelocityX; // m/s
+    // Landing requirement 1: Must be relatively upright compared to the ground
+    bool isUpright = tilt < PhysicsConstants.maxLandingTiltDegrees;
+    
+    // Radial velocity (falling speed): 
+    // The dot product projects the ship's velocity onto the surface normal vector.
+    // Since the normal points OUT, a positive dot product means moving AWAY from the moon.
+    // A negative dot product means falling TOWARDS the moon.
+    // By taking the negative dot product, we get a positive "falling speed".
+    double fallingSpeed = -state.velocity.dot(surfaceNormal);
+    
+    // Landing requirement 2: Must not hit the ground too hard vertically
+    bool isSlowV = fallingSpeed < PhysicsConstants.maxLandingVelocityY;
+    
+    // Tangential velocity (horizontal sliding speed):
+    // The tangent vector is exactly 90 degrees rotated from the normal vector.
+    // (x, y) rotated 90 degrees becomes (-y, x).
+    Vector2 surfaceTangent = Vector2(-surfaceNormal.y, surfaceNormal.x);
+    
+    // The dot product projects the ship's velocity onto the tangent vector, giving us
+    // the true "sliding" speed across the surface, regardless of our location on the sphere.
+    double horizontalSpeed = state.velocity.dot(surfaceTangent).abs();
+    
+    // Landing requirement 3: Must not be sliding too fast horizontally across the ground
+    bool isSlowH = horizontalSpeed < PhysicsConstants.maxLandingVelocityX;
 
+    // If all three conditions are met, it's a perfect landing! Otherwise, explosion.
     if (isUpright && isSlowV && isSlowH) {
       state.isLanded = true;
     } else {

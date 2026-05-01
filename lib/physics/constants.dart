@@ -3,6 +3,14 @@ class PhysicsConstants {
   static const double lunarGravity = 1.625; // m/s^2
   static const double standardGravity = 9.80665; // m/s^2
 
+  // Procedural Level Generation
+  static const double moonRadius = 5000.0;
+  static const int terrainSegments = 400; // Number of points around the circle
+  static const double maxTerrainHeight = 400.0; // Max variation in terrain height
+  static const double noiseFrequency = 8.0; // Controls how bumpy the moon is
+  static const int numLandingPads = 6;
+  static const int padWidthSegments = 2; // How many segments make up a pad
+
   // Ship parameters
   static const double dryMass = 4280.0; // kg (Apollo LM dry mass approx)
   static const double engineMaxThrust = 45040.0; // N (Apollo LM max thrust)
