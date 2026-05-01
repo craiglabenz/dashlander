@@ -155,4 +155,10 @@ class PhysicsConstants {
 
   /// The base thrust slider value used in the sandbox UI to calculate scaling.
   static const double sandboxBaseThrust = 0.12;
+
+  // ---------------------------------------------------------------------------
+  // SCORING VALUES
+  // ---------------------------------------------------------------------------
+  static const double fuelScoreMultiplier = 45;
+  static const double velocityScoreMultiplier = -1000;
 }

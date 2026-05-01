@@ -68,15 +68,18 @@ class GameController {
 
     if (newStatus == GameStatus.won) {
       // Heavily weight fuel conservation
-      int fuelScore = (state.fuelMass * 25).toInt();
-      
+      int fuelScore =
+          (state.fuelMass * PhysicsConstants.fuelScoreMultiplier).toInt();
+
       // Penalty based on absolute landing velocity
-      double speedMeters = state.velocity.length / PhysicsConstants.pixelsPerMeter;
-      int velocityPenalty = (speedMeters * 200).toInt();
-      
+      double speedMeters =
+          state.velocity.length / PhysicsConstants.pixelsPerMeter;
+      int velocityPenalty =
+          (speedMeters * PhysicsConstants.velocityScoreMultiplier).toInt();
+
       int score = fuelScore - velocityPenalty;
       finalScore = score > 0 ? score : 0;
-      
+
       finalScoreBreakdown = ScoreBreakdown(
         fuelScore: fuelScore,
         velocityPenalty: velocityPenalty,
