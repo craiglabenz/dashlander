@@ -5,13 +5,9 @@ import '../game/game_state.dart';
 import '../game/level_generator.dart';
 
 final List<LevelData> defaultLevels = [
-  LevelGenerator.generate(
-    seed: 101,
-    name: "Sea of Tranquility",
-    initialFuel: 256,
-  ),
-  LevelGenerator.generate(seed: 404, name: "Tycho Crater", initialFuel: 256),
-  LevelGenerator.generate(seed: 999, name: "Lunar Alps", initialFuel: 256),
+  LevelGenerator.generate(seed: 101, name: "Sea of Tranquility"),
+  LevelGenerator.generate(seed: 404, name: "Tycho Crater"),
+  LevelGenerator.generate(seed: 999, name: "Lunar Alps"),
 ];
 
 class LevelSelect extends StatefulWidget {

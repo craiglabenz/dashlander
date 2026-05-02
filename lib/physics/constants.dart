@@ -6,7 +6,7 @@ class PhysicsConstants {
   /// The absolute magnitude of lunar gravity acting on the ship (in m/s^2).
   /// This is applied radially toward the center of the spherical moon.
   /// Higher values pull the ship down faster, requiring more fuel to survive.
-  static const double lunarGravity = 3.2;
+  static const double lunarGravity = 3.2 * 1.25;
 
   /// Earth's standard gravity (in m/s^2).
   /// Used solely as a reference to calculate the "G-Force" experienced by the
@@ -58,7 +58,7 @@ class PhysicsConstants {
 
   /// The maximum force the main engine can produce (in Newtons).
   /// This dictates how fast the ship can accelerate upwards to fight gravity.
-  static const double engineMaxThrust = 45040.0;
+  static const double engineMaxThrust = 45040.0 * 1.8;
 
   /// The efficiency of the main engine (in seconds).
   /// A higher specific impulse means the engine consumes less fuel to produce
@@ -88,24 +88,12 @@ class PhysicsConstants {
   // ---------------------------------------------------------------------------
 
   /// The starting fuel mass for the lander (in kg).
-  static const double defaultMaxFuel = 256.0;
+  static const double defaultMaxFuel = 1000.0;
 
   /// The radius of the ship's collision hitbox (in meters).
   /// This invisible circle is used to calculate collisions against the terrain's
   /// line segments.
   static const double shipRadius = 14.0;
-
-  // ---------------------------------------------------------------------------
-  // GHOST SHIPS
-  // ---------------------------------------------------------------------------
-
-  /// The maximum randomized horizontal offset applied to a ghost ship's
-  /// starting position to prevent them from perfectly overlapping the player.
-  static const double ghostOffsetXRange = 40.0;
-
-  /// The maximum randomized vertical offset applied to a ghost ship's
-  /// starting position.
-  static const double ghostOffsetYRange = 20.0;
 
   // ---------------------------------------------------------------------------
   // INITIAL STATE
