@@ -80,21 +80,8 @@ class PhysicsConstants {
   static const double rcsLeverArm = 10.0;
 
   // ---------------------------------------------------------------------------
-  // LANDING VALIDATION
+  // (Landing validation limits moved to ScoreBreakdown)
   // ---------------------------------------------------------------------------
-
-  /// The maximum allowable angle (in degrees) between the ship's orientation
-  /// and the surface normal of the landing pad.
-  /// If the ship is tilted more than this when it touches the pad, it crashes.
-  static const double maxLandingTiltDegrees = 15.0;
-
-  /// The maximum allowable radial speed (falling towards the center of the moon)
-  /// when touching a pad (in m/s). Exceeding this shatters the landing legs.
-  static const double maxLandingVelocityY = 2.0;
-
-  /// The maximum allowable tangential speed (sliding sideways across the pad)
-  /// when touching down (in m/s). Exceeding this snaps the landing legs sideways.
-  static const double maxLandingVelocityX = 1.0;
 
   // ---------------------------------------------------------------------------
   // GAME LIMITS & COLLISION
@@ -155,11 +142,4 @@ class PhysicsConstants {
 
   /// The base thrust slider value used in the sandbox UI to calculate scaling.
   static const double sandboxBaseThrust = 0.12;
-
-  // ---------------------------------------------------------------------------
-  // SCORING VALUES
-  // ---------------------------------------------------------------------------
-  static const double fuelScoreMultiplier = 45;
-  static const double velocityScoreMultiplier = -1000;
-  static const double tiltScoreMultiplier = -500;
 }

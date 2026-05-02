@@ -3,24 +3,28 @@ import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart';
 import '../physics/constants.dart';
 import '../physics/lander_state.dart';
+import '../physics/math_utils.dart';
 import 'models/game_status.dart';
 import 'models/level_data.dart';
 import 'models/sandbox_config.dart';
 import 'models/telemetry_data.dart';
 
-class ScoreBreakdown {
-  final int fuelScore;
-  final int velocityPenalty;
-  final int tiltPenalty;
-  final int totalScore;
+import 'models/score_breakdown.dart';
 
-  ScoreBreakdown({
-    required this.fuelScore,
-    required this.velocityPenalty,
-    required this.tiltPenalty,
-    required this.totalScore,
+class FinalMetrics {
+  final double shipDeltaDeg;
+  final double padDeltaDeg;
+  final double finalTiltDeg;
+  final double impactVelocityMetersPerSecond;
+
+  FinalMetrics({
+    required this.shipDeltaDeg,
+    required this.padDeltaDeg,
+    required this.finalTiltDeg,
+    required this.impactVelocityMetersPerSecond,
   });
 }
+
 
 class GameController {
   final ValueNotifier<TelemetryData> telemetry = ValueNotifier(
@@ -31,6 +35,7 @@ class GameController {
   // Game results
   int finalScore = 0;
   ScoreBreakdown? finalScoreBreakdown;
+  FinalMetrics? finalMetrics;
   LanderState? finalState;
 
   LevelData? currentLevel;
@@ -47,11 +52,12 @@ class GameController {
     // Calculate relative tilt compared to the surface normal beneath the ship
     double angleDeg = (state.angle * 180 / pi) % 360;
     if (angleDeg < 0) angleDeg += 360;
-    double surfaceAngle = atan2(surfaceNormal.x, -surfaceNormal.y);
-    double surfaceAngleDeg = (surfaceAngle * 180 / pi) % 360;
-    if (surfaceAngleDeg < 0) surfaceAngleDeg += 360;
-    double diffDeg = (angleDeg - surfaceAngleDeg).abs();
-    double tilt = min(diffDeg, 360 - diffDeg);
+    
+    double shipDeltaDeg = MathUtils.calculateRelativeTiltDeg(
+      position: state.position,
+      absoluteAngleDeg: angleDeg,
+    );
+    double tilt = shipDeltaDeg.abs();
 
     telemetry.value = TelemetryData(
       fuel: state.fuelMass,
@@ -68,45 +74,49 @@ class GameController {
     status.value = newStatus;
     finalState = state;
 
-    if (newStatus == GameStatus.won) {
-      // Heavily weight fuel conservation
-      int fuelScore =
-          (state.fuelMass * PhysicsConstants.fuelScoreMultiplier).toInt();
+    // 1. Calculate the final metrics unconditionally for the UI
+    double angleDeg = (state.angle * 180 / pi) % 360;
+    if (angleDeg < 0) angleDeg += 360;
+    
+    double shipDeltaDeg = MathUtils.calculateRelativeTiltDeg(
+      position: state.position,
+      absoluteAngleDeg: angleDeg,
+    );
 
-      // Penalty based on absolute landing velocity
-      double speedMeters =
-          state.velocity.length / PhysicsConstants.pixelsPerMeter;
-      int velocityPenalty =
-          (speedMeters * PhysicsConstants.velocityScoreMultiplier).toInt();
-
-      // Penalty based on tilt relative to surface
+    double padDeltaDeg;
+    if (state.padIndex != null && currentLevel != null) {
+      padDeltaDeg = currentLevel!.padAngleDeltas[state.padIndex!] ?? 0.0;
+    } else {
       double surfaceAngleDeg;
       if (state.padAngleDeg != null) {
         surfaceAngleDeg = state.padAngleDeg!;
       } else {
         Vector2 surfaceNormal = state.position.normalized();
-        double surfaceAngle = atan2(surfaceNormal.x, -surfaceNormal.y);
-        surfaceAngleDeg = (surfaceAngle * 180 / pi) % 360;
-        if (surfaceAngleDeg < 0) surfaceAngleDeg += 360;
+        surfaceAngleDeg = MathUtils.calculateAbsoluteAngleDeg(surfaceNormal);
       }
-      
-      double angleDeg = (state.angle * 180 / pi) % 360;
-      if (angleDeg < 0) angleDeg += 360;
-      
-      double diffDeg = (angleDeg - surfaceAngleDeg).abs();
-      double tilt = min(diffDeg, 360 - diffDeg);
-      
-      int tiltPenalty = (tilt * PhysicsConstants.tiltScoreMultiplier).toInt();
-
-      int score = fuelScore + velocityPenalty + tiltPenalty;
-      finalScore = score > 0 ? score : 0;
-
-      finalScoreBreakdown = ScoreBreakdown(
-        fuelScore: fuelScore,
-        velocityPenalty: velocityPenalty,
-        tiltPenalty: tiltPenalty,
-        totalScore: finalScore,
+      padDeltaDeg = MathUtils.calculateRelativeTiltDeg(
+        position: state.position,
+        absoluteAngleDeg: surfaceAngleDeg,
       );
+    }
+    
+    double tilt = MathUtils.calculateTiltDifference(shipDeltaDeg, padDeltaDeg);
+
+    Vector2 surfaceNormal = state.position.normalized();
+    double fallingSpeedPixels = -state.velocity.dot(surfaceNormal);
+    double fallingSpeedMeters = fallingSpeedPixels / PhysicsConstants.pixelsPerMeter;
+
+    finalMetrics = FinalMetrics(
+      shipDeltaDeg: shipDeltaDeg,
+      padDeltaDeg: padDeltaDeg,
+      finalTiltDeg: tilt,
+      impactVelocityMetersPerSecond: fallingSpeedMeters,
+    );
+
+    // 2. Calculate the score if won
+    if (newStatus == GameStatus.won) {
+      finalScoreBreakdown = ScoreBreakdown.calculate(finalMetrics!, state);
+      finalScore = finalScoreBreakdown!.totalScore;
     } else {
       finalScore = 0;
       finalScoreBreakdown = null;
@@ -117,6 +127,7 @@ class GameController {
     status.value = GameStatus.menu;
     finalScore = 0;
     finalScoreBreakdown = null;
+    finalMetrics = null;
     finalState = null;
   }
 }

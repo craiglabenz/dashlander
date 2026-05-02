@@ -20,6 +20,7 @@ class LanderState {
   bool isLanded;
   String? crashReason;
   double? padAngleDeg;
+  int? padIndex;
 
   double currentGForce; // Track current frame's G-force for the HUD
   double maxGForce; // Track maximum G-force for scoring
@@ -40,6 +41,7 @@ class LanderState {
     this.isLanded = false,
     this.crashReason,
     this.padAngleDeg,
+    this.padIndex,
     this.currentGForce = 0.0,
     this.maxGForce = 0.0,
   });

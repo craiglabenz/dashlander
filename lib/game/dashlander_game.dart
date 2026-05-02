@@ -201,6 +201,12 @@ class DashlanderGame extends FlameGame
         keysPressed.contains(LogicalKeyboardKey.arrowUp) ||
         keysPressed.contains(LogicalKeyboardKey.keyW) ||
         keysPressed.contains(LogicalKeyboardKey.space);
+
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.backquote) {
+      debugMode = !debugMode;
+    }
+
     return super.onKeyEvent(event, keysPressed);
   }
 

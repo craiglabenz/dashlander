@@ -1,9 +1,8 @@
-import 'dart:math';
-import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../physics/constants.dart';
+
 import '../game/game_state.dart';
+import '../game/models/score_breakdown.dart';
 
 class GameOverModal extends StatelessWidget {
   final GameController controller;
@@ -30,24 +29,8 @@ class GameOverModal extends StatelessWidget {
             ? 'Flawless execution, Commander.'
             : state.crashReason ?? 'Structural integrity compromised.';
 
-    Vector2 sphericalNormal = state.position.normalized();
-    double fallingSpeedPixels = -state.velocity.dot(sphericalNormal);
-    double fallingSpeedMeters =
-        fallingSpeedPixels / PhysicsConstants.pixelsPerMeter;
-
-    double angleDeg = (state.angle * 180 / pi) % 360;
-    if (angleDeg < 0) angleDeg += 360;
-
-    double surfaceAngleDeg;
-    if (state.padAngleDeg != null) {
-      surfaceAngleDeg = state.padAngleDeg!;
-    } else {
-      double surfaceAngle = atan2(sphericalNormal.x, -sphericalNormal.y);
-      surfaceAngleDeg = (surfaceAngle * 180 / pi) % 360;
-      if (surfaceAngleDeg < 0) surfaceAngleDeg += 360;
-    }
-    double diffDeg = (angleDeg - surfaceAngleDeg).abs();
-    double tilt = min(diffDeg, 360 - diffDeg);
+    final metrics = controller.finalMetrics;
+    if (metrics == null) return const SizedBox.shrink();
 
     return Container(
       color: Colors.black.withValues(alpha: 0.8),
@@ -120,28 +103,42 @@ class GameOverModal extends StatelessWidget {
                 const SizedBox(height: 24),
               ],
               _buildStatRow(
-                'Impact Velocity',
-                '${fallingSpeedMeters.toStringAsFixed(1)} m/s',
-                fallingSpeedMeters > PhysicsConstants.maxLandingVelocityY
-                    ? Colors.redAccent
-                    : Colors.greenAccent,
-                impactText:
-                    isWin
-                        ? '${controller.finalScoreBreakdown?.velocityPenalty ?? 0}'
-                        : null,
-                impactColor: Colors.redAccent,
+                'Landing Pad',
+                state.padIndex != null
+                    ? 'Segment ${state.padIndex}'
+                    : 'Off-pad Crash',
+                Colors.white70,
               ),
               _buildStatRow(
-                'Final Tilt',
-                '${tilt.toStringAsFixed(1)}°',
-                tilt > PhysicsConstants.maxLandingTiltDegrees
+                'Impact Velocity',
+                '${metrics.impactVelocityMetersPerSecond.toStringAsFixed(1)} m/s',
+                metrics.impactVelocityMetersPerSecond >
+                        ScoreBreakdown.maxLandingVelocityY
                     ? Colors.redAccent
                     : Colors.greenAccent,
                 impactText:
                     isWin
-                        ? '${controller.finalScoreBreakdown?.tiltPenalty ?? 0}'
+                        ? '${controller.finalScoreBreakdown!.velocityScore >= 0 ? '+' : ''}${controller.finalScoreBreakdown?.velocityScore ?? 0}'
                         : null,
-                impactColor: Colors.redAccent,
+                impactColor:
+                    (controller.finalScoreBreakdown?.velocityScore ?? 0) >= 0
+                        ? Colors.greenAccent
+                        : Colors.redAccent,
+              ),
+              _buildStatRow(
+                'Tilt Delta',
+                '${metrics.finalTiltDeg.toStringAsFixed(1)}°',
+                metrics.finalTiltDeg > ScoreBreakdown.maxLandingTiltDegrees
+                    ? Colors.redAccent
+                    : Colors.greenAccent,
+                impactText:
+                    isWin
+                        ? '${controller.finalScoreBreakdown!.tiltScore >= 0 ? '+' : ''}${controller.finalScoreBreakdown?.tiltScore ?? 0}'
+                        : null,
+                impactColor:
+                    (controller.finalScoreBreakdown?.tiltScore ?? 0) >= 0
+                        ? Colors.greenAccent
+                        : Colors.redAccent,
               ),
               _buildStatRow(
                 'Remaining Fuel',
@@ -212,28 +209,67 @@ class GameOverModal extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: GoogleFonts.shareTechMono(color: Colors.grey.shade400),
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: GoogleFonts.shareTechMono(color: Colors.grey.shade400),
+            ),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (impactText != null) ...[
-                Text(
-                  impactText,
-                  style: GoogleFonts.shareTechMono(
-                    color: impactColor ?? Colors.white,
-                    fontWeight: FontWeight.bold,
+          const Spacer(),
+          Expanded(
+            flex: 2,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (impactText != null) ...[
+                  Expanded(
+                    flex: 2,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        impactText,
+                        style: GoogleFonts.shareTechMono(
+                          color: impactColor ?? Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                Expanded(
+                  flex: 3,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      value,
+                      style: GoogleFonts.shareTechMono(color: valueColor),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
               ],
-              Text(value, style: GoogleFonts.shareTechMono(color: valueColor)),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+///
+extension DebuggableWidget on Widget {
+  ///
+  Widget border({Color? color}) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: color ?? const Color.from(alpha: 1, red: 1, green: 0, blue: 0),
+        ),
+      ),
+      child: this,
+    );
+  }
+
+  ///
+  Widget withBorder({Color? color}) => border(color: color);
 }

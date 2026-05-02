@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../game/game_state.dart';
-import '../physics/constants.dart';
+import '../game/models/score_breakdown.dart';
 import 'minimap.dart';
 
 class HudOverlay extends StatelessWidget {
@@ -55,7 +55,9 @@ class HudOverlay extends StatelessWidget {
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     color: Colors.black54,
-                                    border: Border.all(color: Colors.grey.shade600),
+                                    border: Border.all(
+                                      color: Colors.grey.shade600,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: const Icon(
@@ -70,28 +72,47 @@ class HudOverlay extends StatelessWidget {
                             Expanded(
                               child: Row(
                                 children: [
-                                  Expanded(flex: 3, child: _buildFuelGauge(data.fuel, data.maxFuel)),
-                                  Expanded(flex: 2, child: _buildTelemetryItem(
-                                    'V.SPD',
-                                    '${data.vY.toStringAsFixed(1)} m/s',
-                                    data.vY > PhysicsConstants.maxLandingVelocityY
-                                        ? Colors.redAccent
-                                        : Colors.cyanAccent,
-                                  )),
-                                  Expanded(flex: 2, child: _buildTelemetryItem(
-                                    'H.SPD',
-                                    '${data.vX.abs().toStringAsFixed(1)} m/s',
-                                    data.vX.abs() > PhysicsConstants.maxLandingVelocityX
-                                        ? Colors.redAccent
-                                        : Colors.cyanAccent,
-                                  )),
-                                  Expanded(flex: 2, child: _buildTelemetryItem(
-                                    'TILT',
-                                    '${data.tilt.toStringAsFixed(1)}°',
-                                    data.tilt > PhysicsConstants.maxLandingTiltDegrees
-                                        ? Colors.redAccent
-                                        : Colors.cyanAccent,
-                                  )),
+                                  Expanded(
+                                    flex: 3,
+                                    child: _buildFuelGauge(
+                                      data.fuel,
+                                      data.maxFuel,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildTelemetryItem(
+                                      'V.SPD',
+                                      '${data.vY.toStringAsFixed(1)} m/s',
+                                      data.vY >
+                                              ScoreBreakdown.maxLandingVelocityY
+                                          ? Colors.redAccent
+                                          : Colors.cyanAccent,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildTelemetryItem(
+                                      'H.SPD',
+                                      '${data.vX.abs().toStringAsFixed(1)} m/s',
+                                      data.vX.abs() >
+                                              ScoreBreakdown.maxLandingVelocityX
+                                          ? Colors.redAccent
+                                          : Colors.cyanAccent,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildTelemetryItem(
+                                      'TILT',
+                                      '${data.tilt.toStringAsFixed(1)}°',
+                                      data.tilt >
+                                              ScoreBreakdown
+                                                  .maxLandingTiltDegrees
+                                          ? Colors.redAccent
+                                          : Colors.cyanAccent,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:chaos/chaos.dart';
 import '../physics/constants.dart';
+import '../physics/math_utils.dart';
 import 'models/level_data.dart';
 
 class LevelGenerator {
@@ -134,26 +135,14 @@ class LevelGenerator {
       }
 
       // Calculate absolute angle of the pad's normal
-      double absoluteAngle = atan2(normal.x, -normal.y);
-      if (absoluteAngle < 0) absoluteAngle += 2 * pi;
-      double absoluteAngleDeg = absoluteAngle * 180 / pi;
-
-      // Calculate the perfect spherical normal at the midpoint
-      Vector2 sphericalNormal = mid.normalized();
-      double sphericalAngle = atan2(sphericalNormal.x, -sphericalNormal.y);
-      if (sphericalAngle < 0) sphericalAngle += 2 * pi;
-      double sphericalAngleDeg = sphericalAngle * 180 / pi;
-
+      double absoluteAngleDeg = MathUtils.calculateAbsoluteAngleDeg(normal);
+      
       // Calculate delta. A delta of 0 means the pad is perfectly aligned with the moon's curvature.
-      double deltaDeg = absoluteAngleDeg - sphericalAngleDeg;
-      // Normalize delta to [-180, 180]
-      while (deltaDeg > 180) {
-        deltaDeg -= 360;
-      }
-      while (deltaDeg <= -180) {
-        deltaDeg += 360;
-      }
-
+      double deltaDeg = MathUtils.calculateRelativeTiltDeg(
+        position: mid,
+        absoluteAngleDeg: absoluteAngleDeg,
+      );
+      
       padAngles[idx] = absoluteAngleDeg;
       padAngleDeltas[idx] = deltaDeg;
     }

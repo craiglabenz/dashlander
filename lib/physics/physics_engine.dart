@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'constants.dart';
 import 'lander_state.dart';
+import '../game/models/score_breakdown.dart';
 
 class PhysicsEngine {
   /// The absolute magnitude of lunar gravity in m/s^2.
@@ -145,7 +146,10 @@ class PhysicsEngine {
 
     // Convert the angle back to a normal vector to calculate relative velocities.
     // In Flame, angle 0 points UP (0, -1).
-    Vector2 surfaceNormal = Vector2(sin(surfaceAngleRad), -cos(surfaceAngleRad));
+    Vector2 surfaceNormal = Vector2(
+      sin(surfaceAngleRad),
+      -cos(surfaceAngleRad),
+    );
 
     // The tilt is the absolute difference between the ship's angle and the surface angle.
     // We use min(diff, 360 - diff) to find the shortest angular distance (e.g. 359 and 1 are 2 degrees apart).
@@ -153,7 +157,7 @@ class PhysicsEngine {
     double tilt = min(diffDeg, 360 - diffDeg);
 
     // Landing requirement 1: Must be relatively upright compared to the ground
-    bool isUpright = tilt <= PhysicsConstants.maxLandingTiltDegrees;
+    bool isUpright = tilt <= ScoreBreakdown.maxLandingTiltDegrees;
 
     // Radial velocity (falling speed):
     // The dot product projects the ship's velocity onto the surface normal vector.
@@ -166,8 +170,7 @@ class PhysicsEngine {
     // We convert the max m/s limit to pixels/s for comparison.
     bool isSlowV =
         fallingSpeed <=
-        (PhysicsConstants.maxLandingVelocityY *
-            PhysicsConstants.pixelsPerMeter);
+        (ScoreBreakdown.maxLandingVelocityY * PhysicsConstants.pixelsPerMeter);
 
     // Tangential velocity (horizontal sliding speed):
     // The tangent vector is exactly 90 degrees rotated from the normal vector.
@@ -181,8 +184,7 @@ class PhysicsEngine {
     // Landing requirement 3: Must not be sliding too fast horizontally across the ground
     bool isSlowH =
         horizontalSpeed <=
-        (PhysicsConstants.maxLandingVelocityX *
-            PhysicsConstants.pixelsPerMeter);
+        (ScoreBreakdown.maxLandingVelocityX * PhysicsConstants.pixelsPerMeter);
 
     // If all three conditions are met, it's a perfect landing! Otherwise, explosion.
     if (isUpright && isSlowV && isSlowH) {
@@ -191,17 +193,17 @@ class PhysicsEngine {
       state.isCrashed = true;
       if (!isUpright) {
         state.crashReason =
-            'Tilt exceeded maximum by \n${(tilt - PhysicsConstants.maxLandingTiltDegrees).toStringAsFixed(1)}°';
+            'Tilt exceeded maximum by \n${(tilt - ScoreBreakdown.maxLandingTiltDegrees).toStringAsFixed(1)}°';
       } else if (!isSlowV) {
         double excessV =
             (fallingSpeed / PhysicsConstants.pixelsPerMeter) -
-            PhysicsConstants.maxLandingVelocityY;
+            ScoreBreakdown.maxLandingVelocityY;
         state.crashReason =
             'Vertical speed exceeded limit by \n${excessV.toStringAsFixed(1)} m/s';
       } else if (!isSlowH) {
         double excessH =
             (horizontalSpeed / PhysicsConstants.pixelsPerMeter) -
-            PhysicsConstants.maxLandingVelocityX;
+            ScoreBreakdown.maxLandingVelocityX;
         state.crashReason =
             'Horizontal sliding exceeded limit by \n${excessH.toStringAsFixed(1)} m/s';
       }
