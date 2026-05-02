@@ -207,6 +207,11 @@ class DashlanderGame extends FlameGame
       debugMode = !debugMode;
     }
 
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.keyP) {
+      paused = !paused;
+    }
+
     return super.onKeyEvent(event, keysPressed);
   }
 

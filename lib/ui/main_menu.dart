@@ -20,6 +20,9 @@ class _MainMenuState extends State<MainMenu> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.sizeOf(context).width;
+    double scale = screenWidth < 600 ? screenWidth / 600 : 1.0;
+
     return Container(
       color: Colors.black.withValues(alpha: 0.8),
       child: Center(
@@ -29,7 +32,7 @@ class _MainMenuState extends State<MainMenu> {
             Text(
               'DASHLANDER',
               style: GoogleFonts.orbitron(
-                fontSize: 48,
+                fontSize: 48 * scale,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 8,
                 color: Colors.cyanAccent,

@@ -26,4 +26,3 @@ sealed class TelemetryData with _$TelemetryData {
     y: PhysicsConstants.moonRadius,
   );
 }
-

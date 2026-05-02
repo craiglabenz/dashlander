@@ -5,9 +5,13 @@ import '../game/game_state.dart';
 import '../game/level_generator.dart';
 
 final List<LevelData> defaultLevels = [
-  LevelGenerator.generate(seed: 101, name: "Sea of Tranquility", initialFuel: 1000),
-  LevelGenerator.generate(seed: 404, name: "Tycho Crater", initialFuel: 800),
-  LevelGenerator.generate(seed: 999, name: "Lunar Alps", initialFuel: 600),
+  LevelGenerator.generate(
+    seed: 101,
+    name: "Sea of Tranquility",
+    initialFuel: 256,
+  ),
+  LevelGenerator.generate(seed: 404, name: "Tycho Crater", initialFuel: 256),
+  LevelGenerator.generate(seed: 999, name: "Lunar Alps", initialFuel: 256),
 ];
 
 class LevelSelect extends StatefulWidget {
@@ -82,7 +86,9 @@ class _LevelSelectState extends State<LevelSelect> {
                         style: GoogleFonts.shareTechMono(color: Colors.white),
                         decoration: InputDecoration(
                           hintText: 'Enter custom seed...',
-                          hintStyle: GoogleFonts.shareTechMono(color: Colors.grey.shade600),
+                          hintStyle: GoogleFonts.shareTechMono(
+                            color: Colors.grey.shade600,
+                          ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.cyan.shade900),
                           ),
@@ -90,7 +96,9 @@ class _LevelSelectState extends State<LevelSelect> {
                             borderSide: BorderSide(color: Colors.cyanAccent),
                           ),
                           filled: true,
-                          fillColor: Colors.cyan.shade900.withValues(alpha: 0.2),
+                          fillColor: Colors.cyan.shade900.withValues(
+                            alpha: 0.2,
+                          ),
                         ),
                         onSubmitted: (_) => _generateCustomLevel(),
                       ),
@@ -99,9 +107,16 @@ class _LevelSelectState extends State<LevelSelect> {
                     ElevatedButton(
                       onPressed: _generateCustomLevel,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.cyan.shade900.withValues(alpha: 0.5),
-                        side: BorderSide(color: Colors.cyanAccent.withValues(alpha: 0.5)),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                        backgroundColor: Colors.cyan.shade900.withValues(
+                          alpha: 0.5,
+                        ),
+                        side: BorderSide(
+                          color: Colors.cyanAccent.withValues(alpha: 0.5),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 20,
+                        ),
                       ),
                       child: Text(
                         'GENERATE',

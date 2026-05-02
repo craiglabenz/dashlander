@@ -25,7 +25,6 @@ class FinalMetrics {
   });
 }
 
-
 class GameController {
   final ValueNotifier<TelemetryData> telemetry = ValueNotifier(
     TelemetryData.empty(),
@@ -52,7 +51,7 @@ class GameController {
     // Calculate relative tilt compared to the surface normal beneath the ship
     double angleDeg = (state.angle * 180 / pi) % 360;
     if (angleDeg < 0) angleDeg += 360;
-    
+
     double shipDeltaDeg = MathUtils.calculateRelativeTiltDeg(
       position: state.position,
       absoluteAngleDeg: angleDeg,
@@ -77,7 +76,7 @@ class GameController {
     // 1. Calculate the final metrics unconditionally for the UI
     double angleDeg = (state.angle * 180 / pi) % 360;
     if (angleDeg < 0) angleDeg += 360;
-    
+
     double shipDeltaDeg = MathUtils.calculateRelativeTiltDeg(
       position: state.position,
       absoluteAngleDeg: angleDeg,
@@ -99,12 +98,13 @@ class GameController {
         absoluteAngleDeg: surfaceAngleDeg,
       );
     }
-    
+
     double tilt = MathUtils.calculateTiltDifference(shipDeltaDeg, padDeltaDeg);
 
     Vector2 surfaceNormal = state.position.normalized();
     double fallingSpeedPixels = -state.velocity.dot(surfaceNormal);
-    double fallingSpeedMeters = fallingSpeedPixels / PhysicsConstants.pixelsPerMeter;
+    double fallingSpeedMeters =
+        fallingSpeedPixels / PhysicsConstants.pixelsPerMeter;
 
     finalMetrics = FinalMetrics(
       shipDeltaDeg: shipDeltaDeg,
