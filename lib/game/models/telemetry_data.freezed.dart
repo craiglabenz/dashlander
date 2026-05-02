@@ -17,7 +17,7 @@ mixin _$TelemetryData {
  double get fuel; double get maxFuel; double get vY;// Vertical velocity
  double get vX;// Horizontal velocity
  double get tilt;// Replaces gForce
- double get x; double get y;
+ double get x; double get y; int get terrainIndexBelow; bool get debugModeEnabled; double get height;
 /// Create a copy of TelemetryData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $TelemetryDataCopyWith<TelemetryData> get copyWith => _$TelemetryDataCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TelemetryData&&(identical(other.fuel, fuel) || other.fuel == fuel)&&(identical(other.maxFuel, maxFuel) || other.maxFuel == maxFuel)&&(identical(other.vY, vY) || other.vY == vY)&&(identical(other.vX, vX) || other.vX == vX)&&(identical(other.tilt, tilt) || other.tilt == tilt)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TelemetryData&&(identical(other.fuel, fuel) || other.fuel == fuel)&&(identical(other.maxFuel, maxFuel) || other.maxFuel == maxFuel)&&(identical(other.vY, vY) || other.vY == vY)&&(identical(other.vX, vX) || other.vX == vX)&&(identical(other.tilt, tilt) || other.tilt == tilt)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.terrainIndexBelow, terrainIndexBelow) || other.terrainIndexBelow == terrainIndexBelow)&&(identical(other.debugModeEnabled, debugModeEnabled) || other.debugModeEnabled == debugModeEnabled)&&(identical(other.height, height) || other.height == height));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,fuel,maxFuel,vY,vX,tilt,x,y);
+int get hashCode => Object.hash(runtimeType,fuel,maxFuel,vY,vX,tilt,x,y,terrainIndexBelow,debugModeEnabled,height);
 
 @override
 String toString() {
-  return 'TelemetryData(fuel: $fuel, maxFuel: $maxFuel, vY: $vY, vX: $vX, tilt: $tilt, x: $x, y: $y)';
+  return 'TelemetryData(fuel: $fuel, maxFuel: $maxFuel, vY: $vY, vX: $vX, tilt: $tilt, x: $x, y: $y, terrainIndexBelow: $terrainIndexBelow, debugModeEnabled: $debugModeEnabled, height: $height)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $TelemetryDataCopyWith<$Res>  {
   factory $TelemetryDataCopyWith(TelemetryData value, $Res Function(TelemetryData) _then) = _$TelemetryDataCopyWithImpl;
 @useResult
 $Res call({
- double fuel, double maxFuel, double vY, double vX, double tilt, double x, double y
+ double fuel, double maxFuel, double vY, double vX, double tilt, double x, double y, int terrainIndexBelow, bool debugModeEnabled, double height
 });
 
 
@@ -65,7 +65,7 @@ class _$TelemetryDataCopyWithImpl<$Res>
 
 /// Create a copy of TelemetryData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? fuel = null,Object? maxFuel = null,Object? vY = null,Object? vX = null,Object? tilt = null,Object? x = null,Object? y = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? fuel = null,Object? maxFuel = null,Object? vY = null,Object? vX = null,Object? tilt = null,Object? x = null,Object? y = null,Object? terrainIndexBelow = null,Object? debugModeEnabled = null,Object? height = null,}) {
   return _then(_self.copyWith(
 fuel: null == fuel ? _self.fuel : fuel // ignore: cast_nullable_to_non_nullable
 as double,maxFuel: null == maxFuel ? _self.maxFuel : maxFuel // ignore: cast_nullable_to_non_nullable
@@ -74,6 +74,9 @@ as double,vX: null == vX ? _self.vX : vX // ignore: cast_nullable_to_non_nullabl
 as double,tilt: null == tilt ? _self.tilt : tilt // ignore: cast_nullable_to_non_nullable
 as double,x: null == x ? _self.x : x // ignore: cast_nullable_to_non_nullable
 as double,y: null == y ? _self.y : y // ignore: cast_nullable_to_non_nullable
+as double,terrainIndexBelow: null == terrainIndexBelow ? _self.terrainIndexBelow : terrainIndexBelow // ignore: cast_nullable_to_non_nullable
+as int,debugModeEnabled: null == debugModeEnabled ? _self.debugModeEnabled : debugModeEnabled // ignore: cast_nullable_to_non_nullable
+as bool,height: null == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }
@@ -156,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double fuel,  double maxFuel,  double vY,  double vX,  double tilt,  double x,  double y)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double fuel,  double maxFuel,  double vY,  double vX,  double tilt,  double x,  double y,  int terrainIndexBelow,  bool debugModeEnabled,  double height)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TelemetryData() when $default != null:
-return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt,_that.x,_that.y);case _:
+return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt,_that.x,_that.y,_that.terrainIndexBelow,_that.debugModeEnabled,_that.height);case _:
   return orElse();
 
 }
@@ -177,10 +180,10 @@ return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt,_that.x,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double fuel,  double maxFuel,  double vY,  double vX,  double tilt,  double x,  double y)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double fuel,  double maxFuel,  double vY,  double vX,  double tilt,  double x,  double y,  int terrainIndexBelow,  bool debugModeEnabled,  double height)  $default,) {final _that = this;
 switch (_that) {
 case _TelemetryData():
-return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt,_that.x,_that.y);}
+return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt,_that.x,_that.y,_that.terrainIndexBelow,_that.debugModeEnabled,_that.height);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -194,10 +197,10 @@ return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt,_that.x,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double fuel,  double maxFuel,  double vY,  double vX,  double tilt,  double x,  double y)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double fuel,  double maxFuel,  double vY,  double vX,  double tilt,  double x,  double y,  int terrainIndexBelow,  bool debugModeEnabled,  double height)?  $default,) {final _that = this;
 switch (_that) {
 case _TelemetryData() when $default != null:
-return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt,_that.x,_that.y);case _:
+return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt,_that.x,_that.y,_that.terrainIndexBelow,_that.debugModeEnabled,_that.height);case _:
   return null;
 
 }
@@ -209,7 +212,7 @@ return $default(_that.fuel,_that.maxFuel,_that.vY,_that.vX,_that.tilt,_that.x,_t
 
 
 class _TelemetryData extends TelemetryData {
-   _TelemetryData({required this.fuel, required this.maxFuel, required this.vY, required this.vX, required this.tilt, required this.x, required this.y}): super._();
+   _TelemetryData({required this.fuel, required this.maxFuel, required this.vY, required this.vX, required this.tilt, required this.x, required this.y, required this.terrainIndexBelow, required this.debugModeEnabled, required this.height}): super._();
   
 
 @override final  double fuel;
@@ -222,6 +225,9 @@ class _TelemetryData extends TelemetryData {
 // Replaces gForce
 @override final  double x;
 @override final  double y;
+@override final  int terrainIndexBelow;
+@override final  bool debugModeEnabled;
+@override final  double height;
 
 /// Create a copy of TelemetryData
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +239,16 @@ _$TelemetryDataCopyWith<_TelemetryData> get copyWith => __$TelemetryDataCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TelemetryData&&(identical(other.fuel, fuel) || other.fuel == fuel)&&(identical(other.maxFuel, maxFuel) || other.maxFuel == maxFuel)&&(identical(other.vY, vY) || other.vY == vY)&&(identical(other.vX, vX) || other.vX == vX)&&(identical(other.tilt, tilt) || other.tilt == tilt)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TelemetryData&&(identical(other.fuel, fuel) || other.fuel == fuel)&&(identical(other.maxFuel, maxFuel) || other.maxFuel == maxFuel)&&(identical(other.vY, vY) || other.vY == vY)&&(identical(other.vX, vX) || other.vX == vX)&&(identical(other.tilt, tilt) || other.tilt == tilt)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.terrainIndexBelow, terrainIndexBelow) || other.terrainIndexBelow == terrainIndexBelow)&&(identical(other.debugModeEnabled, debugModeEnabled) || other.debugModeEnabled == debugModeEnabled)&&(identical(other.height, height) || other.height == height));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,fuel,maxFuel,vY,vX,tilt,x,y);
+int get hashCode => Object.hash(runtimeType,fuel,maxFuel,vY,vX,tilt,x,y,terrainIndexBelow,debugModeEnabled,height);
 
 @override
 String toString() {
-  return 'TelemetryData(fuel: $fuel, maxFuel: $maxFuel, vY: $vY, vX: $vX, tilt: $tilt, x: $x, y: $y)';
+  return 'TelemetryData(fuel: $fuel, maxFuel: $maxFuel, vY: $vY, vX: $vX, tilt: $tilt, x: $x, y: $y, terrainIndexBelow: $terrainIndexBelow, debugModeEnabled: $debugModeEnabled, height: $height)';
 }
 
 
@@ -253,7 +259,7 @@ abstract mixin class _$TelemetryDataCopyWith<$Res> implements $TelemetryDataCopy
   factory _$TelemetryDataCopyWith(_TelemetryData value, $Res Function(_TelemetryData) _then) = __$TelemetryDataCopyWithImpl;
 @override @useResult
 $Res call({
- double fuel, double maxFuel, double vY, double vX, double tilt, double x, double y
+ double fuel, double maxFuel, double vY, double vX, double tilt, double x, double y, int terrainIndexBelow, bool debugModeEnabled, double height
 });
 
 
@@ -270,7 +276,7 @@ class __$TelemetryDataCopyWithImpl<$Res>
 
 /// Create a copy of TelemetryData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? fuel = null,Object? maxFuel = null,Object? vY = null,Object? vX = null,Object? tilt = null,Object? x = null,Object? y = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? fuel = null,Object? maxFuel = null,Object? vY = null,Object? vX = null,Object? tilt = null,Object? x = null,Object? y = null,Object? terrainIndexBelow = null,Object? debugModeEnabled = null,Object? height = null,}) {
   return _then(_TelemetryData(
 fuel: null == fuel ? _self.fuel : fuel // ignore: cast_nullable_to_non_nullable
 as double,maxFuel: null == maxFuel ? _self.maxFuel : maxFuel // ignore: cast_nullable_to_non_nullable
@@ -279,6 +285,9 @@ as double,vX: null == vX ? _self.vX : vX // ignore: cast_nullable_to_non_nullabl
 as double,tilt: null == tilt ? _self.tilt : tilt // ignore: cast_nullable_to_non_nullable
 as double,x: null == x ? _self.x : x // ignore: cast_nullable_to_non_nullable
 as double,y: null == y ? _self.y : y // ignore: cast_nullable_to_non_nullable
+as double,terrainIndexBelow: null == terrainIndexBelow ? _self.terrainIndexBelow : terrainIndexBelow // ignore: cast_nullable_to_non_nullable
+as int,debugModeEnabled: null == debugModeEnabled ? _self.debugModeEnabled : debugModeEnabled // ignore: cast_nullable_to_non_nullable
+as bool,height: null == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }

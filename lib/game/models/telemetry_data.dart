@@ -14,6 +14,9 @@ sealed class TelemetryData with _$TelemetryData {
     required double tilt, // Replaces gForce
     required double x,
     required double y,
+    required int terrainIndexBelow,
+    required bool debugModeEnabled,
+    required double height,
   }) = _TelemetryData;
 
   factory TelemetryData.empty() => TelemetryData(
@@ -24,5 +27,8 @@ sealed class TelemetryData with _$TelemetryData {
     tilt: 0,
     x: 0,
     y: PhysicsConstants.moonRadius,
+    terrainIndexBelow: 0,
+    debugModeEnabled: false,
+    height: 0.0,
   );
 }

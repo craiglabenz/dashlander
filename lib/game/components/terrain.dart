@@ -2,8 +2,10 @@ import 'dart:ui' as ui;
 import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import '../../physics/constants.dart';
+import '../dashlander_game.dart';
 
-class TerrainComponent extends PositionComponent with HasGameReference {
+class TerrainComponent extends PositionComponent with HasGameReference<DashlanderGame> {
   final List<Vector2> points;
   final List<int> padIndices;
   final Map<int, double> padAngles;
@@ -135,8 +137,46 @@ class TerrainComponent extends PositionComponent with HasGameReference {
       );
     }
 
-    // 4. Draw Pad Angles & Debug Visuals
+    // 4. Draw Deep Space Barrier
+    final barrierPaint = Paint()
+      ..color = Colors.red.withValues(alpha: 0.1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    
+    final innerBarrierPaint = Paint()
+      ..color = Colors.redAccent.withValues(alpha: 0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    canvas.drawCircle(Offset.zero, PhysicsConstants.moonRadius + 3000, barrierPaint);
+    canvas.drawCircle(Offset.zero, PhysicsConstants.moonRadius + 3000, innerBarrierPaint);
+
+    // 5. Draw Pad Angles & Debug Visuals
     if (game.debugMode) {
+      // Draw dotted line from center of moon to the lander
+      Vector2 shipPos = game.landerState.position;
+      double distance = shipPos.length;
+      Vector2 direction = shipPos.normalized();
+      double dashLength = 20.0;
+      double dashSpace = 20.0;
+      
+      final dashPaint = Paint()
+        ..color = Colors.yellowAccent.withValues(alpha: 0.8)
+        ..strokeWidth = 2
+        ..style = PaintingStyle.stroke;
+
+      double currentDistance = 0.0;
+      while (currentDistance < distance) {
+        double nextDistance = min(currentDistance + dashLength, distance);
+        canvas.drawLine(
+          Offset(direction.x * currentDistance, direction.y * currentDistance),
+          Offset(direction.x * nextDistance, direction.y * nextDistance),
+          dashPaint,
+        );
+        currentDistance += dashLength + dashSpace;
+      }
+
       for (int segmentIdx in padIndices) {
         Vector2 p1 = points[segmentIdx];
         Vector2 p2 = points[(segmentIdx + 1) % (points.length - 1)];

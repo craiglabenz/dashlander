@@ -160,6 +160,10 @@ class DashlanderGame extends FlameGame
   @override
   void update(double dt) {
     super.update(dt);
+    // Only update active game logic if we're not game over
+    if (gameController.status.value == GameStatus.playing) {
+      gameController.updateTelemetry(landerState, debugModeEnabled: debugMode, terrainPoints: terrain.points);
+    }
     if (gameController.status.value == GameStatus.playing && isMounted) {
       // Dynamic Spherical Camera Rotation
       // To keep the surface of the moon always "beneath" the player on screen,
@@ -169,6 +173,27 @@ class DashlanderGame extends FlameGame
       // Setting the viewfinder angle to this value counter-rotates the entire game world,
       // creating the illusion of a flat surface directly below the ship at all times.
       camera.viewfinder.angle = atan2(landerState.position.x, -landerState.position.y);
+
+      // Dynamic Camera Zoom
+      double altitude = max(0.0, landerState.position.length - PhysicsConstants.moonRadius);
+      
+      // Only start zooming out once the player reaches a threshold altitude
+      const double zoomStartAltitude = 800.0;
+      const double zoomEndAltitude = 3000.0; // Deep space boundary
+      
+      if (altitude <= zoomStartAltitude) {
+        camera.viewfinder.zoom = 1.0;
+      } else {
+        double zoomProgress = ((altitude - zoomStartAltitude) / (zoomEndAltitude - zoomStartAltitude)).clamp(0.0, 1.0);
+        
+        // Cap the maximum zoom-out to 0.5x of the initial scope.
+        // We still interpolate visible distance to maintain the smooth 1/x curve.
+        double minVisibleDistance = size.y / 2; // Zoom 1.0
+        double maxVisibleDistance = minVisibleDistance / 0.5; // Zoom 0.5
+        
+        double currentVisibleDistance = ui.lerpDouble(minVisibleDistance, maxVisibleDistance, zoomProgress)!;
+        camera.viewfinder.zoom = minVisibleDistance / currentVisibleDistance;
+      }
     }
   }
 

@@ -111,6 +111,15 @@ class HudOverlay extends StatelessWidget {
                                         scale,
                                       ),
                                     ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: _buildTelemetryItem(
+                                        'ALT',
+                                        '${data.height.toStringAsFixed(1)} m',
+                                        Colors.cyanAccent,
+                                        scale,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -122,6 +131,29 @@ class HudOverlay extends StatelessWidget {
                   ),
                 ),
               ),
+              if (data.debugModeEnabled)
+                Positioned(
+                  top: 100, // Just below the HUD
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.shade900.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.purpleAccent.withValues(alpha: 0.5)),
+                      ),
+                      child: Text(
+                        'INDEX BELOW: ${data.terrainIndexBelow}',
+                        style: GoogleFonts.shareTechMono(
+                          color: Colors.purpleAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               Align(
                 alignment: Alignment.bottomLeft,
                 child: SafeArea(
@@ -168,6 +200,10 @@ class HudOverlay extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(3),
+            border: Border.all(
+              color: Colors.teal.shade800.withValues(alpha: 0.6),
+              width: 1.0,
+            ),
           ),
           alignment: Alignment.centerLeft,
           child: Container(

@@ -41,7 +41,7 @@ class GameController {
   SandboxConfig? sandboxConfig;
   int ghostShipsCount = 0;
 
-  void updateTelemetry(LanderState state) {
+  void updateTelemetry(LanderState state, {bool debugModeEnabled = false, List<Vector2>? terrainPoints}) {
     // Determine radial/tangential velocity relative to surface normal
     Vector2 surfaceNormal = state.position.normalized();
     double fallingSpeed = -state.velocity.dot(surfaceNormal);
@@ -58,6 +58,43 @@ class GameController {
     );
     double tilt = shipDeltaDeg.abs();
 
+    // Calculate the terrain index directly below the lander
+    // In Flame, -Y is UP. Angle is 0 at the top, increasing clockwise.
+    double angleRad = atan2(state.position.x, -state.position.y);
+    if (angleRad < 0) angleRad += 2 * pi;
+    int terrainIndexBelow = (angleRad / (2 * pi) * PhysicsConstants.terrainSegments).floor() % PhysicsConstants.terrainSegments;
+
+    double height = 0.0;
+    if (terrainPoints != null && terrainPoints.isNotEmpty) {
+      Vector2 p1 = terrainPoints[terrainIndexBelow];
+      Vector2 p2 = terrainPoints[(terrainIndexBelow + 1) % terrainPoints.length];
+
+      // Direction of the terrain segment (clockwise)
+      Vector2 dir = p2 - p1;
+      // Normal pointing outwards from the moon center
+      Vector2 normal = Vector2(dir.y, -dir.x).normalized();
+
+      Vector2 s0 = state.position;
+      Vector2 v = state.position.normalized(); // Vector pointing straight UP from moon center
+      
+      // If the ship falls straight down towards the center of the moon, its position over time 
+      // is S(t) = s0 - t * v.
+      // It impacts the ground when its bounding circle touches the line segment p1-p2.
+      // This occurs when the perpendicular distance from S(t) to the line equals the ship's radius:
+      // (S(t) - p1) . normal = shipRadius
+      // (s0 - t * v - p1) . normal = shipRadius
+      // (s0 - p1).dot(normal) - t * v.dot(normal) = shipRadius
+      // t = ( (s0 - p1).dot(normal) - shipRadius ) / v.dot(normal)
+      
+      double shipRadius = PhysicsConstants.shipRadius;
+      double dotVNormal = v.dot(normal);
+
+      if (dotVNormal != 0) {
+        double t = ((s0 - p1).dot(normal) - shipRadius) / dotVNormal;
+        height = max(0.0, t);
+      }
+    }
+
     telemetry.value = TelemetryData(
       fuel: state.fuelMass,
       maxFuel: currentLevel?.initialFuel ?? PhysicsConstants.defaultMaxFuel,
@@ -66,6 +103,9 @@ class GameController {
       tilt: tilt,
       x: state.position.x,
       y: state.position.y,
+      terrainIndexBelow: terrainIndexBelow,
+      debugModeEnabled: debugModeEnabled,
+      height: height,
     );
   }
 
