@@ -12,12 +12,10 @@ import 'components/parallax_stars.dart';
 import 'components/ship.dart';
 import 'components/terrain.dart';
 import 'game_state.dart';
-import 'ai_controller.dart';
 import 'behaviors/physics_behavior.dart';
 import 'behaviors/exhaust_behavior.dart';
 import 'behaviors/ship_collision_behavior.dart';
 import 'behaviors/player_input_behavior.dart';
-import 'behaviors/ghost_ai_behavior.dart';
 import 'behaviors/telemetry_behavior.dart';
 
 class DashlanderGame extends FlameGame
@@ -103,52 +101,14 @@ class DashlanderGame extends FlameGame
       behaviors: [
         PlayerInputBehavior(),
         PhysicsBehavior(physicsEngine: physicsEngine),
-        ExhaustBehavior(hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel),
+        ExhaustBehavior(
+          hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
+        ),
         ShipCollisionBehavior(physicsEngine: physicsEngine),
         TelemetryBehavior(),
       ],
     );
     world.add(ship);
-
-    // 5. Setup Ghost Ships
-    for (int i = 0; i < gameController.ghostShipsCount; i++) {
-      final seed = DateTime.now().millisecondsSinceEpoch + i;
-      final ai = GhostAIController(seed: seed);
-
-      // Offset ghost ships slightly so they don't perfectly overlap
-      final offset = Vector2(
-        (Random().nextDouble() - 0.5) * PhysicsConstants.ghostOffsetXRange,
-        (Random().nextDouble() - 0.5) * PhysicsConstants.ghostOffsetYRange,
-      );
-      final ghostState = LanderState(
-        position: level.startPosition.clone() + offset,
-        velocity: Vector2(
-          PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
-          PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
-        ), // Slight initial push
-        angle: 0,
-        angularVelocity: 0,
-        fuelMass: level.initialFuel,
-        dryMass: PhysicsConstants.dryMass,
-        engineMaxThrust: PhysicsConstants.engineMaxThrust,
-        specificImpulse: PhysicsConstants.specificImpulse,
-        baseInertia: PhysicsConstants.baseInertia,
-      );
-      final hue = Random().nextDouble() * 360.0;
-      final color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
-      final ghostShip = ShipComponent(
-        state: ghostState,
-        isGhost: true,
-        tintColor: color,
-        behaviors: [
-          GhostAIBehavior(aiController: ai),
-          PhysicsBehavior(physicsEngine: physicsEngine),
-          ExhaustBehavior(hasFuel: () => ghostState.fuelMass > 0 || physicsEngine.infiniteFuel),
-          ShipCollisionBehavior(physicsEngine: physicsEngine),
-        ],
-      );
-      world.add(ghostShip);
-    }
 
     // Set camera to follow ship
     camera.follow(ship);
@@ -162,7 +122,11 @@ class DashlanderGame extends FlameGame
     super.update(dt);
     // Only update active game logic if we're not game over
     if (gameController.status.value == GameStatus.playing) {
-      gameController.updateTelemetry(landerState, debugModeEnabled: debugMode, terrainPoints: terrain.points);
+      gameController.updateTelemetry(
+        landerState,
+        debugModeEnabled: debugMode,
+        terrainPoints: terrain.points,
+      );
     }
     if (gameController.status.value == GameStatus.playing && isMounted) {
       // Dynamic Spherical Camera Rotation
@@ -172,26 +136,39 @@ class DashlanderGame extends FlameGame
       // Since Flame's Y-axis points down, we use atan2(x, -y) to find the angle.
       // Setting the viewfinder angle to this value counter-rotates the entire game world,
       // creating the illusion of a flat surface directly below the ship at all times.
-      camera.viewfinder.angle = atan2(landerState.position.x, -landerState.position.y);
+      camera.viewfinder.angle = atan2(
+        landerState.position.x,
+        -landerState.position.y,
+      );
 
       // Dynamic Camera Zoom
-      double altitude = max(0.0, landerState.position.length - PhysicsConstants.moonRadius);
-      
+      double altitude = max(
+        0.0,
+        landerState.position.length - PhysicsConstants.moonRadius,
+      );
+
       // Only start zooming out once the player reaches a threshold altitude
       const double zoomStartAltitude = 800.0;
       const double zoomEndAltitude = 3000.0; // Deep space boundary
-      
+
       if (altitude <= zoomStartAltitude) {
         camera.viewfinder.zoom = 1.0;
       } else {
-        double zoomProgress = ((altitude - zoomStartAltitude) / (zoomEndAltitude - zoomStartAltitude)).clamp(0.0, 1.0);
-        
+        double zoomProgress = ((altitude - zoomStartAltitude) /
+                (zoomEndAltitude - zoomStartAltitude))
+            .clamp(0.0, 1.0);
+
         // Cap the maximum zoom-out to 0.5x of the initial scope.
         // We still interpolate visible distance to maintain the smooth 1/x curve.
         double minVisibleDistance = size.y / 2; // Zoom 1.0
         double maxVisibleDistance = minVisibleDistance / 0.5; // Zoom 0.5
-        
-        double currentVisibleDistance = ui.lerpDouble(minVisibleDistance, maxVisibleDistance, zoomProgress)!;
+
+        double currentVisibleDistance =
+            ui.lerpDouble(
+              minVisibleDistance,
+              maxVisibleDistance,
+              zoomProgress,
+            )!;
         camera.viewfinder.zoom = minVisibleDistance / currentVisibleDistance;
       }
     }
@@ -232,8 +209,7 @@ class DashlanderGame extends FlameGame
       debugMode = !debugMode;
     }
 
-    if (event is KeyDownEvent &&
-        event.logicalKey == LogicalKeyboardKey.keyP) {
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.keyP) {
       paused = !paused;
     }
 
