@@ -155,7 +155,8 @@ class GameController {
 
     // 2. Calculate the score if won
     if (newStatus == GameStatus.won) {
-      finalScoreBreakdown = ScoreBreakdown.calculate(finalMetrics!, state);
+      double maxFuel = currentLevel?.initialFuel ?? PhysicsConstants.defaultMaxFuel;
+      finalScoreBreakdown = ScoreBreakdown.calculate(finalMetrics!, state, maxFuel);
       finalScore = finalScoreBreakdown!.totalScore;
     } else {
       finalScore = 0;

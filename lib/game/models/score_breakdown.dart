@@ -24,7 +24,7 @@ class ScoreBreakdown {
   // ---------------------------------------------------------------------------
   static const int maxVelocityScore = 1000;
   static const int maxTiltScore = 500;
-  static const double fuelScoreMultiplier = 45;
+  static const int maxFuelScore = 5000;
 
   final int fuelScore;
   final int velocityScore;
@@ -38,9 +38,10 @@ class ScoreBreakdown {
     required this.totalScore,
   });
 
-  factory ScoreBreakdown.calculate(FinalMetrics metrics, LanderState state) {
-    // Heavily weight fuel conservation
-    int fuelScore = (state.fuelMass * fuelScoreMultiplier).toInt();
+  factory ScoreBreakdown.calculate(FinalMetrics metrics, LanderState state, double maxFuel) {
+    // Score based on percentage of fuel conserved
+    double fuelPercentage = (state.fuelMass / maxFuel).clamp(0.0, 1.0);
+    int fuelScore = (fuelPercentage * maxFuelScore).toInt();
 
     // Midpoint Scoring Algorithm for Velocity
     double velocityMidpoint = maxLandingVelocityY / 2;

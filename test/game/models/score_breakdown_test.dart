@@ -31,11 +31,11 @@ void main() {
         impactVelocityMetersPerSecond: 0.0,
       );
 
-      final breakdown = ScoreBreakdown.calculate(metrics, baseState);
+      final breakdown = ScoreBreakdown.calculate(metrics, baseState, 200.0);
 
       expect(breakdown.velocityScore, ScoreBreakdown.maxVelocityScore);
       expect(breakdown.tiltScore, ScoreBreakdown.maxTiltScore);
-      expect(breakdown.fuelScore, (100.0 * ScoreBreakdown.fuelScoreMultiplier).toInt());
+      expect(breakdown.fuelScore, (100.0 / 200.0 * ScoreBreakdown.maxFuelScore).toInt());
     });
 
     test('midpoint landing gives zero points', () {
@@ -46,7 +46,7 @@ void main() {
         impactVelocityMetersPerSecond: ScoreBreakdown.maxLandingVelocityY / 2,
       );
 
-      final breakdown = ScoreBreakdown.calculate(metrics, baseState);
+      final breakdown = ScoreBreakdown.calculate(metrics, baseState, 200.0);
 
       expect(breakdown.velocityScore, 0);
       expect(breakdown.tiltScore, 0);
@@ -60,7 +60,7 @@ void main() {
         impactVelocityMetersPerSecond: ScoreBreakdown.maxLandingVelocityY,
       );
 
-      final breakdown = ScoreBreakdown.calculate(metrics, baseState);
+      final breakdown = ScoreBreakdown.calculate(metrics, baseState, 200.0);
 
       expect(breakdown.velocityScore, -ScoreBreakdown.maxVelocityScore);
       expect(breakdown.tiltScore, -ScoreBreakdown.maxTiltScore);
@@ -75,7 +75,7 @@ void main() {
       );
       
       baseState.fuelMass = 0; // 0 fuel score, large negative penalty
-      final breakdown = ScoreBreakdown.calculate(metrics, baseState);
+      final breakdown = ScoreBreakdown.calculate(metrics, baseState, 200.0);
       
       expect(breakdown.totalScore, 0);
     });

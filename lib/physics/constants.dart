@@ -6,7 +6,7 @@ class PhysicsConstants {
   /// The absolute magnitude of lunar gravity acting on the ship (in m/s^2).
   /// This is applied radially toward the center of the spherical moon.
   /// Higher values pull the ship down faster, requiring more fuel to survive.
-  static const double lunarGravity = 1.625;
+  static const double lunarGravity = 3.2;
 
   /// Earth's standard gravity (in m/s^2).
   /// Used solely as a reference to calculate the "G-Force" experienced by the
@@ -31,12 +31,12 @@ class PhysicsConstants {
   /// The maximum vertical height (in meters) of mountains and craters added
   /// on top of the base `moonRadius`. Higher values create more jagged,
   /// extreme terrain that is harder to navigate.
-  static const double maxTerrainHeight = 100.0;
+  static const double maxTerrainHeight = 150.0;
 
   /// A multiplier applied to the sine wave generators that produce hills.
   /// Higher values mean more frequent, narrower hills. Lower values mean
   /// fewer, wider, rolling hills.
-  static const double noiseFrequency = 4.0;
+  static const double noiseFrequency = 4.5;
 
   /// The total number of perfectly flat landing pads carved out of the terrain.
   /// More pads make the level easier to complete.
@@ -88,7 +88,7 @@ class PhysicsConstants {
   // ---------------------------------------------------------------------------
 
   /// The starting fuel mass for the lander (in kg).
-  static const double defaultMaxFuel = 200.0;
+  static const double defaultMaxFuel = 256.0;
 
   /// The radius of the ship's collision hitbox (in meters).
   /// This invisible circle is used to calculate collisions against the terrain's
