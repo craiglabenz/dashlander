@@ -1,64 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flame/components.dart';
 import '../game/game_state.dart';
 
+import '../game/level_generator.dart';
+
 final List<LevelData> defaultLevels = [
-  LevelData(
-    id: 1,
-    name: "Sea of Tranquility",
-    initialFuel: 1000,
-    terrainPoints: [
-      Vector2(0, 600), Vector2(200, 550), Vector2(350, 650),
-      Vector2(450, 650), Vector2(600, 650), // Pad between indices 3 and 4
-      Vector2(800, 500),
-      Vector2(1000, 700),
-      Vector2(1200, 600),
-      Vector2(1500, 600),
-    ],
-    padIndices: [3],
-    startPosition: Vector2(100, 100),
-  ),
-  LevelData(
-    id: 2,
-    name: "Tycho Crater",
-    initialFuel: 800,
-    terrainPoints: [
-      Vector2(0, 400), Vector2(150, 300), Vector2(250, 500),
-      Vector2(400, 800),
-      Vector2(500, 800),
-      Vector2(600, 800), // Pads 3-4 and 4-5
-      Vector2(750, 450),
-      Vector2(900, 350),
-      Vector2(1100, 650),
-      Vector2(1500, 500),
-    ],
-    padIndices: [3, 4],
-    startPosition: Vector2(100, 100),
-  ),
-  LevelData(
-    id: 3,
-    name: "Lunar Alps",
-    initialFuel: 600,
-    terrainPoints: [
-      Vector2(0, 700), Vector2(200, 700), Vector2(300, 400),
-      Vector2(450, 300), Vector2(600, 600), Vector2(700, 750),
-      Vector2(800, 750), Vector2(880, 750), // Pad 6-7
-      Vector2(950, 500),
-      Vector2(1100, 200),
-      Vector2(1300, 400),
-      Vector2(1500, 800),
-    ],
-    padIndices: [6],
-    startPosition: Vector2(150, 100),
-  ),
+  LevelGenerator.generate(seed: 101, name: "Sea of Tranquility", initialFuel: 1000),
+  LevelGenerator.generate(seed: 404, name: "Tycho Crater", initialFuel: 800),
+  LevelGenerator.generate(seed: 999, name: "Lunar Alps", initialFuel: 600),
 ];
 
-class LevelSelect extends StatelessWidget {
+class LevelSelect extends StatefulWidget {
   final VoidCallback onBack;
   final Function(LevelData) onSelect;
 
   const LevelSelect({super.key, required this.onBack, required this.onSelect});
+
+  @override
+  State<LevelSelect> createState() => _LevelSelectState();
+}
+
+class _LevelSelectState extends State<LevelSelect> {
+  final TextEditingController _seedController = TextEditingController();
+
+  void _generateCustomLevel() {
+    final seedStr = _seedController.text.trim();
+    if (seedStr.isNotEmpty) {
+      final seed = int.tryParse(seedStr) ?? seedStr.hashCode;
+      widget.onSelect(LevelGenerator.generate(seed: seed.abs()));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,14 +66,56 @@ class LevelSelect extends StatelessWidget {
                           .map(
                             (lvl) => _LevelCard(
                               level: lvl,
-                              onSelect: () => onSelect(lvl),
+                              onSelect: () => widget.onSelect(lvl),
                             ),
                           )
                           .toList(),
                 ),
                 const SizedBox(height: 48),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 200,
+                      child: TextField(
+                        controller: _seedController,
+                        style: GoogleFonts.shareTechMono(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Enter custom seed...',
+                          hintStyle: GoogleFonts.shareTechMono(color: Colors.grey.shade600),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.cyan.shade900),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.cyanAccent),
+                          ),
+                          filled: true,
+                          fillColor: Colors.cyan.shade900.withValues(alpha: 0.2),
+                        ),
+                        onSubmitted: (_) => _generateCustomLevel(),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: _generateCustomLevel,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.cyan.shade900.withValues(alpha: 0.5),
+                        side: BorderSide(color: Colors.cyanAccent.withValues(alpha: 0.5)),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                      ),
+                      child: Text(
+                        'GENERATE',
+                        style: GoogleFonts.orbitron(
+                          color: Colors.cyanAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 48),
                 TextButton(
-                  onPressed: onBack,
+                  onPressed: widget.onBack,
                   child: Text(
                     '← BACK TO MENU',
                     style: GoogleFonts.shareTechMono(

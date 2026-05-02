@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import '../physics/lander_state.dart';
+import '../physics/constants.dart';
 import 'game_state.dart';
 import 'dart:math';
 
@@ -17,56 +18,111 @@ class GhostAIController {
       descentSpeedMultiplier =
           0.8 + Random(seed).nextDouble() * 0.6; // 0.8x to 1.4x
 
+  /// Computes the AI steering torque for this frame based on the level geometry and ship state.
+  /// 
+  /// This AI acts as a PD-controller to safely guide the ghost ship to a landing pad.
+  /// Because the moon is spherical, it first maps the ship's current position and 
+  /// all landing pads into an "unwrapped" radial coordinate system where arc-length 
+  /// distance serves as the X-axis and altitude from the moon's center serves as the Y-axis.
   double update(LanderState state, double dt, LevelData level) {
     if (state.isCrashed || state.isLanded) return 0.0;
 
-    // 1. Find nearest pad
+    // Calculate the ship's current angle relative to the center of the moon.
+    // We use atan2(x, -y) because Flame's -Y axis is UP. 
+    // This gives an angle of 0 when the ship is perfectly at the "top" of the moon.
+    double shipTheta = atan2(state.position.x, -state.position.y);
+    
+    // Helper to keep angles cleanly within [-pi, pi] to avoid math wrap-around bugs
+    double normalizeAngle(double a) {
+      while (a > pi) {
+        a -= 2 * pi;
+      }
+      while (a < -pi) {
+        a += 2 * pi;
+      }
+      return a;
+    }
+
+    // 1. Find the geographically nearest landing pad.
+    // Instead of using Cartesian distance (which would cut THROUGH the moon),
+    // we use angular distance across the curved surface.
     Vector2? targetPad;
     for (int padIndex in level.padIndices) {
       if (padIndex < level.terrainPoints.length - 1) {
         final p1 = level.terrainPoints[padIndex];
         final p2 = level.terrainPoints[padIndex + 1];
+        // The pad's true physical position is precisely the midpoint of its two vertices
         final center = (p1 + p2) / 2;
 
-        if (targetPad == null ||
-            (center.x - state.position.x).abs() <
-                (targetPad.x - state.position.x).abs()) {
+        if (targetPad == null) {
           targetPad = center;
+        } else {
+          // Compare the absolute angular differences.
+          // Because we use normalizeAngle, crossing the pi/-pi boundary at the "bottom" 
+          // of the moon is handled gracefully.
+          double distCurrent = normalizeAngle(atan2(center.x, -center.y) - shipTheta).abs();
+          double distBest = normalizeAngle(atan2(targetPad.x, -targetPad.y) - shipTheta).abs();
+          if (distCurrent < distBest) {
+            targetPad = center;
+          }
         }
       }
     }
 
     if (targetPad == null) return 0.0;
 
-    // 2. Navigation logic
-    double dx = targetPad.x - state.position.x;
-    double dy = targetPad.y - state.position.y;
+    // 2. Unwrapped Navigation Coordinates
+    // Here we translate the spherical reality into linear variables (dx, dy, vx, vy)
+    // so the rest of the original flat-world AI logic can function without modification.
+
+    double targetTheta = atan2(targetPad.x, -targetPad.y);
+    
+    // dx is the physical arc-length distance across the surface.
+    // Formula: arcLength = angle_difference * radius
+    double dx = normalizeAngle(targetTheta - shipTheta) * PhysicsConstants.moonRadius;
+    
+    // dy is relative altitude. 
+    // We compare the raw lengths (radii) of the ship and pad vectors from (0,0).
+    // Positive dy means the ship is higher than the pad.
+    double dy = state.position.length - targetPad.length;
+
+    // We compute the surface normal (outward facing) and tangent (sideways facing).
+    Vector2 surfaceNormal = state.position.normalized();
+    Vector2 surfaceTangent = Vector2(-surfaceNormal.y, surfaceNormal.x);
+    
+    // We project the ship's absolute velocity onto these axes to find out how fast 
+    // it is sliding sideways (vx) and falling downwards (vy).
+    double vx = state.velocity.dot(surfaceTangent);
+    double vy = -state.velocity.dot(surfaceNormal); // negated so positive means falling
+
+    // We also need the ship's angle relative to the curved surface, not the absolute screen.
+    double shipAngleRel = normalizeAngle(state.angle - shipTheta);
 
     // Determine desired angle based on horizontal distance
     double desiredAngle = 0.0;
 
     // Braking logic scale based on speed
     if (dx > targetDistanceThreshold) {
-      if (state.velocity.x < maxHorizontalSpeed) {
+      if (vx < maxHorizontalSpeed) {
         desiredAngle = maxTiltAngle; // Lean right to move right
-      } else if (state.velocity.x > maxHorizontalSpeed + 5) {
+      } else if (vx > maxHorizontalSpeed + 5) {
         desiredAngle = -maxTiltAngle * 0.8; // Too fast, lean left to brake
       } else {
         desiredAngle = 0.0; // Cruise
       }
     } else if (dx < -targetDistanceThreshold) {
-      if (state.velocity.x > -maxHorizontalSpeed) {
+      if (vx > -maxHorizontalSpeed) {
         desiredAngle = -maxTiltAngle; // Lean left to move left
-      } else if (state.velocity.x < -maxHorizontalSpeed - 5) {
+      } else if (vx < -maxHorizontalSpeed - 5) {
         desiredAngle = maxTiltAngle * 0.8; // Too fast, lean right to brake
       } else {
         desiredAngle = 0.0; // Cruise
       }
     } else {
       // Close to pad, aggressively slow down horizontal speed
-      if (state.velocity.x > 2) {
+      if (vx > 2) {
         desiredAngle = -maxTiltAngle; // Lean left to slow down
-      } else if (state.velocity.x < -2) {
+      } else if (vx < -2) {
         desiredAngle = maxTiltAngle; // Lean right to slow down
       } else {
         desiredAngle = 0.0; // Upright
@@ -78,8 +134,7 @@ class GhostAIController {
 
     if (dx.abs() > 100) {
       // Far from pad: maintain a high safe altitude to clear terrain
-      double safeY = targetPad.y - 300;
-      if (state.position.y > safeY) {
+      if (dy < 300) {
         desiredVy = -15.0; // Climb
       } else {
         desiredVy = 5.0; // Slowly descend or maintain
@@ -103,22 +158,14 @@ class GhostAIController {
     }
 
     // Apply thrust if falling faster than desired
-    if (state.velocity.y > desiredVy) {
+    if (vy > desiredVy) {
       state.isThrusting = true;
     } else {
       state.isThrusting = false;
     }
 
     // 4. Steering (PD-like Controller)
-    double angleDiff = state.angle - desiredAngle;
-
-    // Normalize angle difference to [-pi, pi]
-    while (angleDiff > pi) {
-      angleDiff -= 2 * pi;
-    }
-    while (angleDiff < -pi) {
-      angleDiff += 2 * pi;
-    }
+    double angleDiff = normalizeAngle(shipAngleRel - desiredAngle);
 
     // Predict where the angle will be based on current angular velocity
     double predictedAngleDiff = angleDiff + state.angularVelocity * 1.5;

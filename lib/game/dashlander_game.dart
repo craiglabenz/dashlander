@@ -73,8 +73,8 @@ class DashlanderGame extends FlameGame
     landerState = LanderState(
       position: level.startPosition.clone(),
       velocity: Vector2(
-        PhysicsConstants.initialVelocityX,
-        PhysicsConstants.initialVelocityY,
+        PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
+        PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
       ), // Slight initial push
       angle: 0,
       angularVelocity: 0,
@@ -92,8 +92,10 @@ class DashlanderGame extends FlameGame
     terrain = TerrainComponent(
       points: level.terrainPoints,
       padIndices: level.padIndices,
+      padAngles: level.padAngles,
+      padAngleDeltas: level.padAngleDeltas,
     );
-    add(terrain);
+    world.add(terrain);
 
     // 4. Add Ship
     ship = ShipComponent(
@@ -106,7 +108,7 @@ class DashlanderGame extends FlameGame
         TelemetryBehavior(),
       ],
     );
-    add(ship);
+    world.add(ship);
 
     // 5. Setup Ghost Ships
     for (int i = 0; i < gameController.ghostShipsCount; i++) {
@@ -121,8 +123,8 @@ class DashlanderGame extends FlameGame
       final ghostState = LanderState(
         position: level.startPosition.clone() + offset,
         velocity: Vector2(
-          PhysicsConstants.initialVelocityX,
-          PhysicsConstants.initialVelocityY,
+          PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
+          PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
         ), // Slight initial push
         angle: 0,
         angularVelocity: 0,
@@ -145,7 +147,7 @@ class DashlanderGame extends FlameGame
           ShipCollisionBehavior(physicsEngine: physicsEngine),
         ],
       );
-      add(ghostShip);
+      world.add(ghostShip);
     }
 
     // Set camera to follow ship
@@ -153,6 +155,21 @@ class DashlanderGame extends FlameGame
 
     // Set initial state
     gameController.status.value = GameStatus.playing;
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (gameController.status.value == GameStatus.playing && isMounted) {
+      // Dynamic Spherical Camera Rotation
+      // To keep the surface of the moon always "beneath" the player on screen,
+      // we must constantly rotate the camera viewfinder based on the ship's position.
+      // We calculate the angle of the ship relative to the moon's center (0,0).
+      // Since Flame's Y-axis points down, we use atan2(x, -y) to find the angle.
+      // Setting the viewfinder angle to this value counter-rotates the entire game world,
+      // creating the illusion of a flat surface directly below the ship at all times.
+      camera.viewfinder.angle = atan2(landerState.position.x, -landerState.position.y);
+    }
   }
 
   void triggerGameOver(bool landed) {
