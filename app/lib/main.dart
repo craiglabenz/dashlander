@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:data_layer/data_layer.dart';
 import 'package:dashlander/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flame/game.dart';
@@ -81,8 +80,6 @@ class _GameCoordinatorState extends State<GameCoordinator> {
     _controller.status.addListener(() async {
       if (_controller.status.value == GameStatus.won ||
           _controller.status.value == GameStatus.lost) {
-        print('_controller.status.value: ${_controller.status.value}');
-        print('_controller.lastReplay: ${_controller.lastReplay}');
         if (_controller.lastReplay != null) {
           String? initials = prefs.getString('user_initials');
           if (initials == null) {

@@ -40,6 +40,9 @@ class DashlanderGame extends FlameGame
   ui.FragmentProgram? _bloomProgram;
   ui.FragmentShader? _bloomShader;
 
+  double _accumulator = 0.0;
+  static const double _fixedDt = 1.0 / 60.0;
+
   DashlanderGame({required this.gameController});
 
   @override
@@ -161,7 +164,18 @@ class DashlanderGame extends FlameGame
   }
 
   @override
+  // ignore: must_call_super
   void update(double dt) {
+    _accumulator += dt;
+    if (_accumulator > 0.1) _accumulator = 0.1; // clamp to prevent death spiral
+    
+    while (_accumulator >= _fixedDt) {
+      _fixedUpdate(_fixedDt);
+      _accumulator -= _fixedDt;
+    }
+  }
+
+  void _fixedUpdate(double dt) {
     super.update(dt);
     // Only update active game logic if we're not game over
     if (gameController.status.value == GameStatus.playing) {
@@ -221,6 +235,17 @@ class DashlanderGame extends FlameGame
   void triggerGameOver(bool landed) {
     if (!_gameOverTriggered) {
       _gameOverTriggered = true;
+      
+      // Record a final checkpoint to ensure the ghost comes to rest correctly
+      replayRecorder.recordCheckpoint(
+        x: landerState.position.x,
+        y: landerState.position.y,
+        vx: landerState.velocity.x,
+        vy: landerState.velocity.y,
+        angle: landerState.angle,
+        angularVelocity: landerState.angularVelocity,
+      );
+
       Future.delayed(const Duration(seconds: 2), () {
         if (isMounted) {
           gameController.setGameOver(
@@ -254,6 +279,13 @@ class DashlanderGame extends FlameGame
         isUpPressed: isUpPressed,
         isLeftPressed: isLeftPressed,
         isRightPressed: isRightPressed,
+        x: landerState.position.x,
+        y: landerState.position.y,
+        vx: landerState.velocity.x,
+        vy: landerState.velocity.y,
+        angle: landerState.angle,
+        angularVelocity: landerState.angularVelocity,
+        timeOffset: _fixedDt,
       );
     }
 

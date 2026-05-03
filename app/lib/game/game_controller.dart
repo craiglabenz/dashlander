@@ -184,7 +184,6 @@ class GameController {
 
     if (replayRecorder != null) {
       lastReplay = replayRecorder.finalizeReplay(score: finalScore);
-      print('set lastReplay: $lastReplay');
     }
 
     // It is important that these lines remain the last in this function, as

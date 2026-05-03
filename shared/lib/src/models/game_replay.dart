@@ -11,6 +11,12 @@ abstract class ThrusterAction with _$ThrusterAction {
     required ThrusterType thruster,
     required bool isFiring,
     required int timestampMs,
+    @Default(0.0) double x,
+    @Default(0.0) double y,
+    @Default(0.0) double vx,
+    @Default(0.0) double vy,
+    @Default(0.0) double angle,
+    @Default(0.0) double angularVelocity,
   }) = _ThrusterAction;
 
   factory ThrusterAction.fromJson(Map<String, dynamic> json) =>

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ThrusterAction {
 
- ThrusterType get thruster; bool get isFiring; int get timestampMs;
+ ThrusterType get thruster; bool get isFiring; int get timestampMs; double get x; double get y; double get vx; double get vy; double get angle; double get angularVelocity;
 /// Create a copy of ThrusterAction
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ThrusterActionCopyWith<ThrusterAction> get copyWith => _$ThrusterActionCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThrusterAction&&(identical(other.thruster, thruster) || other.thruster == thruster)&&(identical(other.isFiring, isFiring) || other.isFiring == isFiring)&&(identical(other.timestampMs, timestampMs) || other.timestampMs == timestampMs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThrusterAction&&(identical(other.thruster, thruster) || other.thruster == thruster)&&(identical(other.isFiring, isFiring) || other.isFiring == isFiring)&&(identical(other.timestampMs, timestampMs) || other.timestampMs == timestampMs)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.vx, vx) || other.vx == vx)&&(identical(other.vy, vy) || other.vy == vy)&&(identical(other.angle, angle) || other.angle == angle)&&(identical(other.angularVelocity, angularVelocity) || other.angularVelocity == angularVelocity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,thruster,isFiring,timestampMs);
+int get hashCode => Object.hash(runtimeType,thruster,isFiring,timestampMs,x,y,vx,vy,angle,angularVelocity);
 
 @override
 String toString() {
-  return 'ThrusterAction(thruster: $thruster, isFiring: $isFiring, timestampMs: $timestampMs)';
+  return 'ThrusterAction(thruster: $thruster, isFiring: $isFiring, timestampMs: $timestampMs, x: $x, y: $y, vx: $vx, vy: $vy, angle: $angle, angularVelocity: $angularVelocity)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ThrusterActionCopyWith<$Res>  {
   factory $ThrusterActionCopyWith(ThrusterAction value, $Res Function(ThrusterAction) _then) = _$ThrusterActionCopyWithImpl;
 @useResult
 $Res call({
- ThrusterType thruster, bool isFiring, int timestampMs
+ ThrusterType thruster, bool isFiring, int timestampMs, double x, double y, double vx, double vy, double angle, double angularVelocity
 });
 
 
@@ -65,12 +65,18 @@ class _$ThrusterActionCopyWithImpl<$Res>
 
 /// Create a copy of ThrusterAction
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? thruster = null,Object? isFiring = null,Object? timestampMs = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? thruster = null,Object? isFiring = null,Object? timestampMs = null,Object? x = null,Object? y = null,Object? vx = null,Object? vy = null,Object? angle = null,Object? angularVelocity = null,}) {
   return _then(_self.copyWith(
 thruster: null == thruster ? _self.thruster : thruster // ignore: cast_nullable_to_non_nullable
 as ThrusterType,isFiring: null == isFiring ? _self.isFiring : isFiring // ignore: cast_nullable_to_non_nullable
 as bool,timestampMs: null == timestampMs ? _self.timestampMs : timestampMs // ignore: cast_nullable_to_non_nullable
-as int,
+as int,x: null == x ? _self.x : x // ignore: cast_nullable_to_non_nullable
+as double,y: null == y ? _self.y : y // ignore: cast_nullable_to_non_nullable
+as double,vx: null == vx ? _self.vx : vx // ignore: cast_nullable_to_non_nullable
+as double,vy: null == vy ? _self.vy : vy // ignore: cast_nullable_to_non_nullable
+as double,angle: null == angle ? _self.angle : angle // ignore: cast_nullable_to_non_nullable
+as double,angularVelocity: null == angularVelocity ? _self.angularVelocity : angularVelocity // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 
@@ -155,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ThrusterType thruster,  bool isFiring,  int timestampMs)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ThrusterType thruster,  bool isFiring,  int timestampMs,  double x,  double y,  double vx,  double vy,  double angle,  double angularVelocity)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ThrusterAction() when $default != null:
-return $default(_that.thruster,_that.isFiring,_that.timestampMs);case _:
+return $default(_that.thruster,_that.isFiring,_that.timestampMs,_that.x,_that.y,_that.vx,_that.vy,_that.angle,_that.angularVelocity);case _:
   return orElse();
 
 }
@@ -176,10 +182,10 @@ return $default(_that.thruster,_that.isFiring,_that.timestampMs);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ThrusterType thruster,  bool isFiring,  int timestampMs)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ThrusterType thruster,  bool isFiring,  int timestampMs,  double x,  double y,  double vx,  double vy,  double angle,  double angularVelocity)  $default,) {final _that = this;
 switch (_that) {
 case _ThrusterAction():
-return $default(_that.thruster,_that.isFiring,_that.timestampMs);case _:
+return $default(_that.thruster,_that.isFiring,_that.timestampMs,_that.x,_that.y,_that.vx,_that.vy,_that.angle,_that.angularVelocity);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +202,10 @@ return $default(_that.thruster,_that.isFiring,_that.timestampMs);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ThrusterType thruster,  bool isFiring,  int timestampMs)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ThrusterType thruster,  bool isFiring,  int timestampMs,  double x,  double y,  double vx,  double vy,  double angle,  double angularVelocity)?  $default,) {final _that = this;
 switch (_that) {
 case _ThrusterAction() when $default != null:
-return $default(_that.thruster,_that.isFiring,_that.timestampMs);case _:
+return $default(_that.thruster,_that.isFiring,_that.timestampMs,_that.x,_that.y,_that.vx,_that.vy,_that.angle,_that.angularVelocity);case _:
   return null;
 
 }
@@ -211,12 +217,18 @@ return $default(_that.thruster,_that.isFiring,_that.timestampMs);case _:
 @JsonSerializable()
 
 class _ThrusterAction implements ThrusterAction {
-  const _ThrusterAction({required this.thruster, required this.isFiring, required this.timestampMs});
+  const _ThrusterAction({required this.thruster, required this.isFiring, required this.timestampMs, this.x = 0.0, this.y = 0.0, this.vx = 0.0, this.vy = 0.0, this.angle = 0.0, this.angularVelocity = 0.0});
   factory _ThrusterAction.fromJson(Map<String, dynamic> json) => _$ThrusterActionFromJson(json);
 
 @override final  ThrusterType thruster;
 @override final  bool isFiring;
 @override final  int timestampMs;
+@override@JsonKey() final  double x;
+@override@JsonKey() final  double y;
+@override@JsonKey() final  double vx;
+@override@JsonKey() final  double vy;
+@override@JsonKey() final  double angle;
+@override@JsonKey() final  double angularVelocity;
 
 /// Create a copy of ThrusterAction
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +243,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThrusterAction&&(identical(other.thruster, thruster) || other.thruster == thruster)&&(identical(other.isFiring, isFiring) || other.isFiring == isFiring)&&(identical(other.timestampMs, timestampMs) || other.timestampMs == timestampMs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThrusterAction&&(identical(other.thruster, thruster) || other.thruster == thruster)&&(identical(other.isFiring, isFiring) || other.isFiring == isFiring)&&(identical(other.timestampMs, timestampMs) || other.timestampMs == timestampMs)&&(identical(other.x, x) || other.x == x)&&(identical(other.y, y) || other.y == y)&&(identical(other.vx, vx) || other.vx == vx)&&(identical(other.vy, vy) || other.vy == vy)&&(identical(other.angle, angle) || other.angle == angle)&&(identical(other.angularVelocity, angularVelocity) || other.angularVelocity == angularVelocity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,thruster,isFiring,timestampMs);
+int get hashCode => Object.hash(runtimeType,thruster,isFiring,timestampMs,x,y,vx,vy,angle,angularVelocity);
 
 @override
 String toString() {
-  return 'ThrusterAction(thruster: $thruster, isFiring: $isFiring, timestampMs: $timestampMs)';
+  return 'ThrusterAction(thruster: $thruster, isFiring: $isFiring, timestampMs: $timestampMs, x: $x, y: $y, vx: $vx, vy: $vy, angle: $angle, angularVelocity: $angularVelocity)';
 }
 
 
@@ -251,7 +263,7 @@ abstract mixin class _$ThrusterActionCopyWith<$Res> implements $ThrusterActionCo
   factory _$ThrusterActionCopyWith(_ThrusterAction value, $Res Function(_ThrusterAction) _then) = __$ThrusterActionCopyWithImpl;
 @override @useResult
 $Res call({
- ThrusterType thruster, bool isFiring, int timestampMs
+ ThrusterType thruster, bool isFiring, int timestampMs, double x, double y, double vx, double vy, double angle, double angularVelocity
 });
 
 
@@ -268,12 +280,18 @@ class __$ThrusterActionCopyWithImpl<$Res>
 
 /// Create a copy of ThrusterAction
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? thruster = null,Object? isFiring = null,Object? timestampMs = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? thruster = null,Object? isFiring = null,Object? timestampMs = null,Object? x = null,Object? y = null,Object? vx = null,Object? vy = null,Object? angle = null,Object? angularVelocity = null,}) {
   return _then(_ThrusterAction(
 thruster: null == thruster ? _self.thruster : thruster // ignore: cast_nullable_to_non_nullable
 as ThrusterType,isFiring: null == isFiring ? _self.isFiring : isFiring // ignore: cast_nullable_to_non_nullable
 as bool,timestampMs: null == timestampMs ? _self.timestampMs : timestampMs // ignore: cast_nullable_to_non_nullable
-as int,
+as int,x: null == x ? _self.x : x // ignore: cast_nullable_to_non_nullable
+as double,y: null == y ? _self.y : y // ignore: cast_nullable_to_non_nullable
+as double,vx: null == vx ? _self.vx : vx // ignore: cast_nullable_to_non_nullable
+as double,vy: null == vy ? _self.vy : vy // ignore: cast_nullable_to_non_nullable
+as double,angle: null == angle ? _self.angle : angle // ignore: cast_nullable_to_non_nullable
+as double,angularVelocity: null == angularVelocity ? _self.angularVelocity : angularVelocity // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 

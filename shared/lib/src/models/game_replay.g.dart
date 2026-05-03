@@ -19,6 +19,12 @@ _ThrusterAction _$ThrusterActionFromJson(Map<String, dynamic> json) =>
       thruster: $enumDecode(_$ThrusterTypeEnumMap, json['thruster']),
       isFiring: json['isFiring'] as bool,
       timestampMs: (json['timestampMs'] as num).toInt(),
+      x: (json['x'] as num?)?.toDouble() ?? 0.0,
+      y: (json['y'] as num?)?.toDouble() ?? 0.0,
+      vx: (json['vx'] as num?)?.toDouble() ?? 0.0,
+      vy: (json['vy'] as num?)?.toDouble() ?? 0.0,
+      angle: (json['angle'] as num?)?.toDouble() ?? 0.0,
+      angularVelocity: (json['angularVelocity'] as num?)?.toDouble() ?? 0.0,
     );
 
 Map<String, dynamic> _$ThrusterActionToJson(_ThrusterAction instance) =>
@@ -26,6 +32,12 @@ Map<String, dynamic> _$ThrusterActionToJson(_ThrusterAction instance) =>
       'thruster': _$ThrusterTypeEnumMap[instance.thruster]!,
       'isFiring': instance.isFiring,
       'timestampMs': instance.timestampMs,
+      'x': instance.x,
+      'y': instance.y,
+      'vx': instance.vx,
+      'vy': instance.vy,
+      'angle': instance.angle,
+      'angularVelocity': instance.angularVelocity,
     };
 
 const _$ThrusterTypeEnumMap = {

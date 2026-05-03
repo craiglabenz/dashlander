@@ -34,6 +34,18 @@ class GhostInputBehavior extends Behavior<ShipComponent> {
         case ThrusterType.main:
           _isUpPressed = action.isFiring;
       }
+
+      // State synchronization (dead reckoning correction)
+      // Only snap if the recorded position isn't the default 0.0 value
+      if (action.x != 0.0 || action.y != 0.0) {
+        state.position.x = action.x;
+        state.position.y = action.y;
+        state.velocity.x = action.vx;
+        state.velocity.y = action.vy;
+        state.angle = action.angle;
+        state.angularVelocity = action.angularVelocity;
+      }
+
       _nextActionIndex++;
     }
 
