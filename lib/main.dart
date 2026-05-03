@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dashlander/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'game/dashlander_game.dart';
 import 'game/game_state.dart';
@@ -9,7 +13,11 @@ import 'ui/level_select.dart';
 import 'ui/main_menu.dart';
 import 'ui/sandbox_setup.dart';
 
-void main() {
+late FirebaseFirestore firestore;
+
+void main() async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  firestore = FirebaseFirestore.instance;
   runApp(const DashlanderApp());
 }
 
@@ -18,11 +26,14 @@ class DashlanderApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Dashlander',
-      theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: Colors.black),
-      debugShowCheckedModeBanner: false,
-      home: const GameCoordinator(),
+    return Provider<FirebaseFirestore>.value(
+      value: firestore,
+      child: MaterialApp(
+        title: 'Dashlander',
+        theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: Colors.black),
+        debugShowCheckedModeBanner: false,
+        home: const GameCoordinator(),
+      ),
     );
   }
 }
