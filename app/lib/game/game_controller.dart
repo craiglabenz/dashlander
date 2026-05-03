@@ -8,8 +8,9 @@ import 'models/game_status.dart';
 import 'models/level_data.dart';
 import 'models/sandbox_config.dart';
 import 'models/telemetry_data.dart';
-
 import 'models/score_breakdown.dart';
+import 'replay_recorder.dart';
+import 'package:shared/shared.dart';
 
 class FinalMetrics {
   final double shipDeltaDeg;
@@ -40,6 +41,8 @@ class GameController {
   LevelData? currentLevel;
   SandboxConfig? sandboxConfig;
   int ghostShipsCount = 0;
+  
+  GameReplay? lastReplay;
 
   void updateTelemetry(LanderState state, {bool debugModeEnabled = false, List<Vector2>? terrainPoints}) {
     // Determine radial/tangential velocity relative to surface normal
@@ -109,7 +112,7 @@ class GameController {
     );
   }
 
-  void setGameOver(GameStatus newStatus, LanderState state) {
+  void setGameOver(GameStatus newStatus, LanderState state, {ReplayRecorder? replayRecorder}) {
     status.value = newStatus;
     finalState = state;
 
@@ -162,6 +165,10 @@ class GameController {
       finalScore = 0;
       finalScoreBreakdown = null;
     }
+
+    if (replayRecorder != null) {
+      lastReplay = replayRecorder.finalizeReplay(score: finalScore);
+    }
   }
 
   void reset() {
@@ -170,5 +177,6 @@ class GameController {
     finalScoreBreakdown = null;
     finalMetrics = null;
     finalState = null;
+    lastReplay = null;
   }
 }

@@ -17,6 +17,7 @@ import 'behaviors/exhaust_behavior.dart';
 import 'behaviors/ship_collision_behavior.dart';
 import 'behaviors/player_input_behavior.dart';
 import 'behaviors/telemetry_behavior.dart';
+import 'replay_recorder.dart';
 
 class DashlanderGame extends FlameGame
     with KeyboardEvents, HasCollisionDetection {
@@ -27,6 +28,7 @@ class DashlanderGame extends FlameGame
 
   late ShipComponent ship;
   late TerrainComponent terrain;
+  late ReplayRecorder replayRecorder;
 
   bool isLeftPressed = false;
   bool isRightPressed = false;
@@ -68,6 +70,12 @@ class DashlanderGame extends FlameGame
     }
 
     final level = gameController.currentLevel!;
+    
+    replayRecorder = ReplayRecorder(
+      userId: 'local_user', // Placeholder
+      levelSeed: level.id,
+    );
+
     landerState = LanderState(
       position: level.startPosition.clone(),
       velocity: Vector2(
@@ -122,6 +130,7 @@ class DashlanderGame extends FlameGame
     super.update(dt);
     // Only update active game logic if we're not game over
     if (gameController.status.value == GameStatus.playing) {
+      replayRecorder.updateTime(dt);
       gameController.updateTelemetry(
         landerState,
         debugModeEnabled: debugMode,
@@ -182,6 +191,7 @@ class DashlanderGame extends FlameGame
           gameController.setGameOver(
             landed ? GameStatus.won : GameStatus.lost,
             landerState,
+            replayRecorder: replayRecorder,
           );
         }
       });
@@ -203,6 +213,14 @@ class DashlanderGame extends FlameGame
         keysPressed.contains(LogicalKeyboardKey.arrowUp) ||
         keysPressed.contains(LogicalKeyboardKey.keyW) ||
         keysPressed.contains(LogicalKeyboardKey.space);
+
+    if (gameController.status.value == GameStatus.playing) {
+      replayRecorder.recordInputState(
+        isUpPressed: isUpPressed,
+        isLeftPressed: isLeftPressed,
+        isRightPressed: isRightPressed,
+      );
+    }
 
     if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.backquote) {
