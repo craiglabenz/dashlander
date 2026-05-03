@@ -9,15 +9,18 @@ class ScoreBreakdown {
   /// The maximum allowable angle (in degrees) between the ship's orientation
   /// and the surface normal of the landing pad.
   /// If the ship is tilted more than this when it touches the pad, it crashes.
-  static const double maxLandingTiltDegrees = 15.0;
+  // static const double maxLandingTiltDegrees = 15.0;
+  static const double maxLandingTiltDegrees = 90.0;
 
   /// The maximum allowable radial speed (falling towards the center of the moon)
   /// when touching a pad (in m/s). Exceeding this shatters the landing legs.
-  static const double maxLandingVelocityY = 2.0;
+  // static const double maxLandingVelocityY = 2.0;
+  static const double maxLandingVelocityY = 100.0;
 
   /// The maximum allowable tangential speed (sliding sideways across the pad)
   /// when touching down (in m/s). Exceeding this snaps the landing legs sideways.
-  static const double maxLandingVelocityX = 1.0;
+  // static const double maxLandingVelocityX = 1.0;
+  static const double maxLandingVelocityX = 100.0;
 
   // ---------------------------------------------------------------------------
   // SCORING VALUES
@@ -38,7 +41,11 @@ class ScoreBreakdown {
     required this.totalScore,
   });
 
-  factory ScoreBreakdown.calculate(FinalMetrics metrics, LanderState state, double maxFuel) {
+  factory ScoreBreakdown.calculate(
+    FinalMetrics metrics,
+    LanderState state,
+    double maxFuel,
+  ) {
     // Score based on percentage of fuel conserved
     double fuelPercentage = (state.fuelMass / maxFuel).clamp(0.0, 1.0);
     int fuelScore = (fuelPercentage * maxFuelScore).toInt();
@@ -47,8 +54,8 @@ class ScoreBreakdown {
     double velocityMidpoint = maxLandingVelocityY / 2;
     double velocityScoreRaw =
         ((velocityMidpoint - metrics.impactVelocityMetersPerSecond) /
-                velocityMidpoint) *
-            maxVelocityScore;
+            velocityMidpoint) *
+        maxVelocityScore;
     int velocityScore = velocityScoreRaw.toInt();
 
     // Midpoint Scoring Algorithm for Tilt

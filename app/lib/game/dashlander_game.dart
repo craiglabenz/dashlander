@@ -17,6 +17,7 @@ import 'behaviors/exhaust_behavior.dart';
 import 'behaviors/ship_collision_behavior.dart';
 import 'behaviors/player_input_behavior.dart';
 import 'behaviors/telemetry_behavior.dart';
+import 'behaviors/ghost_input_behavior.dart';
 import 'replay_recorder.dart';
 
 class DashlanderGame extends FlameGame
@@ -70,7 +71,7 @@ class DashlanderGame extends FlameGame
     }
 
     final level = gameController.currentLevel!;
-    
+
     replayRecorder = ReplayRecorder(
       userId: 'local_user', // Placeholder
       levelSeed: level.id,
@@ -117,6 +118,40 @@ class DashlanderGame extends FlameGame
       ],
     );
     world.add(ship);
+
+    // 5. Add Target Ghost Ship (if playing against leaderboard)
+    if (gameController.targetGhostReplay != null) {
+      final ghostState = LanderState(
+        position: level.startPosition.clone(),
+        velocity: Vector2(
+          PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
+          PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
+        ),
+        angle: 0,
+        angularVelocity: 0,
+        fuelMass: level.initialFuel,
+        dryMass: PhysicsConstants.dryMass,
+        engineMaxThrust: PhysicsConstants.engineMaxThrust,
+        specificImpulse: PhysicsConstants.specificImpulse,
+        baseInertia: PhysicsConstants.baseInertia,
+      );
+
+      final ghostShip = ShipComponent(
+        state: ghostState,
+        isGhost: true,
+        tintColor: Colors.deepOrangeAccent,
+        behaviors: [
+          GhostInputBehavior(replay: gameController.targetGhostReplay!),
+          PhysicsBehavior(physicsEngine: physicsEngine),
+          ExhaustBehavior(
+            hasFuel:
+                () => ghostState.fuelMass > 0 || physicsEngine.infiniteFuel,
+          ),
+          ShipCollisionBehavior(physicsEngine: physicsEngine),
+        ],
+      );
+      world.add(ghostShip);
+    }
 
     // Set camera to follow ship
     camera.follow(ship);

@@ -41,10 +41,15 @@ class GameController {
   LevelData? currentLevel;
   SandboxConfig? sandboxConfig;
   int ghostShipsCount = 0;
-  
+  GameReplay? targetGhostReplay;
+
   GameReplay? lastReplay;
 
-  void updateTelemetry(LanderState state, {bool debugModeEnabled = false, List<Vector2>? terrainPoints}) {
+  void updateTelemetry(
+    LanderState state, {
+    bool debugModeEnabled = false,
+    List<Vector2>? terrainPoints,
+  }) {
     // Determine radial/tangential velocity relative to surface normal
     Vector2 surfaceNormal = state.position.normalized();
     double fallingSpeed = -state.velocity.dot(surfaceNormal);
@@ -65,12 +70,15 @@ class GameController {
     // In Flame, -Y is UP. Angle is 0 at the top, increasing clockwise.
     double angleRad = atan2(state.position.x, -state.position.y);
     if (angleRad < 0) angleRad += 2 * pi;
-    int terrainIndexBelow = (angleRad / (2 * pi) * PhysicsConstants.terrainSegments).floor() % PhysicsConstants.terrainSegments;
+    int terrainIndexBelow =
+        (angleRad / (2 * pi) * PhysicsConstants.terrainSegments).floor() %
+        PhysicsConstants.terrainSegments;
 
     double height = 0.0;
     if (terrainPoints != null && terrainPoints.isNotEmpty) {
       Vector2 p1 = terrainPoints[terrainIndexBelow];
-      Vector2 p2 = terrainPoints[(terrainIndexBelow + 1) % terrainPoints.length];
+      Vector2 p2 =
+          terrainPoints[(terrainIndexBelow + 1) % terrainPoints.length];
 
       // Direction of the terrain segment (clockwise)
       Vector2 dir = p2 - p1;
@@ -78,9 +86,11 @@ class GameController {
       Vector2 normal = Vector2(dir.y, -dir.x).normalized();
 
       Vector2 s0 = state.position;
-      Vector2 v = state.position.normalized(); // Vector pointing straight UP from moon center
-      
-      // If the ship falls straight down towards the center of the moon, its position over time 
+      Vector2 v =
+          state.position
+              .normalized(); // Vector pointing straight UP from moon center
+
+      // If the ship falls straight down towards the center of the moon, its position over time
       // is S(t) = s0 - t * v.
       // It impacts the ground when its bounding circle touches the line segment p1-p2.
       // This occurs when the perpendicular distance from S(t) to the line equals the ship's radius:
@@ -88,7 +98,7 @@ class GameController {
       // (s0 - t * v - p1) . normal = shipRadius
       // (s0 - p1).dot(normal) - t * v.dot(normal) = shipRadius
       // t = ( (s0 - p1).dot(normal) - shipRadius ) / v.dot(normal)
-      
+
       double shipRadius = PhysicsConstants.shipRadius;
       double dotVNormal = v.dot(normal);
 
@@ -112,10 +122,11 @@ class GameController {
     );
   }
 
-  void setGameOver(GameStatus newStatus, LanderState state, {ReplayRecorder? replayRecorder}) {
-    status.value = newStatus;
-    finalState = state;
-
+  void setGameOver(
+    GameStatus newStatus,
+    LanderState state, {
+    ReplayRecorder? replayRecorder,
+  }) {
     // 1. Calculate the final metrics unconditionally for the UI
     double angleDeg = (state.angle * 180 / pi) % 360;
     if (angleDeg < 0) angleDeg += 360;
@@ -158,8 +169,13 @@ class GameController {
 
     // 2. Calculate the score if won
     if (newStatus == GameStatus.won) {
-      double maxFuel = currentLevel?.initialFuel ?? PhysicsConstants.defaultMaxFuel;
-      finalScoreBreakdown = ScoreBreakdown.calculate(finalMetrics!, state, maxFuel);
+      double maxFuel =
+          currentLevel?.initialFuel ?? PhysicsConstants.defaultMaxFuel;
+      finalScoreBreakdown = ScoreBreakdown.calculate(
+        finalMetrics!,
+        state,
+        maxFuel,
+      );
       finalScore = finalScoreBreakdown!.totalScore;
     } else {
       finalScore = 0;
@@ -168,7 +184,15 @@ class GameController {
 
     if (replayRecorder != null) {
       lastReplay = replayRecorder.finalizeReplay(score: finalScore);
+      print('set lastReplay: $lastReplay');
     }
+
+    // It is important that these lines remain the last in this function, as
+    // they trigger listeners to fire elsewhere; but those listeners logically
+    // assume that this function has completed (specifically, setting
+    // `lastReplay`).
+    status.value = newStatus;
+    finalState = state;
   }
 
   void reset() {
@@ -178,5 +202,6 @@ class GameController {
     finalMetrics = null;
     finalState = null;
     lastReplay = null;
+    targetGhostReplay = null;
   }
 }

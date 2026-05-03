@@ -284,7 +284,7 @@ as int,
 /// @nodoc
 mixin _$GameReplay {
 
- String get userId; int get score; int get levelSeed; List<ThrusterAction> get actions; int get durationMs;
+ String get id; String get userId; int get score; int get levelSeed;@ThrusterActionConverter() List<ThrusterAction> get actions; int get durationMs;
 /// Create a copy of GameReplay
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -297,16 +297,16 @@ $GameReplayCopyWith<GameReplay> get copyWith => _$GameReplayCopyWithImpl<GameRep
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameReplay&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelSeed, levelSeed) || other.levelSeed == levelSeed)&&const DeepCollectionEquality().equals(other.actions, actions)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameReplay&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelSeed, levelSeed) || other.levelSeed == levelSeed)&&const DeepCollectionEquality().equals(other.actions, actions)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,score,levelSeed,const DeepCollectionEquality().hash(actions),durationMs);
+int get hashCode => Object.hash(runtimeType,id,userId,score,levelSeed,const DeepCollectionEquality().hash(actions),durationMs);
 
 @override
 String toString() {
-  return 'GameReplay(userId: $userId, score: $score, levelSeed: $levelSeed, actions: $actions, durationMs: $durationMs)';
+  return 'GameReplay(id: $id, userId: $userId, score: $score, levelSeed: $levelSeed, actions: $actions, durationMs: $durationMs)';
 }
 
 
@@ -317,7 +317,7 @@ abstract mixin class $GameReplayCopyWith<$Res>  {
   factory $GameReplayCopyWith(GameReplay value, $Res Function(GameReplay) _then) = _$GameReplayCopyWithImpl;
 @useResult
 $Res call({
- String userId, int score, int levelSeed, List<ThrusterAction> actions, int durationMs
+ String id, String userId, int score, int levelSeed,@ThrusterActionConverter() List<ThrusterAction> actions, int durationMs
 });
 
 
@@ -334,9 +334,10 @@ class _$GameReplayCopyWithImpl<$Res>
 
 /// Create a copy of GameReplay
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userId = null,Object? score = null,Object? levelSeed = null,Object? actions = null,Object? durationMs = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? score = null,Object? levelSeed = null,Object? actions = null,Object? durationMs = null,}) {
   return _then(_self.copyWith(
-userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
 as int,levelSeed: null == levelSeed ? _self.levelSeed : levelSeed // ignore: cast_nullable_to_non_nullable
 as int,actions: null == actions ? _self.actions : actions // ignore: cast_nullable_to_non_nullable
@@ -426,10 +427,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userId,  int score,  int levelSeed,  List<ThrusterAction> actions,  int durationMs)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId,  int score,  int levelSeed, @ThrusterActionConverter()  List<ThrusterAction> actions,  int durationMs)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GameReplay() when $default != null:
-return $default(_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs);case _:
+return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs);case _:
   return orElse();
 
 }
@@ -447,10 +448,10 @@ return $default(_that.userId,_that.score,_that.levelSeed,_that.actions,_that.dur
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userId,  int score,  int levelSeed,  List<ThrusterAction> actions,  int durationMs)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId,  int score,  int levelSeed, @ThrusterActionConverter()  List<ThrusterAction> actions,  int durationMs)  $default,) {final _that = this;
 switch (_that) {
 case _GameReplay():
-return $default(_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs);case _:
+return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -467,10 +468,10 @@ return $default(_that.userId,_that.score,_that.levelSeed,_that.actions,_that.dur
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userId,  int score,  int levelSeed,  List<ThrusterAction> actions,  int durationMs)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId,  int score,  int levelSeed, @ThrusterActionConverter()  List<ThrusterAction> actions,  int durationMs)?  $default,) {final _that = this;
 switch (_that) {
 case _GameReplay() when $default != null:
-return $default(_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs);case _:
+return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs);case _:
   return null;
 
 }
@@ -482,14 +483,15 @@ return $default(_that.userId,_that.score,_that.levelSeed,_that.actions,_that.dur
 @JsonSerializable()
 
 class _GameReplay implements GameReplay {
-  const _GameReplay({required this.userId, required this.score, required this.levelSeed, required final  List<ThrusterAction> actions, required this.durationMs}): _actions = actions;
+  const _GameReplay({this.id = '', required this.userId, required this.score, required this.levelSeed, @ThrusterActionConverter() required final  List<ThrusterAction> actions, required this.durationMs}): _actions = actions;
   factory _GameReplay.fromJson(Map<String, dynamic> json) => _$GameReplayFromJson(json);
 
+@override@JsonKey() final  String id;
 @override final  String userId;
 @override final  int score;
 @override final  int levelSeed;
  final  List<ThrusterAction> _actions;
-@override List<ThrusterAction> get actions {
+@override@ThrusterActionConverter() List<ThrusterAction> get actions {
   if (_actions is EqualUnmodifiableListView) return _actions;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_actions);
@@ -510,16 +512,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GameReplay&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelSeed, levelSeed) || other.levelSeed == levelSeed)&&const DeepCollectionEquality().equals(other._actions, _actions)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GameReplay&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelSeed, levelSeed) || other.levelSeed == levelSeed)&&const DeepCollectionEquality().equals(other._actions, _actions)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,userId,score,levelSeed,const DeepCollectionEquality().hash(_actions),durationMs);
+int get hashCode => Object.hash(runtimeType,id,userId,score,levelSeed,const DeepCollectionEquality().hash(_actions),durationMs);
 
 @override
 String toString() {
-  return 'GameReplay(userId: $userId, score: $score, levelSeed: $levelSeed, actions: $actions, durationMs: $durationMs)';
+  return 'GameReplay(id: $id, userId: $userId, score: $score, levelSeed: $levelSeed, actions: $actions, durationMs: $durationMs)';
 }
 
 
@@ -530,7 +532,7 @@ abstract mixin class _$GameReplayCopyWith<$Res> implements $GameReplayCopyWith<$
   factory _$GameReplayCopyWith(_GameReplay value, $Res Function(_GameReplay) _then) = __$GameReplayCopyWithImpl;
 @override @useResult
 $Res call({
- String userId, int score, int levelSeed, List<ThrusterAction> actions, int durationMs
+ String id, String userId, int score, int levelSeed,@ThrusterActionConverter() List<ThrusterAction> actions, int durationMs
 });
 
 
@@ -547,9 +549,10 @@ class __$GameReplayCopyWithImpl<$Res>
 
 /// Create a copy of GameReplay
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? score = null,Object? levelSeed = null,Object? actions = null,Object? durationMs = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? score = null,Object? levelSeed = null,Object? actions = null,Object? durationMs = null,}) {
   return _then(_GameReplay(
-userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
 as int,levelSeed: null == levelSeed ? _self.levelSeed : levelSeed // ignore: cast_nullable_to_non_nullable
 as int,actions: null == actions ? _self._actions : actions // ignore: cast_nullable_to_non_nullable

@@ -20,13 +20,32 @@ abstract class ThrusterAction with _$ThrusterAction {
 @freezed
 abstract class GameReplay with _$GameReplay {
   const factory GameReplay({
+    @Default('') String id,
     required String userId,
     required int score,
     required int levelSeed,
+
+    @ThrusterActionConverter() //
     required List<ThrusterAction> actions,
     required int durationMs,
   }) = _GameReplay;
 
   factory GameReplay.fromJson(Map<String, dynamic> json) =>
       _$GameReplayFromJson(json);
+}
+
+@JsonSerializable()
+class ThrusterActionConverter
+    implements JsonConverter<ThrusterAction, Map<String, dynamic>> {
+  const ThrusterActionConverter();
+
+  @override
+  ThrusterAction fromJson(Map<String, dynamic> json) {
+    return ThrusterAction.fromJson(json);
+  }
+
+  @override
+  Map<String, dynamic> toJson(ThrusterAction object) {
+    return object.toJson();
+  }
 }

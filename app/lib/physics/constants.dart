@@ -6,7 +6,8 @@ class PhysicsConstants {
   /// The absolute magnitude of lunar gravity acting on the ship (in m/s^2).
   /// This is applied radially toward the center of the spherical moon.
   /// Higher values pull the ship down faster, requiring more fuel to survive.
-  static const double lunarGravity = 3.2 * 1.25;
+  // static const double lunarGravity = 3.2 * 1.25;
+  static const double lunarGravity = 3.2;
 
   /// Earth's standard gravity (in m/s^2).
   /// Used solely as a reference to calculate the "G-Force" experienced by the

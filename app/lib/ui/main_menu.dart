@@ -4,11 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 class MainMenu extends StatefulWidget {
   final Function(int) onPlayCampaign;
   final Function(int) onPlaySandbox;
+  final VoidCallback onLeaderboard;
 
   const MainMenu({
     super.key,
     required this.onPlayCampaign,
     required this.onPlaySandbox,
+    required this.onLeaderboard,
   });
 
   @override
@@ -69,6 +71,12 @@ class _MainMenuState extends State<MainMenu> {
               label: 'SANDBOX MODE',
               color: Colors.pinkAccent,
               onTap: () => widget.onPlaySandbox(ghostShipsCount),
+            ),
+            const SizedBox(height: 24),
+            _MenuButton(
+              label: 'LEADERBOARD',
+              color: Colors.purpleAccent,
+              onTap: widget.onLeaderboard,
             ),
           ],
         ),
