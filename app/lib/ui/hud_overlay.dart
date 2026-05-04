@@ -138,11 +138,16 @@ class HudOverlay extends StatelessWidget {
                   right: 0,
                   child: Center(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.purple.shade900.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.purpleAccent.withValues(alpha: 0.5)),
+                        border: Border.all(
+                          color: Colors.purpleAccent.withValues(alpha: 0.5),
+                        ),
                       ),
                       child: Text(
                         'INDEX BELOW: ${data.terrainIndexBelow}',
@@ -157,9 +162,26 @@ class HudOverlay extends StatelessWidget {
               Align(
                 alignment: Alignment.bottomLeft,
                 child: SafeArea(
-                  child: Minimap(
-                    telemetry: data,
-                    levelData: controller.currentLevel!,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0, bottom: 4.0),
+                        child: Text(
+                          'SEED: ${controller.currentLevel!.id}',
+                          style: GoogleFonts.shareTechMono(
+                            color: Colors.greenAccent,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Minimap(
+                        telemetry: data,
+                        levelData: controller.currentLevel!,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -240,20 +262,33 @@ class HudOverlay extends StatelessWidget {
     fontFamily: 'monospace',
   );
 
-  Widget _buildTelemetryItem(String label, String value, Color valueColor, double scale) {
+  Widget _buildTelemetryItem(
+    String label,
+    String value,
+    Color valueColor,
+    double scale,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(label, style: _labelStyle.copyWith(
-          fontSize: _labelStyle.fontSize! * scale,
-          letterSpacing: _labelStyle.letterSpacing! * scale,
-        )),
+        Text(
+          label,
+          style: _labelStyle.copyWith(
+            fontSize: _labelStyle.fontSize! * scale,
+            letterSpacing: _labelStyle.letterSpacing! * scale,
+          ),
+        ),
         SizedBox(height: 4 * scale),
-        Text(value, style: _valueStyle.copyWith(
-          color: valueColor,
-          fontSize: _valueStyle.fontSize! * scale,
-        )),
-        SizedBox(height: 10 * scale), // Empty space to match the fuel gauge's bar
+        Text(
+          value,
+          style: _valueStyle.copyWith(
+            color: valueColor,
+            fontSize: _valueStyle.fontSize! * scale,
+          ),
+        ),
+        SizedBox(
+          height: 10 * scale,
+        ), // Empty space to match the fuel gauge's bar
       ],
     );
   }

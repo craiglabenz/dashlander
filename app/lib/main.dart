@@ -10,12 +10,11 @@ import 'game/dashlander_game.dart';
 import 'game/game_state.dart';
 import 'game/level_generator.dart';
 import 'package:shared/shared.dart';
+import 'dart:math';
 import 'ui/game_over_modal.dart';
 import 'ui/hud_overlay.dart';
 import 'ui/leaderboard_screen.dart';
-import 'ui/level_select.dart';
 import 'ui/main_menu.dart';
-import 'ui/sandbox_setup.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'data/hive_adapters.dart';
@@ -227,50 +226,122 @@ class _GameCoordinatorState extends State<GameCoordinator> {
     });
   }
 
-  void _showCampaignMenu(int ghostShipsCount) {
-    setState(() {
-      _game = null;
-      _controller.ghostShipsCount = ghostShipsCount;
-      _controller.status.value = GameStatus.playing; // Hack to show sub-menu
-    });
-    showDialog(
-      context: context,
-      barrierColor: Colors.black,
-      builder:
-          (_) => LevelSelect(
-            onBack: () {
-              Navigator.pop(context);
-              _controller.reset();
-            },
-            onSelect: (lvl) {
-              Navigator.pop(context);
-              _startGame(lvl);
-            },
-          ),
-    );
+  void _playRandomSeed() {
+    final lvl = LevelGenerator.generate(seed: Random().nextInt(1000000));
+    _startGame(lvl);
   }
 
-  void _showSandboxMenu(int ghostShipsCount) {
-    setState(() {
-      _game = null;
-      _controller.ghostShipsCount = ghostShipsCount;
-      _controller.status.value = GameStatus.playing; // Hack to show sub-menu
-    });
-    showDialog(
+  void _promptForSeed() async {
+    int? seed = await _showSeedDialog();
+    if (seed != null) {
+      final lvl = LevelGenerator.generate(seed: seed);
+      _startGame(lvl);
+    }
+  }
+
+  Future<int?> _showSeedDialog() async {
+    int? seed;
+    await showDialog(
       context: context,
-      barrierColor: Colors.black,
-      builder:
-          (_) => SandboxSetup(
-            onBack: () {
-              Navigator.pop(context);
-              _controller.reset();
-            },
-            onStart: (config, lvl) {
-              Navigator.pop(context);
-              _startGame(lvl, config: config);
-            },
+      barrierDismissible: true,
+      builder: (context) {
+        String currentInput = '';
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 380),
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              border: Border.all(color: Colors.pinkAccent, width: 2),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.pinkAccent.withValues(alpha: 0.3),
+                  blurRadius: 30,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'ENTER SEED',
+                  style: GoogleFonts.orbitron(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pinkAccent,
+                    letterSpacing: 2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                TextField(
+                  maxLength: 12,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.shareTechMono(
+                    color: Colors.pinkAccent,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 4,
+                  ),
+                  cursorColor: Colors.pinkAccent,
+                  decoration: InputDecoration(
+                    counterText: '',
+                    hintText: '123456789',
+                    hintStyle: GoogleFonts.shareTechMono(
+                      color: Colors.pinkAccent.withValues(alpha: 0.2),
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 4,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.pinkAccent.withValues(alpha: 0.5),
+                        width: 2,
+                      ),
+                    ),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.pinkAccent,
+                        width: 3,
+                      ),
+                    ),
+                  ),
+                  onChanged: (val) => currentInput = val,
+                ),
+                const SizedBox(height: 48),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      seed = int.tryParse(currentInput);
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.pinkAccent.withValues(alpha: 0.2),
+                      foregroundColor: Colors.pinkAccent,
+                      side: const BorderSide(color: Colors.pinkAccent),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'START LEVEL',
+                      style: GoogleFonts.shareTechMono(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+        );
+      },
     );
+    return seed;
   }
 
   @override
@@ -295,8 +366,8 @@ class _GameCoordinatorState extends State<GameCoordinator> {
             )
           else if (status == GameStatus.menu)
             MainMenu(
-              onPlayCampaign: _showCampaignMenu,
-              onPlaySandbox: _showSandboxMenu,
+              onPlayRandom: _playRandomSeed,
+              onEnterSeed: _promptForSeed,
               onLeaderboard: () => setState(() => _showLeaderboard = true),
             ),
 
@@ -320,6 +391,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
                   () => _startGame(
                     _controller.currentLevel!,
                     config: _controller.sandboxConfig,
+                    targetGhostReplay: _controller.targetGhostReplay,
                   ),
               onMenu: () {
                 _game = null;

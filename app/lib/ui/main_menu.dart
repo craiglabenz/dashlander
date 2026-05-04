@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MainMenu extends StatefulWidget {
-  final Function(int) onPlayCampaign;
-  final Function(int) onPlaySandbox;
+  final VoidCallback onPlayRandom;
+  final VoidCallback onEnterSeed;
   final VoidCallback onLeaderboard;
 
   const MainMenu({
     super.key,
-    required this.onPlayCampaign,
-    required this.onPlaySandbox,
+    required this.onPlayRandom,
+    required this.onEnterSeed,
     required this.onLeaderboard,
   });
 
@@ -18,8 +18,6 @@ class MainMenu extends StatefulWidget {
 }
 
 class _MainMenuState extends State<MainMenu> {
-  int ghostShipsCount = 0;
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.sizeOf(context).width;
@@ -58,19 +56,17 @@ class _MainMenuState extends State<MainMenu> {
                 letterSpacing: 4,
               ),
             ),
-            const SizedBox(height: 48),
-            _buildGhostShipsSelector(),
-            const SizedBox(height: 48),
+            const SizedBox(height: 64),
             _MenuButton(
-              label: 'CAMPAIGN MODE',
+              label: 'PLAY RANDOM SEED',
               color: Colors.cyanAccent,
-              onTap: () => widget.onPlayCampaign(ghostShipsCount),
+              onTap: widget.onPlayRandom,
             ),
             const SizedBox(height: 24),
             _MenuButton(
-              label: 'SANDBOX MODE',
+              label: 'ENTER SEED',
               color: Colors.pinkAccent,
-              onTap: () => widget.onPlaySandbox(ghostShipsCount),
+              onTap: widget.onEnterSeed,
             ),
             const SizedBox(height: 24),
             _MenuButton(
@@ -81,32 +77,6 @@ class _MainMenuState extends State<MainMenu> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildGhostShipsSelector() {
-    return Column(
-      children: [
-        Text(
-          'GHOST SHIPS: $ghostShipsCount',
-          style: GoogleFonts.shareTechMono(
-            color: Colors.purpleAccent,
-            fontSize: 18,
-          ),
-        ),
-        SizedBox(
-          width: 300,
-          child: Slider(
-            value: ghostShipsCount.toDouble(),
-            min: 0,
-            max: 5,
-            divisions: 5,
-            activeColor: Colors.purpleAccent,
-            inactiveColor: Colors.purple.shade900,
-            onChanged: (v) => setState(() => ghostShipsCount = v.toInt()),
-          ),
-        ),
-      ],
     );
   }
 }
