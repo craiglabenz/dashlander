@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'dart:math';
 
 import 'dart:ui' as ui;
+import 'package:flame_audio/flame_audio.dart';
 import '../physics/constants.dart';
 import '../physics/lander_state.dart';
 import '../physics/physics_engine.dart';
@@ -18,6 +19,7 @@ import 'behaviors/ship_collision_behavior.dart';
 import 'behaviors/player_input_behavior.dart';
 import 'behaviors/telemetry_behavior.dart';
 import 'behaviors/ghost_input_behavior.dart';
+import 'behaviors/ship_audio_behavior.dart';
 import 'replay_recorder.dart';
 
 class DashlanderGame extends FlameGame
@@ -56,6 +58,14 @@ class DashlanderGame extends FlameGame
       _bloomProgram = await ui.FragmentProgram.fromAsset('shaders/bloom.frag');
     } catch (e) {
       debugPrint("Failed to load bloom shader: $e");
+    }
+
+    try {
+      FlameAudio.bgm.initialize();
+      FlameAudio.audioCache.prefix = 'assets/audio/';
+      await FlameAudio.bgm.play('background.mp3');
+    } catch (e) {
+      debugPrint("Failed to load or play background music: $e");
     }
 
     // 1. Add background
@@ -116,6 +126,9 @@ class DashlanderGame extends FlameGame
         ExhaustBehavior(
           hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
         ),
+        ShipAudioBehavior(
+          hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
+        ),
         ShipCollisionBehavior(physicsEngine: physicsEngine),
         TelemetryBehavior(),
       ],
@@ -168,7 +181,7 @@ class DashlanderGame extends FlameGame
   void update(double dt) {
     _accumulator += dt;
     if (_accumulator > 0.1) _accumulator = 0.1; // clamp to prevent death spiral
-    
+
     while (_accumulator >= _fixedDt) {
       _fixedUpdate(_fixedDt);
       _accumulator -= _fixedDt;
@@ -235,7 +248,7 @@ class DashlanderGame extends FlameGame
   void triggerGameOver(bool landed) {
     if (!_gameOverTriggered) {
       _gameOverTriggered = true;
-      
+
       // Record a final checkpoint to ensure the ghost comes to rest correctly
       replayRecorder.recordCheckpoint(
         x: landerState.position.x,
