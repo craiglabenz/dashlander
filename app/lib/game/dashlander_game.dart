@@ -1,7 +1,9 @@
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:math';
 
 import 'dart:ui' as ui;
@@ -41,6 +43,16 @@ class DashlanderGame extends FlameGame
 
   ui.FragmentProgram? _bloomProgram;
   ui.FragmentShader? _bloomShader;
+
+  JoystickComponent? joystick;
+
+  bool _isKeyboardLeft = false;
+  bool _isKeyboardRight = false;
+  bool _isKeyboardUp = false;
+
+  bool _isJoystickLeft = false;
+  bool _isJoystickRight = false;
+  bool _isJoystickUp = false;
 
   double _accumulator = 0.0;
   static const double _fixedDt = 1.0 / 60.0;
@@ -174,17 +186,78 @@ class DashlanderGame extends FlameGame
 
     // Set initial state
     gameController.status.value = GameStatus.playing;
+
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.android ||
+        (kIsWeb && size.x < 800)) {
+      joystick = JoystickComponent(
+        knob: CircleComponent(
+          radius: 30,
+          paint: Paint()..color = Colors.white.withValues(alpha: 0.8),
+        ),
+        background: CircleComponent(
+          radius: 80,
+          paint: Paint()..color = Colors.white.withValues(alpha: 0.2),
+        ),
+        margin: const EdgeInsets.only(right: 40, bottom: 40),
+      );
+      camera.viewport.add(joystick!);
+    }
   }
 
   @override
   // ignore: must_call_super
   void update(double dt) {
+    if (joystick != null) {
+      final jUp = joystick!.relativeDelta.y < -0.2;
+      final jLeft = joystick!.relativeDelta.x < -0.2;
+      final jRight = joystick!.relativeDelta.x > 0.2;
+
+      if (jUp != _isJoystickUp ||
+          jLeft != _isJoystickLeft ||
+          jRight != _isJoystickRight) {
+        _isJoystickUp = jUp;
+        _isJoystickLeft = jLeft;
+        _isJoystickRight = jRight;
+        _updateCombinedInputState();
+      }
+    }
+
     _accumulator += dt;
     if (_accumulator > 0.1) _accumulator = 0.1; // clamp to prevent death spiral
 
     while (_accumulator >= _fixedDt) {
       _fixedUpdate(_fixedDt);
       _accumulator -= _fixedDt;
+    }
+  }
+
+  void _updateCombinedInputState() {
+    bool newUp = _isKeyboardUp || _isJoystickUp;
+    bool newLeft = _isKeyboardLeft || _isJoystickLeft;
+    bool newRight = _isKeyboardRight || _isJoystickRight;
+
+    if (newUp != isUpPressed ||
+        newLeft != isLeftPressed ||
+        newRight != isRightPressed) {
+      isUpPressed = newUp;
+      isLeftPressed = newLeft;
+      isRightPressed = newRight;
+
+      if (gameController.status.value == GameStatus.playing) {
+        replayRecorder.recordInputState(
+          isUpPressed: isUpPressed,
+          isLeftPressed: isLeftPressed,
+          isRightPressed: isRightPressed,
+          x: landerState.position.x,
+          y: landerState.position.y,
+          vx: landerState.velocity.x,
+          vy: landerState.velocity.y,
+          angle: landerState.angle,
+          angularVelocity: landerState.angularVelocity,
+          timeOffset: _fixedDt,
+        );
+      }
     }
   }
 
@@ -276,31 +349,18 @@ class DashlanderGame extends FlameGame
     KeyEvent event,
     Set<LogicalKeyboardKey> keysPressed,
   ) {
-    isLeftPressed =
+    _isKeyboardLeft =
         keysPressed.contains(LogicalKeyboardKey.arrowLeft) ||
         keysPressed.contains(LogicalKeyboardKey.keyA);
-    isRightPressed =
+    _isKeyboardRight =
         keysPressed.contains(LogicalKeyboardKey.arrowRight) ||
         keysPressed.contains(LogicalKeyboardKey.keyD);
-    isUpPressed =
+    _isKeyboardUp =
         keysPressed.contains(LogicalKeyboardKey.arrowUp) ||
         keysPressed.contains(LogicalKeyboardKey.keyW) ||
         keysPressed.contains(LogicalKeyboardKey.space);
 
-    if (gameController.status.value == GameStatus.playing) {
-      replayRecorder.recordInputState(
-        isUpPressed: isUpPressed,
-        isLeftPressed: isLeftPressed,
-        isRightPressed: isRightPressed,
-        x: landerState.position.x,
-        y: landerState.position.y,
-        vx: landerState.velocity.x,
-        vy: landerState.velocity.y,
-        angle: landerState.angle,
-        angularVelocity: landerState.angularVelocity,
-        timeOffset: _fixedDt,
-      );
-    }
+    _updateCombinedInputState();
 
     if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.backquote) {

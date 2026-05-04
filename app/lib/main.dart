@@ -79,8 +79,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
   void initState() {
     super.initState();
     _controller.status.addListener(() async {
-      if (_controller.status.value == GameStatus.won ||
-          _controller.status.value == GameStatus.lost) {
+      if (_controller.status.value == GameStatus.won) {
         if (_controller.lastReplay != null) {
           String? initials = prefs.getString('user_initials');
           if (initials == null) {

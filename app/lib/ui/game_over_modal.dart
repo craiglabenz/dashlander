@@ -97,6 +97,62 @@ class GameOverModal extends StatelessWidget {
                           letterSpacing: 4,
                         ),
                       ),
+                      if (controller.targetGhostReplay != null) ...[
+                        const SizedBox(height: 8),
+                        Divider(
+                          color: Colors.cyan.shade700.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  'GHOST SCORE',
+                                  style: GoogleFonts.shareTechMono(
+                                    color: Colors.deepOrangeAccent,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                Text(
+                                  '${controller.targetGhostReplay!.score}',
+                                  style: GoogleFonts.shareTechMono(
+                                    color: Colors.deepOrangeAccent.shade100,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  'DIFFERENCE',
+                                  style: GoogleFonts.shareTechMono(
+                                    color: Colors.grey.shade400,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                Text(
+                                  '${controller.finalScore >= controller.targetGhostReplay!.score ? '+' : ''}${controller.finalScore - controller.targetGhostReplay!.score}',
+                                  style: GoogleFonts.shareTechMono(
+                                    color:
+                                        controller.finalScore >=
+                                                controller
+                                                    .targetGhostReplay!
+                                                    .score
+                                            ? Colors.greenAccent
+                                            : Colors.redAccent,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
