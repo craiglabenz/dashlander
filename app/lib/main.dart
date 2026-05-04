@@ -3,6 +3,7 @@ import 'package:dashlander/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'game/dashlander_game.dart';
@@ -108,23 +109,104 @@ class _GameCoordinatorState extends State<GameCoordinator> {
       barrierDismissible: false,
       builder: (context) {
         String currentInput = '';
-        return AlertDialog(
-          title: const Text('Enter Initials'),
-          content: TextField(
-            maxLength: 3,
-            textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(hintText: 'e.g. AAA'),
-            onChanged: (val) => currentInput = val,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                initials = currentInput.toUpperCase();
-                Navigator.pop(context);
-              },
-              child: const Text('Save'),
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: 380,
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              border: Border.all(color: Colors.cyanAccent, width: 2),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.cyanAccent.withValues(alpha: 0.3),
+                  blurRadius: 30,
+                ),
+              ],
             ),
-          ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'PILOT REGISTRATION',
+                  style: GoogleFonts.orbitron(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.cyanAccent,
+                    letterSpacing: 2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Enter your 3-character identifier for the galactic leaderboard.',
+                  style: GoogleFonts.shareTechMono(color: Colors.grey.shade400),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                TextField(
+                  maxLength: 3,
+                  textCapitalization: TextCapitalization.characters,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.shareTechMono(
+                    color: Colors.cyanAccent,
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 16,
+                  ),
+                  cursorColor: Colors.cyanAccent,
+                  decoration: InputDecoration(
+                    counterText: '',
+                    hintText: 'AAA',
+                    hintStyle: GoogleFonts.shareTechMono(
+                      color: Colors.cyanAccent.withValues(alpha: 0.2),
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 16,
+                    ),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.cyanAccent.withValues(alpha: 0.5),
+                        width: 2,
+                      ),
+                    ),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.cyanAccent,
+                        width: 3,
+                      ),
+                    ),
+                  ),
+                  onChanged: (val) => currentInput = val,
+                ),
+                const SizedBox(height: 48),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      initials = currentInput.toUpperCase();
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.cyanAccent.withValues(alpha: 0.2),
+                      foregroundColor: Colors.cyanAccent,
+                      side: const BorderSide(color: Colors.cyanAccent),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'SAVE DESIGNATION',
+                      style: GoogleFonts.shareTechMono(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
