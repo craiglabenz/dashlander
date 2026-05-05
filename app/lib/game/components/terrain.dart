@@ -159,7 +159,72 @@ class TerrainComponent extends PositionComponent
     canvas.drawCircle(Offset.zero, levelRadius + PhysicsConstants.deepSpaceBoundary, barrierPaint);
     canvas.drawCircle(Offset.zero, levelRadius + PhysicsConstants.deepSpaceBoundary, innerBarrierPaint);
 
-    // 5. Draw Pad Angles & Debug Visuals
+    // 5. Draw Pad Multipliers (always visible)
+    int numSegments = points.length - 1;
+    List<List<int>> pads = [];
+    if (padIndices.isNotEmpty) {
+      List<int> currentPad = [padIndices[0]];
+      for (int i = 1; i < padIndices.length; i++) {
+        int prev = padIndices[i - 1];
+        int curr = padIndices[i];
+        if (curr == (prev + 1) % numSegments) {
+          currentPad.add(curr);
+        } else {
+          pads.add(currentPad);
+          currentPad = [curr];
+        }
+      }
+      pads.add(currentPad);
+    }
+
+    for (List<int> pad in pads) {
+      int firstIdx = pad.first;
+      int lastIdx = pad.last;
+
+      Vector2 pFirst1 = points[firstIdx];
+      Vector2 pFirst2 = points[(firstIdx + 1) % numSegments];
+      Vector2 firstMid = (pFirst1 + pFirst2) / 2;
+
+      Vector2 pLast1 = points[lastIdx];
+      Vector2 pLast2 = points[(lastIdx + 1) % numSegments];
+      Vector2 lastMid = (pLast1 + pLast2) / 2;
+
+      Vector2 centerPos = (firstMid + lastMid) / 2;
+
+      double absoluteAngleDeg = padAngles[firstIdx] ?? 0;
+      double absoluteAngleRad = absoluteAngleDeg * pi / 180;
+      Vector2 normal = Vector2(sin(absoluteAngleRad), -cos(absoluteAngleRad));
+
+      final level = game.gameController.currentLevel;
+      final multiplier = level?.padMultipliers[firstIdx] ?? 1.0;
+
+      Vector2 multiplierPos = centerPos - normal * 30;
+      final multiplierSpan = TextSpan(
+        text: '${multiplier.toStringAsFixed(1)}x',
+        style: const TextStyle(
+          color: Colors.yellowAccent,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.0,
+        ),
+      );
+      final multiplierPainter = TextPainter(
+        text: multiplierSpan,
+        textDirection: TextDirection.ltr,
+      );
+      multiplierPainter.layout();
+
+      canvas.save();
+      canvas.translate(multiplierPos.x, multiplierPos.y);
+      canvas.rotate(absoluteAngleRad);
+      multiplierPainter.paint(
+        canvas,
+        Offset(-multiplierPainter.width / 2, -multiplierPainter.height / 2),
+      );
+      canvas.restore();
+    }
+
+    // 6. Draw Pad Angles & Debug Visuals
     if (game.debugMode) {
       // Draw dotted line from center of moon to the lander
       Vector2 shipPos = game.landerState.position;
@@ -207,15 +272,15 @@ class TerrainComponent extends PositionComponent
             ..strokeWidth = 2,
         );
 
-        // Push text inward by 30 physics units so it sits directly below the line
-        Vector2 textPos = mid - normal * 30;
+        // Push debug text inward by 50 physics units so it sits below the multiplier
+        Vector2 textPos = mid - normal * 50;
 
         final textSpan = TextSpan(
           text:
               '$segmentIdx : ${deltaDeg > 0 ? '+' : ''}${deltaDeg.toStringAsFixed(1)}°',
           style: const TextStyle(
             color: Colors.greenAccent,
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),

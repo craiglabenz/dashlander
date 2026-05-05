@@ -67,11 +67,12 @@ class LevelGenerator {
     ).round().clamp(1, segments ~/ 4);
 
     final double rawStartX = PhysicsConstants.initialVelocityX;
-    final double vX = applyVariance(
+    double vX = applyVariance(
       rawStartX,
       PhysicsConstants.initialVelocityXVariance,
       chaos.nextDouble() * 2.0 - 1.0,
     );
+    if (chaos.nextBool()) vX = -vX;
 
     final double rawStartY = PhysicsConstants.initialVelocityY;
     final double vY = applyVariance(
@@ -131,9 +132,9 @@ class LevelGenerator {
     int padsToPlace = padsCount;
 
     // Randomize where we look for the first pad so it can be much further away
-    // than just immediately in front of the player.
-    int minSearchIdx = 2;
-    int maxSearchIdx = (segments / 3).floor(); // Up to ~120 degrees away
+    // than just immediately in front of the player. Distance floor is 60° and max is 180°.
+    int minSearchIdx = max(2, (segments * 60.0 / 360.0).floor());
+    int maxSearchIdx = (segments / 2).floor(); // Up to 180 degrees away
 
     // Square the random number so it skews closer on average, but can still be far.
     double distanceFactor = pow(chaos.nextDouble(), 2).toDouble();
@@ -270,42 +271,17 @@ class LevelGenerator {
       padAngleDeltas[idx] = deltaDeg;
     }
 
-    // Calculate Difficulty Multiplier
-    double difficulty = 0.9;
-
-    // 1. Distance to first pad (Further away = MUCH harder)
-    // distanceRatio is 0.0 to 1.0. The average distanceFactor (squared random) is ~0.33.
-    // Shift this so a close pad significantly reduces difficulty, and a far pad increases it.
-    double distanceRatio = searchWindowStart / maxSearchIdx;
-    difficulty += (distanceRatio - 0.33) * 1.0; // Extreme weight
-
-    // 2. Landing Pads Count (Fewer pads = harder, but only if you have to travel far!)
-    // Normalizing around the base constant.
-    int basePads = PhysicsConstants.numLandingPads;
-    // We multiply by distanceRatio so that fewer pads don't matter at all if the first pad is right next to you.
-    // And we reduce the overall weight significantly.
-    difficulty += (basePads - padsCount) * 0.03 * distanceRatio;
-
-    // 3. Pad Width (Shorter pads = harder)
-    int baseWidth = PhysicsConstants.padWidthSegments;
-    difficulty += (baseWidth - padWidth) * 0.15;
-
-    // 4. Terrain Height (Higher terrain = harder) - Reduced weight
-    double heightRatio = maxHeight / PhysicsConstants.maxTerrainHeight;
-    difficulty += (heightRatio - 1.0) * 0.05;
-
-    // 5. Initial Velocity (Higher speed = harder)
-    double velocityMagnitude = initialVelocity.length;
-    double baseVelocityMagnitude =
-        Vector2(
-          PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
-          PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
-        ).length;
-    double velocityRatio = velocityMagnitude / baseVelocityMagnitude;
-    difficulty += (velocityRatio - 1.0) * 0.05;
-
-    // Cap score penalty at 0.5
-    difficulty = max(difficulty, 0.5);
+    // Calculate Multiplier per pad
+    Map<int, double> padMultipliers = {};
+    for (int p in padIndices) {
+      int dist = min(p, segments - p);
+      double distDeg = (dist / segments) * 360.0;
+      double multiplier = 0.5 + (distDeg / 180.0) * 1.5; // 0.5 to 2.0 based on distance
+      
+      for (int i = 0; i < padWidth; i++) {
+        padMultipliers[(p + i) % segments] = multiplier;
+      }
+    }
 
     return LevelData(
       id: seed,
@@ -315,11 +291,11 @@ class LevelGenerator {
       padIndices: expandedPadIndices,
       padAngles: padAngles,
       padAngleDeltas: padAngleDeltas,
+      padMultipliers: padMultipliers,
       startPosition: startPosition,
       initialVelocity: initialVelocity,
       radius: radius,
       maxTerrainHeight: maxHeight,
-      difficultyMultiplier: difficulty,
     );
   }
 

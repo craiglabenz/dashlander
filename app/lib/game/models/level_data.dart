@@ -19,6 +19,6 @@ sealed class LevelData with _$LevelData {
     required Vector2 initialVelocity,
     required double radius,
     required double maxTerrainHeight,
-    required double difficultyMultiplier,
+    required Map<int, double> padMultipliers,
   }) = _LevelData;
 }

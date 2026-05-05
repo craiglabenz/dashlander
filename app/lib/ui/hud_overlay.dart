@@ -177,17 +177,7 @@ class HudOverlay extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16.0, bottom: 4.0),
-                        child: Text(
-                          'DIFFICULTY: ${controller.currentLevel!.difficultyMultiplier.toStringAsFixed(2)}x',
-                          style: GoogleFonts.shareTechMono(
-                            color: Colors.orangeAccent,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+
                       Minimap(
                         telemetry: data,
                         levelData: controller.currentLevel!,

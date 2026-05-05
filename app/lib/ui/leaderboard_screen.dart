@@ -108,8 +108,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   replays.sort((a, b) => b.score.compareTo(a.score));
 
                   final String? currentInitials =
-                      prefs.getString('user_name') ??
-                      prefs.getString('user_initials');
+                      prefs.getString('user_name');
 
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(

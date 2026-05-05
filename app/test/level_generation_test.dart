@@ -17,7 +17,7 @@ extension LevelDataToJson on LevelData {
       'initialVelocity': {'x': initialVelocity.x, 'y': initialVelocity.y},
       'radius': radius,
       'maxTerrainHeight': maxTerrainHeight,
-      'difficultyMultiplier': difficultyMultiplier,
+      'padMultipliers': padMultipliers.map((k, v) => MapEntry(k.toString(), v)),
     };
   }
 }

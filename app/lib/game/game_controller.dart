@@ -175,11 +175,15 @@ class GameController {
     if (newStatus == GameStatus.won) {
       double maxFuel =
           currentLevel?.initialFuel ?? PhysicsConstants.defaultMaxFuel;
+      double multiplier = 1.0;
+      if (state.padIndex != null && currentLevel != null) {
+        multiplier = currentLevel!.padMultipliers[state.padIndex!] ?? 1.0;
+      }
       finalScoreBreakdown = ScoreBreakdown.calculate(
         finalMetrics!,
         state,
         maxFuel,
-        currentLevel!.difficultyMultiplier,
+        multiplier,
       );
       finalScore = finalScoreBreakdown!.finalScore;
     } else {
