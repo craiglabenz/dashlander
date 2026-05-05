@@ -134,11 +134,12 @@ class LevelGenerator {
     // than just immediately in front of the player.
     int minSearchIdx = 2;
     int maxSearchIdx = (segments / 3).floor(); // Up to ~120 degrees away
-    
+
     // Square the random number so it skews closer on average, but can still be far.
     double distanceFactor = pow(chaos.nextDouble(), 2).toDouble();
-    int searchWindowStart = minSearchIdx + (distanceFactor * (maxSearchIdx - minSearchIdx)).floor();
-    
+    int searchWindowStart =
+        minSearchIdx + (distanceFactor * (maxSearchIdx - minSearchIdx)).floor();
+
     int startPadIndex = searchWindowStart;
     double bestStartTilt = double.infinity;
     // Scan a 10-segment window to find the flattest spot in this region
@@ -271,31 +272,38 @@ class LevelGenerator {
 
     // Calculate Difficulty Multiplier
     double difficulty = 1.0;
-    
+
     // 1. Landing Pads Count (Fewer pads = harder)
-    double padsRatio = PhysicsConstants.numLandingPads / padsCount;
-    difficulty += (padsRatio - 1.0) * 0.2; 
-    
+    // Normalizing around the base constant.
+    int basePads = PhysicsConstants.numLandingPads;
+    difficulty += (basePads - padsCount) * 0.1;
+
     // 2. Pad Width (Shorter pads = harder)
-    double padWidthRatio = PhysicsConstants.padWidthSegments / padWidth;
-    difficulty += (padWidthRatio - 1.0) * 0.2;
-    
-    // 3. Terrain Height (Higher terrain = harder)
+    int baseWidth = PhysicsConstants.padWidthSegments;
+    difficulty += (baseWidth - padWidth) * 0.1;
+
+    // 3. Terrain Height (Higher terrain = harder) - Reduced weight
     double heightRatio = maxHeight / PhysicsConstants.maxTerrainHeight;
-    difficulty += (heightRatio - 1.0) * 0.15;
-    
+    difficulty += (heightRatio - 1.0) * 0.05;
+
     // 4. Distance to first pad (Further away = harder)
+    // distanceRatio is 0.0 to 1.0. The average distanceFactor (squared random) is ~0.33.
+    // Shift this so a close pad reduces difficulty, and a far pad increases it.
     double distanceRatio = searchWindowStart / maxSearchIdx;
-    difficulty += distanceRatio * 0.15; 
-    
+    difficulty += (distanceRatio - 0.33) * 0.3;
+
     // 5. Initial Velocity (Higher speed = harder)
     double velocityMagnitude = initialVelocity.length;
-    double baseVelocityMagnitude = Vector2(PhysicsConstants.initialVelocityX, PhysicsConstants.initialVelocityY).length;
+    double baseVelocityMagnitude =
+        Vector2(
+          PhysicsConstants.initialVelocityX,
+          PhysicsConstants.initialVelocityY,
+        ).length;
     double velocityRatio = velocityMagnitude / baseVelocityMagnitude;
-    difficulty += (velocityRatio - 1.0) * 0.1;
-    
-    // Clamp between 0.5 and 1.5
-    difficulty = difficulty.clamp(0.5, 1.5);
+    difficulty += (velocityRatio - 1.0) * 0.05;
+
+    // Clamp between 0.5 and 2
+    difficulty = difficulty.clamp(0.5, 2);
 
     return LevelData(
       id: seed,

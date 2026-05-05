@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import '../lib/game/level_generator.dart';
-import '../lib/game/models/level_data.dart';
+import 'package:dashlander/game/level_generator.dart';
+import 'package:dashlander/game/models/level_data.dart';
 
 extension LevelDataToJson on LevelData {
   Map<String, dynamic> toJson() {
