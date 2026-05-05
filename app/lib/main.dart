@@ -22,6 +22,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'data/hive_adapters.dart';
 import 'data/replay_repository.dart';
+import 'clean_audio_stub.dart' if (dart.library.html) 'clean_audio_web.dart';
 
 late FirebaseFirestore firestore;
 late ReplayRepository replayRepository;
@@ -42,12 +43,18 @@ void main() async {
 
   replayRepository = ReplayRepository(firestore: firestore, hiveInit: hiveInit);
 
+  cleanWebAudio();
+
   try {
     FlameAudio.bgm.initialize();
     FlameAudio.audioCache.prefix = 'assets/audio/';
-    FlameAudio.bgm.play('background.mp3');
+    FlameAudio.audioCache.loadAll([
+      'background.mp3',
+      'engine-main-long.mp3',
+      'engine-rcs-long.mp3',
+    ]);
   } catch (e) {
-    debugPrint("Failed to load or play background music: $e");
+    debugPrint("Failed to load background music: $e");
   }
 
   runApp(const DashlanderApp());
@@ -86,13 +93,26 @@ class _GameCoordinatorState extends State<GameCoordinator> {
   bool _showLeaderboard = false;
   bool _isMuteVisible = true;
   Timer? _muteTimer;
+  bool _bgmStarted = false;
+
+  void _onFirstInteraction() {
+    if (!_bgmStarted && !_controller.isMuted.value) {
+      _bgmStarted = true;
+      FlameAudio.bgm.play('background.mp3');
+    }
+  }
 
   void _toggleMute() {
     _controller.isMuted.value = !_controller.isMuted.value;
     if (_controller.isMuted.value) {
       FlameAudio.bgm.pause();
     } else {
-      FlameAudio.bgm.resume();
+      if (!_bgmStarted) {
+        _bgmStarted = true;
+        FlameAudio.bgm.play('background.mp3');
+      } else {
+        FlameAudio.bgm.resume();
+      }
     }
   }
 
@@ -278,11 +298,13 @@ class _GameCoordinatorState extends State<GameCoordinator> {
     LevelData level, {
     SandboxConfig? config,
     GameReplay? targetGhostReplay,
+    bool isWatching = false,
   }) {
     _controller.reset();
     _controller.currentLevel = level;
     _controller.sandboxConfig = config;
     _controller.targetGhostReplay = targetGhostReplay;
+    _controller.isWatching = isWatching;
     _game = DashlanderGame(gameController: _controller);
     setState(() {
       _showLeaderboard = false;
@@ -411,8 +433,11 @@ class _GameCoordinatorState extends State<GameCoordinator> {
   Widget build(BuildContext context) {
     final status = _controller.status.value;
 
-    return Scaffold(
-      body: Stack(
+    return Listener(
+      onPointerDown: (_) => _onFirstInteraction(),
+      behavior: HitTestBehavior.translucent,
+      child: Scaffold(
+        body: Stack(
         children: [
           // 1. The Flame Game Layer
           if (_game != null) GameWidget(game: _game!),
@@ -425,6 +450,10 @@ class _GameCoordinatorState extends State<GameCoordinator> {
                 // Find the level
                 final lvl = LevelGenerator.generate(seed: replay.levelSeed);
                 _startGame(lvl, targetGhostReplay: replay);
+              },
+              onWatchSelected: (replay) {
+                final lvl = LevelGenerator.generate(seed: replay.levelSeed);
+                _startGame(lvl, targetGhostReplay: replay, isWatching: true);
               },
             )
           else if (status == GameStatus.menu)
@@ -509,6 +538,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

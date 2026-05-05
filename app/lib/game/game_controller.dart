@@ -45,6 +45,7 @@ class GameController {
   SandboxConfig? sandboxConfig;
   int ghostShipsCount = 0;
   GameReplay? targetGhostReplay;
+  bool isWatching = false;
 
   GameReplay? lastReplay;
 
@@ -201,7 +202,7 @@ class GameController {
       finalScoreBreakdown = null;
     }
 
-    if (replayRecorder != null) {
+    if (replayRecorder != null && !isWatching) {
       lastReplay = replayRecorder.finalizeReplay(score: finalScore);
     }
 
@@ -221,5 +222,6 @@ class GameController {
     finalState = null;
     lastReplay = null;
     targetGhostReplay = null;
+    isWatching = false;
   }
 }

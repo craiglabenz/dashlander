@@ -99,7 +99,7 @@ class GameOverModal extends StatelessWidget {
                           letterSpacing: 4,
                         ),
                       ),
-                      if (controller.targetGhostReplay != null) ...[
+                      if (controller.targetGhostReplay != null && !controller.isWatching) ...[
                         const SizedBox(height: 8),
                         Divider(
                           color: Colors.cyan.shade700.withValues(alpha: 0.5),

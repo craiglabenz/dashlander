@@ -121,23 +121,25 @@ class DashlanderGame extends FlameGame
     world.add(terrain);
 
     // 4. Add Ship
-    ship = ShipComponent(
-      state: landerState,
-      behaviors: [
-        PlayerInputBehavior(),
-        PhysicsBehavior(physicsEngine: physicsEngine),
-        ExhaustBehavior(
-          hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
-        ),
-        ShipAudioBehavior(
-          hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
-          isMuted: () => gameController.isMuted.value,
-        ),
-        ShipCollisionBehavior(physicsEngine: physicsEngine),
-        TelemetryBehavior(),
-      ],
-    );
-    world.add(ship);
+    if (!gameController.isWatching) {
+      ship = ShipComponent(
+        state: landerState,
+        behaviors: [
+          PlayerInputBehavior(),
+          PhysicsBehavior(physicsEngine: physicsEngine),
+          ExhaustBehavior(
+            hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
+          ),
+          ShipAudioBehavior(
+            hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
+            isMuted: () => gameController.isMuted.value,
+          ),
+          ShipCollisionBehavior(physicsEngine: physicsEngine),
+          TelemetryBehavior(),
+        ],
+      );
+      world.add(ship);
+    }
 
     // 5. Add Target Ghost Ship (if playing against leaderboard)
     if (gameController.targetGhostReplay != null) {
@@ -155,8 +157,8 @@ class DashlanderGame extends FlameGame
 
       final ghostShip = ShipComponent(
         state: ghostState,
-        isGhost: true,
-        tintColor: Colors.deepOrangeAccent,
+        isGhost: !gameController.isWatching,
+        tintColor: gameController.isWatching ? null : Colors.deepOrangeAccent,
         behaviors: [
           GhostInputBehavior(replay: gameController.targetGhostReplay!),
           PhysicsBehavior(physicsEngine: physicsEngine),
@@ -165,9 +167,21 @@ class DashlanderGame extends FlameGame
                 () => ghostState.fuelMass > 0 || physicsEngine.infiniteFuel,
           ),
           ShipCollisionBehavior(physicsEngine: physicsEngine),
+          if (gameController.isWatching) TelemetryBehavior(),
+          if (gameController.isWatching)
+            ShipAudioBehavior(
+              hasFuel:
+                  () => ghostState.fuelMass > 0 || physicsEngine.infiniteFuel,
+              isMuted: () => gameController.isMuted.value,
+            ),
         ],
       );
       world.add(ghostShip);
+
+      if (gameController.isWatching) {
+        ship = ghostShip;
+        landerState = ghostState;
+      }
     }
 
     // Set camera to follow ship
@@ -176,9 +190,10 @@ class DashlanderGame extends FlameGame
     // Set initial state
     gameController.status.value = GameStatus.playing;
 
-    if (defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.android ||
-        (kIsWeb && size.x < 800)) {
+    if (!gameController.isWatching &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android ||
+            (kIsWeb && size.x < 800))) {
       joystick = JoystickComponent(
         knob: CircleComponent(
           radius: 30,

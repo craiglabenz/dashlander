@@ -8,11 +8,13 @@ import '../main.dart';
 class LeaderboardScreen extends StatefulWidget {
   final VoidCallback onBack;
   final Function(GameReplay replay) onReplaySelected;
+  final Function(GameReplay replay) onWatchSelected;
 
   const LeaderboardScreen({
     super.key,
     required this.onBack,
     required this.onReplaySelected,
+    required this.onWatchSelected,
   });
 
   @override
@@ -37,36 +39,46 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.cyanAccent,
-                    ),
-                    onPressed: widget.onBack,
-                  ),
-                  Text(
-                    'LEADERBOARD',
-                    style: GoogleFonts.orbitron(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 8,
-                      color: Colors.cyanAccent,
-                      shadows: [
-                        BoxShadow(
-                          color: Colors.cyanAccent.withValues(alpha: 0.8),
-                          blurRadius: 15,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 500;
+                return Padding(
+                  padding: EdgeInsets.all(isMobile ? 16.0 : 32.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.cyanAccent,
                         ),
-                      ],
-                    ),
+                        onPressed: widget.onBack,
+                      ),
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'LEADERBOARD',
+                            style: GoogleFonts.orbitron(
+                              fontSize: isMobile ? 24 : 32,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: isMobile ? 4 : 8,
+                              color: Colors.cyanAccent,
+                              shadows: [
+                                BoxShadow(
+                                  color: Colors.cyanAccent.withValues(alpha: 0.8),
+                                  blurRadius: 15,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 48), // Balance for back button
+                    ],
                   ),
-                  const SizedBox(width: 48), // Balance for back button
-                ],
-              ),
+                );
+              },
             ),
             Expanded(
               child: StreamBuilder<List<GameReplay>>(
@@ -124,6 +136,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         replay: replay,
                         isMine: isMine,
                         onReplay: () => widget.onReplaySelected(replay),
+                        onWatch: () => widget.onWatchSelected(replay),
                       );
                     },
                   );
@@ -142,12 +155,14 @@ class _LeaderboardRow extends StatefulWidget {
   final GameReplay replay;
   final bool isMine;
   final VoidCallback onReplay;
+  final VoidCallback onWatch;
 
   const _LeaderboardRow({
     required this.rank,
     required this.replay,
     required this.isMine,
     required this.onReplay,
+    required this.onWatch,
   });
 
   @override
@@ -159,99 +174,158 @@ class _LeaderboardRowState extends State<_LeaderboardRow> {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => isHovered = true),
-      onExit: (_) => setState(() => isHovered = false),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color:
-                widget.isMine
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 500;
+        final rankFontSize = isMobile ? 18.0 : 24.0;
+        final nameFontSize = isMobile ? 16.0 : 24.0;
+        final scoreFontSize = isMobile ? 18.0 : 28.0;
+        final detailsFontSize = isMobile ? 11.0 : 14.0;
+        final rankWidth = isMobile ? 35.0 : 50.0;
+        final buttonPadding = isMobile
+            ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
+            : const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+        final buttonFontSize = isMobile ? 12.0 : 14.0;
+
+        Widget buildWatchButton() {
+          return MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: widget.onWatch,
+              child: Container(
+                padding: buttonPadding,
+                decoration: BoxDecoration(
+                  color: Colors.cyan.shade700,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'WATCH',
+                  style: GoogleFonts.shareTechMono(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: buttonFontSize,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        Widget buildReplayButton() {
+          return MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: widget.onReplay,
+              child: Container(
+                padding: buttonPadding,
+                decoration: BoxDecoration(
+                  color: Colors.pinkAccent,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'REPLAY',
+                  style: GoogleFonts.shareTechMono(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: buttonFontSize,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return MouseRegion(
+          onEnter: (_) => setState(() => isHovered = true),
+          onExit: (_) => setState(() => isHovered = false),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: widget.isMine
                     ? Colors.amberAccent
                     : (isHovered ? Colors.pinkAccent : Colors.cyan.shade900),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          color:
-              widget.isMine
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+              color: widget.isMine
                   ? Colors.amber.withValues(alpha: 0.1)
                   : (isHovered
                       ? Colors.pinkAccent.withValues(alpha: 0.1)
                       : Colors.transparent),
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 50,
-              child: Text(
-                '#${widget.rank}',
-                style: GoogleFonts.orbitron(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade400,
-                ),
-              ),
             ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.replay.userId + (widget.isMine ? ' (YOU)' : ''),
-                    style: GoogleFonts.shareTechMono(
-                      fontSize: 24,
-                      color: widget.isMine ? Colors.amberAccent : Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'LVL ${widget.replay.levelSeed} | ${(widget.replay.durationMs / 1000).toStringAsFixed(1)}s',
-                    style: GoogleFonts.shareTechMono(
-                      fontSize: 14,
-                      color: Colors.cyan.shade200,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              '${widget.replay.score}',
-              style: GoogleFonts.orbitron(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.cyanAccent,
-              ),
-            ),
-            const SizedBox(width: 32),
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: widget.onReplay,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.pinkAccent,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: rankWidth,
                   child: Text(
-                    'REPLAY',
-                    style: GoogleFonts.shareTechMono(
+                    '#${widget.rank}',
+                    style: GoogleFonts.orbitron(
+                      fontSize: rankFontSize,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.grey.shade400,
                     ),
                   ),
                 ),
-              ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.replay.userId + (widget.isMine ? ' (YOU)' : ''),
+                        style: GoogleFonts.shareTechMono(
+                          fontSize: nameFontSize,
+                          color: widget.isMine ? Colors.amberAccent : Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'LVL ${widget.replay.levelSeed} | ${(widget.replay.durationMs / 1000).toStringAsFixed(1)}s',
+                        style: GoogleFonts.shareTechMono(
+                          fontSize: detailsFontSize,
+                          color: Colors.cyan.shade200,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${widget.replay.score}',
+                  style: GoogleFonts.orbitron(
+                    fontSize: scoreFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.cyanAccent,
+                  ),
+                ),
+                SizedBox(width: isMobile ? 12 : 32),
+                if (isMobile)
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      buildWatchButton(),
+                      const SizedBox(height: 4),
+                      buildReplayButton(),
+                    ],
+                  )
+                else
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      buildWatchButton(),
+                      const SizedBox(width: 8),
+                      buildReplayButton(),
+                    ],
+                  ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
