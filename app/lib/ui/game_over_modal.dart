@@ -8,12 +8,14 @@ class GameOverModal extends StatelessWidget {
   final GameController controller;
   final VoidCallback onRetry;
   final VoidCallback onMenu;
+  final VoidCallback onNext;
 
   const GameOverModal({
     super.key,
     required this.controller,
     required this.onRetry,
     required this.onMenu,
+    required this.onNext,
   });
 
   @override
@@ -225,6 +227,7 @@ class GameOverModal extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
+                    flex: 1,
                     child: OutlinedButton(
                       onPressed: onMenu,
                       style: OutlinedButton.styleFrom(
@@ -240,8 +243,27 @@ class GameOverModal extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   Expanded(
+                    flex: 1,
+                    child: OutlinedButton(
+                      onPressed: onNext,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.cyanAccent,
+                        side: BorderSide(color: Colors.cyanAccent.withValues(alpha: 0.5)),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: Text(
+                        'NEXT',
+                        style: GoogleFonts.shareTechMono(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 1,
                     child: ElevatedButton(
                       onPressed: onRetry,
                       style: ElevatedButton.styleFrom(

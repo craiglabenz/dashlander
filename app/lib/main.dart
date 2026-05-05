@@ -397,6 +397,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
                 _game = null;
                 _controller.reset();
               },
+              onNext: _playRandomSeed,
             ),
         ],
       ),
