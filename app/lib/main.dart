@@ -5,6 +5,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:unique_names_generator/unique_names_generator.dart' as ung;
 
 import 'game/dashlander_game.dart';
 import 'game/game_state.dart';
@@ -80,18 +81,18 @@ class _GameCoordinatorState extends State<GameCoordinator> {
     _controller.status.addListener(() async {
       if (_controller.status.value == GameStatus.won) {
         if (_controller.lastReplay != null) {
-          String? initials = prefs.getString('user_initials');
-          if (initials == null) {
-            initials = await _promptForInitials();
-            if (initials != null && initials.trim().isNotEmpty) {
-              await prefs.setString('user_initials', initials.trim());
+          String? userName = prefs.getString('user_name') ?? prefs.getString('user_initials');
+          if (userName == null) {
+            userName = await _promptForName();
+            if (userName != null && userName.trim().isNotEmpty) {
+              await prefs.setString('user_name', userName.trim());
             } else {
-              initials = 'ANON';
+              userName = 'ANON';
             }
           }
 
           final replayToSave = _controller.lastReplay!.copyWith(
-            userId: initials,
+            userId: userName,
           );
           await replayRepository.setItem(replayToSave);
         }
@@ -100,115 +101,130 @@ class _GameCoordinatorState extends State<GameCoordinator> {
     });
   }
 
-  Future<String?> _promptForInitials() async {
-    String? initials;
+  Future<String?> _promptForName() async {
+    String? selectedName;
+    final generator = ung.UniqueNamesGenerator(
+      config: ung.Config(
+        dictionaries: [ung.adjectives, ung.animals],
+        style: ung.Style.capital,
+        separator: ' ',
+        length: 2,
+      ),
+    );
+
+    String currentName = generator.generate();
+
     await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        String currentInput = '';
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: 380,
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              border: Border.all(color: Colors.cyanAccent, width: 2),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.cyanAccent.withValues(alpha: 0.3),
-                  blurRadius: 30,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'PILOT REGISTRATION',
-                  style: GoogleFonts.orbitron(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.cyanAccent,
-                    letterSpacing: 2,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Enter your 3-character identifier for the galactic leaderboard.',
-                  style: GoogleFonts.shareTechMono(color: Colors.grey.shade400),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                TextField(
-                  maxLength: 3,
-                  textCapitalization: TextCapitalization.characters,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.shareTechMono(
-                    color: Colors.cyanAccent,
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 16,
-                  ),
-                  cursorColor: Colors.cyanAccent,
-                  decoration: InputDecoration(
-                    counterText: '',
-                    hintText: 'AAA',
-                    hintStyle: GoogleFonts.shareTechMono(
-                      color: Colors.cyanAccent.withValues(alpha: 0.2),
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 16,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Container(
+                width: 380,
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  border: Border.all(color: Colors.cyanAccent, width: 2),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.cyanAccent.withValues(alpha: 0.3),
+                      blurRadius: 30,
                     ),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.cyanAccent.withValues(alpha: 0.5),
-                        width: 2,
-                      ),
-                    ),
-                    focusedBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.cyanAccent,
-                        width: 3,
-                      ),
-                    ),
-                  ),
-                  onChanged: (val) => currentInput = val,
+                  ],
                 ),
-                const SizedBox(height: 48),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      initials = currentInput.toUpperCase();
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.cyanAccent.withValues(alpha: 0.2),
-                      foregroundColor: Colors.cyanAccent,
-                      side: const BorderSide(color: Colors.cyanAccent),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'SAVE CALL SIGN',
-                      style: GoogleFonts.shareTechMono(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'PILOT REGISTRATION',
+                      style: GoogleFonts.orbitron(
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        color: Colors.cyanAccent,
+                        letterSpacing: 2,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Your assigned galactic identifier.',
+                      style: GoogleFonts.shareTechMono(color: Colors.grey.shade400),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      currentName,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.shareTechMono(
+                        color: Colors.cyanAccent,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 48),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                currentName = generator.generate();
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.pinkAccent.withValues(alpha: 0.2),
+                              foregroundColor: Colors.pinkAccent,
+                              side: const BorderSide(color: Colors.pinkAccent),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'REROLL',
+                              style: GoogleFonts.shareTechMono(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              selectedName = currentName;
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.cyanAccent.withValues(alpha: 0.2),
+                              foregroundColor: Colors.cyanAccent,
+                              side: const BorderSide(color: Colors.cyanAccent),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'ACCEPT',
+                              style: GoogleFonts.shareTechMono(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
-    return initials;
+    return selectedName;
   }
 
   void _startGame(
