@@ -285,28 +285,26 @@ class DashlanderGame extends FlameGame
         landerState.position.length - gameController.currentLevel!.radius,
       );
 
-      // Only start zooming out once the player reaches a threshold altitude
-      const double zoomStartAltitude = 800.0;
-      const double zoomEndAltitude = 3000.0; // Deep space boundary
+      // The distance from the center of the screen to the bottom edge is size.y / 2.
+      // If the ship's altitude exceeds this, the surface will be off-screen.
+      // We start zooming out when the altitude reaches 60% of the visible distance
+      // to keep the surface comfortably visible at the bottom of the screen.
+      double minVisibleDistance = size.y / 2; // Zoom 1.0
+      double zoomStartAltitude = minVisibleDistance * 0.6;
 
       if (altitude <= zoomStartAltitude) {
         camera.viewfinder.zoom = 1.0;
       } else {
-        double zoomProgress = ((altitude - zoomStartAltitude) /
-                (zoomEndAltitude - zoomStartAltitude))
-            .clamp(0.0, 1.0);
+        // To keep the surface at the 60% mark on the screen, the total visible distance
+        // from the ship to the screen edge must be `altitude / 0.6`.
+        double targetVisibleDistance = altitude / 0.6;
 
-        // Cap the maximum zoom-out to 0.5x of the initial scope.
-        // We still interpolate visible distance to maintain the smooth 1/x curve.
-        double minVisibleDistance = size.y / 2; // Zoom 1.0
-        double maxVisibleDistance = minVisibleDistance / 0.5; // Zoom 0.5
-
-        double currentVisibleDistance =
-            ui.lerpDouble(
-              minVisibleDistance,
-              maxVisibleDistance,
-              zoomProgress,
-            )!;
+        // Cap the maximum visible distance so the ship doesn't become invisibly small.
+        // The deep space boundary is around 3000 units. To keep the surface visible
+        // all the way to the boundary (3000 / 0.6), we need a max distance of ~5000.
+        double maxVisibleDistance = 5000.0;
+        
+        double currentVisibleDistance = min(targetVisibleDistance, maxVisibleDistance);
         camera.viewfinder.zoom = minVisibleDistance / currentVisibleDistance;
       }
     }
