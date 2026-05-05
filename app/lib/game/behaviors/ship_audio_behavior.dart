@@ -13,7 +13,9 @@ class ShipAudioBehavior extends Behavior<ShipComponent> {
   
   static const double _fadeSpeed = 5.0; // Volume per second
 
-  ShipAudioBehavior({required this.hasFuel});
+  final bool Function() isMuted;
+
+  ShipAudioBehavior({required this.hasFuel, required this.isMuted});
 
   @override
   Future<void> onLoad() async {
@@ -54,8 +56,13 @@ class ShipAudioBehavior extends Behavior<ShipComponent> {
     }
     _rcsVolume = _rcsVolume.clamp(0.0, 0.5);
 
-    _mainEnginePlayer?.setVolume(_mainVolume);
-    _rcsEnginePlayer?.setVolume(_rcsVolume);
+    if (isMuted()) {
+      _mainEnginePlayer?.setVolume(0.0);
+      _rcsEnginePlayer?.setVolume(0.0);
+    } else {
+      _mainEnginePlayer?.setVolume(_mainVolume);
+      _rcsEnginePlayer?.setVolume(_rcsVolume);
+    }
   }
 
   @override

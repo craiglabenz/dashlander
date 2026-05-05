@@ -17,12 +17,14 @@ class FinalMetrics {
   final double padDeltaDeg;
   final double finalTiltDeg;
   final double impactVelocityMetersPerSecond;
+  final double horizontalVelocityMetersPerSecond;
 
   FinalMetrics({
     required this.shipDeltaDeg,
     required this.padDeltaDeg,
     required this.finalTiltDeg,
     required this.impactVelocityMetersPerSecond,
+    required this.horizontalVelocityMetersPerSecond,
   });
 }
 
@@ -31,6 +33,7 @@ class GameController {
     TelemetryData.empty(),
   );
   final ValueNotifier<GameStatus> status = ValueNotifier(GameStatus.menu);
+  final ValueNotifier<bool> isMuted = ValueNotifier(false);
 
   // Game results
   int finalScore = 0;
@@ -160,15 +163,22 @@ class GameController {
     double tilt = MathUtils.calculateTiltDifference(shipDeltaDeg, padDeltaDeg);
 
     Vector2 surfaceNormal = state.position.normalized();
+    Vector2 surfaceTangent = Vector2(-surfaceNormal.y, surfaceNormal.x);
+
     double fallingSpeedPixels = -state.velocity.dot(surfaceNormal);
     double fallingSpeedMeters =
         fallingSpeedPixels / PhysicsConstants.pixelsPerMeter;
+
+    double horizontalSpeedPixels = state.velocity.dot(surfaceTangent);
+    double horizontalSpeedMeters = 
+        horizontalSpeedPixels / PhysicsConstants.pixelsPerMeter;
 
     finalMetrics = FinalMetrics(
       shipDeltaDeg: shipDeltaDeg,
       padDeltaDeg: padDeltaDeg,
       finalTiltDeg: tilt,
       impactVelocityMetersPerSecond: fallingSpeedMeters,
+      horizontalVelocityMetersPerSecond: horizontalSpeedMeters,
     );
 
     // 2. Calculate the score if won

@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:math';
 
 import 'dart:ui' as ui;
-import 'package:flame_audio/flame_audio.dart';
+
 import '../physics/constants.dart';
 import '../physics/lander_state.dart';
 import '../physics/physics_engine.dart';
@@ -72,13 +72,7 @@ class DashlanderGame extends FlameGame
       debugPrint("Failed to load bloom shader: $e");
     }
 
-    try {
-      FlameAudio.bgm.initialize();
-      FlameAudio.audioCache.prefix = 'assets/audio/';
-      await FlameAudio.bgm.play('background.mp3');
-    } catch (e) {
-      debugPrint("Failed to load or play background music: $e");
-    }
+
 
     // 1. Add background
     add(ParallaxStars()..priority = -9);
@@ -137,6 +131,7 @@ class DashlanderGame extends FlameGame
         ),
         ShipAudioBehavior(
           hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
+          isMuted: () => gameController.isMuted.value,
         ),
         ShipCollisionBehavior(physicsEngine: physicsEngine),
         TelemetryBehavior(),

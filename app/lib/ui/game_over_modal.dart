@@ -167,22 +167,41 @@ class GameOverModal extends StatelessWidget {
                     : 'Off-pad Crash',
                 Colors.white70,
               ),
-              _buildStatRow(
-                'Impact Velocity',
-                '${metrics.impactVelocityMetersPerSecond.toStringAsFixed(1)} m/s',
-                metrics.impactVelocityMetersPerSecond >
-                        ScoreBreakdown.maxLandingVelocityY
-                    ? Colors.redAccent
-                    : Colors.greenAccent,
-                impactText:
-                    isWin
-                        ? '${controller.finalScoreBreakdown!.velocityScore >= 0 ? '+' : ''}${controller.finalScoreBreakdown?.velocityScore ?? 0}'
-                        : null,
-                impactColor:
-                    (controller.finalScoreBreakdown?.velocityScore ?? 0) >= 0
-                        ? Colors.greenAccent
-                        : Colors.redAccent,
-              ),
+              if (!isWin) ...[
+                _buildStatRow(
+                  'Vert. Velocity',
+                  '${metrics.impactVelocityMetersPerSecond.toStringAsFixed(1)} m/s',
+                  metrics.impactVelocityMetersPerSecond >
+                          ScoreBreakdown.maxLandingVelocityY
+                      ? Colors.redAccent
+                      : Colors.greenAccent,
+                ),
+                _buildStatRow(
+                  'Horiz. Velocity',
+                  '${metrics.horizontalVelocityMetersPerSecond.abs().toStringAsFixed(1)} m/s',
+                  metrics.horizontalVelocityMetersPerSecond.abs() >
+                          ScoreBreakdown.maxLandingVelocityX
+                      ? Colors.redAccent
+                      : Colors.greenAccent,
+                ),
+              ] else ...[
+                _buildStatRow(
+                  'Impact Velocity',
+                  '${metrics.impactVelocityMetersPerSecond.toStringAsFixed(1)} m/s',
+                  metrics.impactVelocityMetersPerSecond >
+                          ScoreBreakdown.maxLandingVelocityY
+                      ? Colors.redAccent
+                      : Colors.greenAccent,
+                  impactText:
+                      isWin
+                          ? '${controller.finalScoreBreakdown!.velocityScore >= 0 ? '+' : ''}${controller.finalScoreBreakdown?.velocityScore ?? 0}'
+                          : null,
+                  impactColor:
+                      (controller.finalScoreBreakdown?.velocityScore ?? 0) >= 0
+                          ? Colors.greenAccent
+                          : Colors.redAccent,
+                ),
+              ],
               _buildStatRow(
                 'Tilt Delta',
                 '${metrics.finalTiltDeg.toStringAsFixed(1)}°',

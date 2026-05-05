@@ -10,8 +10,10 @@ import 'package:unique_names_generator/unique_names_generator.dart' as ung;
 import 'game/dashlander_game.dart';
 import 'game/game_state.dart';
 import 'game/level_generator.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:shared/shared.dart';
 import 'dart:math';
+import 'dart:async';
 import 'ui/game_over_modal.dart';
 import 'ui/hud_overlay.dart';
 import 'ui/leaderboard_screen.dart';
@@ -39,6 +41,14 @@ void main() async {
   prefs = await SharedPreferences.getInstance();
 
   replayRepository = ReplayRepository(firestore: firestore, hiveInit: hiveInit);
+
+  try {
+    FlameAudio.bgm.initialize();
+    FlameAudio.audioCache.prefix = 'assets/audio/';
+    FlameAudio.bgm.play('background.mp3');
+  } catch (e) {
+    debugPrint("Failed to load or play background music: $e");
+  }
 
   runApp(const DashlanderApp());
 }
@@ -74,14 +84,39 @@ class _GameCoordinatorState extends State<GameCoordinator> {
   final GameController _controller = GameController();
   DashlanderGame? _game;
   bool _showLeaderboard = false;
+  bool _isMuteVisible = true;
+  Timer? _muteTimer;
+
+  void _toggleMute() {
+    _controller.isMuted.value = !_controller.isMuted.value;
+    if (_controller.isMuted.value) {
+      FlameAudio.bgm.pause();
+    } else {
+      FlameAudio.bgm.resume();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _controller.status.addListener(() async {
-      if (_controller.status.value == GameStatus.won) {
+      final status = _controller.status.value;
+
+      if (status == GameStatus.menu) {
+        _muteTimer?.cancel();
+        setState(() => _isMuteVisible = true);
+      } else if (status == GameStatus.playing) {
+        _muteTimer?.cancel();
+        setState(() => _isMuteVisible = true);
+        _muteTimer = Timer(const Duration(seconds: 3), () {
+          if (mounted) setState(() => _isMuteVisible = false);
+        });
+      }
+
+      if (status == GameStatus.won) {
         if (_controller.lastReplay != null) {
-          String? userName = prefs.getString('user_name') ?? prefs.getString('user_initials');
+          String? userName =
+              prefs.getString('user_name') ?? prefs.getString('user_initials');
           if (userName == null) {
             userName = await _promptForName();
             if (userName != null && userName.trim().isNotEmpty) {
@@ -99,6 +134,12 @@ class _GameCoordinatorState extends State<GameCoordinator> {
       }
       setState(() {}); // Rebuild UI based on status
     });
+  }
+
+  @override
+  void dispose() {
+    _muteTimer?.cancel();
+    super.dispose();
   }
 
   Future<String?> _promptForName() async {
@@ -152,7 +193,9 @@ class _GameCoordinatorState extends State<GameCoordinator> {
                     const SizedBox(height: 8),
                     Text(
                       'Your assigned galactic identifier.',
-                      style: GoogleFonts.shareTechMono(color: Colors.grey.shade400),
+                      style: GoogleFonts.shareTechMono(
+                        color: Colors.grey.shade400,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -176,7 +219,9 @@ class _GameCoordinatorState extends State<GameCoordinator> {
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.pinkAccent.withValues(alpha: 0.2),
+                              backgroundColor: Colors.pinkAccent.withValues(
+                                alpha: 0.2,
+                              ),
                               foregroundColor: Colors.pinkAccent,
                               side: const BorderSide(color: Colors.pinkAccent),
                               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -199,7 +244,9 @@ class _GameCoordinatorState extends State<GameCoordinator> {
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.cyanAccent.withValues(alpha: 0.2),
+                              backgroundColor: Colors.cyanAccent.withValues(
+                                alpha: 0.2,
+                              ),
                               foregroundColor: Colors.cyanAccent,
                               side: const BorderSide(color: Colors.cyanAccent),
                               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -415,6 +462,51 @@ class _GameCoordinatorState extends State<GameCoordinator> {
               },
               onNext: _playRandomSeed,
             ),
+
+          // 3. Global Overlays
+          Positioned(
+            top: 16,
+            right: 16,
+            child: SafeArea(
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 500),
+                opacity: _isMuteVisible ? 1.0 : 0.0,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _toggleMute,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.cyan.shade900.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.cyanAccent.withValues(alpha: 0.3),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.cyanAccent.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: _controller.isMuted,
+                        builder: (context, isMuted, child) {
+                          return Icon(
+                            isMuted ? Icons.volume_off : Icons.volume_up,
+                            color: Colors.cyanAccent,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

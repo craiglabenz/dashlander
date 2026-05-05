@@ -30,6 +30,7 @@ void main() {
         padDeltaDeg: 0.0,
         finalTiltDeg: 0.0,
         impactVelocityMetersPerSecond: 0.0,
+        horizontalVelocityMetersPerSecond: 0.0,
       );
 
       final breakdown = ScoreBreakdown.calculate(metrics, baseState, 200.0, 1.0);
@@ -45,6 +46,7 @@ void main() {
         padDeltaDeg: 0.0,
         finalTiltDeg: ScoreBreakdown.maxLandingTiltDegrees / 2,
         impactVelocityMetersPerSecond: ScoreBreakdown.maxLandingVelocityY / 2,
+        horizontalVelocityMetersPerSecond: 0.0,
       );
 
       final breakdown = ScoreBreakdown.calculate(metrics, baseState, 200.0, 1.0);
@@ -59,6 +61,7 @@ void main() {
         padDeltaDeg: 0.0,
         finalTiltDeg: ScoreBreakdown.maxLandingTiltDegrees,
         impactVelocityMetersPerSecond: ScoreBreakdown.maxLandingVelocityY,
+        horizontalVelocityMetersPerSecond: 0.0,
       );
 
       final breakdown = ScoreBreakdown.calculate(metrics, baseState, 200.0, 1.0);
@@ -73,6 +76,7 @@ void main() {
         padDeltaDeg: 0.0,
         finalTiltDeg: ScoreBreakdown.maxLandingTiltDegrees,
         impactVelocityMetersPerSecond: ScoreBreakdown.maxLandingVelocityY,
+        horizontalVelocityMetersPerSecond: 0.0,
       );
       
       baseState.fuelMass = 0; // 0 fuel score, large negative penalty
