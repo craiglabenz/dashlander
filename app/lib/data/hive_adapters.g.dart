@@ -69,19 +69,37 @@ class ThrusterActionAdapter extends TypeAdapter<ThrusterAction> {
       thruster: fields[0] as ThrusterType,
       isFiring: fields[1] as bool,
       timestampMs: (fields[2] as num).toInt(),
+      x: fields[3] == null ? 0.0 : (fields[3] as num).toDouble(),
+      y: fields[4] == null ? 0.0 : (fields[4] as num).toDouble(),
+      vx: fields[5] == null ? 0.0 : (fields[5] as num).toDouble(),
+      vy: fields[6] == null ? 0.0 : (fields[6] as num).toDouble(),
+      angle: fields[7] == null ? 0.0 : (fields[7] as num).toDouble(),
+      angularVelocity: fields[8] == null ? 0.0 : (fields[8] as num).toDouble(),
     );
   }
 
   @override
   void write(BinaryWriter writer, ThrusterAction obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.thruster)
       ..writeByte(1)
       ..write(obj.isFiring)
       ..writeByte(2)
-      ..write(obj.timestampMs);
+      ..write(obj.timestampMs)
+      ..writeByte(3)
+      ..write(obj.x)
+      ..writeByte(4)
+      ..write(obj.y)
+      ..writeByte(5)
+      ..write(obj.vx)
+      ..writeByte(6)
+      ..write(obj.vy)
+      ..writeByte(7)
+      ..write(obj.angle)
+      ..writeByte(8)
+      ..write(obj.angularVelocity);
   }
 
   @override

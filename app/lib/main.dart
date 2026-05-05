@@ -194,7 +194,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'SAVE DESIGNATION',
+                      'SAVE CALL SIGN',
                       style: GoogleFonts.shareTechMono(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

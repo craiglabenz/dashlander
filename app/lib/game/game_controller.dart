@@ -70,9 +70,13 @@ class GameController {
     // In Flame, -Y is UP. Angle is 0 at the top, increasing clockwise.
     double angleRad = atan2(state.position.x, -state.position.y);
     if (angleRad < 0) angleRad += 2 * pi;
+    int numSegments = PhysicsConstants.terrainSegments;
+    if (terrainPoints != null && terrainPoints.isNotEmpty) {
+      numSegments = terrainPoints.length - 1;
+    }
+
     int terrainIndexBelow =
-        (angleRad / (2 * pi) * PhysicsConstants.terrainSegments).floor() %
-        PhysicsConstants.terrainSegments;
+        (angleRad / (2 * pi) * numSegments).floor() % numSegments;
 
     double height = 0.0;
     if (terrainPoints != null && terrainPoints.isNotEmpty) {
@@ -175,8 +179,9 @@ class GameController {
         finalMetrics!,
         state,
         maxFuel,
+        currentLevel!.difficultyMultiplier,
       );
-      finalScore = finalScoreBreakdown!.totalScore;
+      finalScore = finalScoreBreakdown!.finalScore;
     } else {
       finalScore = 0;
       finalScoreBreakdown = null;

@@ -23,30 +23,36 @@ class PhysicsConstants {
   /// flatter-feeling surface curvature, while a smaller radius creates a tiny,
   /// asteroid-like world.
   static const double moonRadius = 1000.0;
+  static const double moonRadiusVariance = 0.2;
 
   /// The number of discrete geometric line segments used to draw the moon.
   /// Higher values create a smoother circle but cost more performance to render
   /// and perform collision checks against.
   static const int terrainSegments = 80;
+  static const double terrainSegmentsVariance = 0.2;
 
   /// The maximum vertical height (in meters) of mountains and craters added
   /// on top of the base `moonRadius`. Higher values create more jagged,
   /// extreme terrain that is harder to navigate.
-  static const double maxTerrainHeight = 150.0;
+  static const double maxTerrainHeight = 300.0;
+  static const double maxTerrainHeightVariance = 0.75;
 
   /// A multiplier applied to the sine wave generators that produce hills.
   /// Higher values mean more frequent, narrower hills. Lower values mean
   /// fewer, wider, rolling hills.
   static const double noiseFrequency = 4.5;
+  static const double noiseFrequencyVariance = 0.3;
 
   /// The total number of perfectly flat landing pads carved out of the terrain.
   /// More pads make the level easier to complete.
-  static const int numLandingPads = 6;
+  static const int numLandingPads = 3;
+  static const double numLandingPadsVariance = 0.66;
 
   /// The width of each landing pad, measured in `terrainSegments`.
   /// Since the total circumference is divided into 400 segments, a pad width of
   /// 2 means each pad spans roughly 1.8 degrees of the moon's surface.
   static const int padWidthSegments = 2;
+  static const double padWidthSegmentsVariance = 0.5;
 
   // ---------------------------------------------------------------------------
   // SHIP PARAMETERS (Mass & Thrust)
@@ -103,9 +109,15 @@ class PhysicsConstants {
   /// The starting tangential velocity of the ship when spawned (in m/s).
   /// Giving the ship a slight sideways push helps initiate the feeling of orbit.
   static const double initialVelocityX = 2.0;
+  static const double initialVelocityXVariance = 0.2;
 
   /// The starting radial velocity (falling speed) of the ship when spawned (in m/s).
   static const double initialVelocityY = 0.0;
+  static const double initialVelocityYVariance = 0.2;
+
+  /// The starting altitude of the ship above the moon's surface.
+  static const double startAltitude = 300.0;
+  static const double startAltitudeVariance = 0.2;
 
   // ---------------------------------------------------------------------------
   // SCALE

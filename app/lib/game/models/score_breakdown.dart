@@ -33,18 +33,23 @@ class ScoreBreakdown {
   final int velocityScore;
   final int tiltScore;
   final int totalScore;
+  final double difficultyMultiplier;
+  final int finalScore;
 
   ScoreBreakdown({
     required this.fuelScore,
     required this.velocityScore,
     required this.tiltScore,
     required this.totalScore,
+    required this.difficultyMultiplier,
+    required this.finalScore,
   });
 
   factory ScoreBreakdown.calculate(
     FinalMetrics metrics,
     LanderState state,
     double maxFuel,
+    double difficultyMultiplier,
   ) {
     // Score based on percentage of fuel conserved
     double fuelPercentage = (state.fuelMass / maxFuel).clamp(0.0, 1.0);
@@ -66,12 +71,15 @@ class ScoreBreakdown {
 
     int score = fuelScore + velocityScore + tiltScore;
     int totalScore = score > 0 ? score : 0;
+    int finalScore = (totalScore * difficultyMultiplier).round();
 
     return ScoreBreakdown(
       fuelScore: fuelScore,
       velocityScore: velocityScore,
       tiltScore: tiltScore,
       totalScore: totalScore,
+      difficultyMultiplier: difficultyMultiplier,
+      finalScore: finalScore,
     );
   }
 }

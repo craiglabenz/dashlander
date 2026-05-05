@@ -206,6 +206,21 @@ class GameOverModal extends StatelessWidget {
                         : null,
                 impactColor: Colors.greenAccent,
               ),
+              if (isWin) ...[
+                const SizedBox(height: 8),
+                const Divider(color: Colors.white24),
+                const SizedBox(height: 8),
+                _buildStatRow(
+                  'Base Score',
+                  '${controller.finalScoreBreakdown?.totalScore ?? 0}',
+                  Colors.white70,
+                ),
+                _buildStatRow(
+                  'Difficulty Multiplier',
+                  'x${controller.finalScoreBreakdown?.difficultyMultiplier.toStringAsFixed(2) ?? "1.00"}',
+                  Colors.orangeAccent,
+                ),
+              ],
               const SizedBox(height: 32),
               Row(
                 children: [

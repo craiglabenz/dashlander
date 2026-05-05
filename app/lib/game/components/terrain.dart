@@ -2,10 +2,10 @@ import 'dart:ui' as ui;
 import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import '../../physics/constants.dart';
 import '../dashlander_game.dart';
 
-class TerrainComponent extends PositionComponent with HasGameReference<DashlanderGame> {
+class TerrainComponent extends PositionComponent
+    with HasGameReference<DashlanderGame> {
   final List<Vector2> points;
   final List<int> padIndices;
   final Map<int, double> padAngles;
@@ -55,7 +55,10 @@ class TerrainComponent extends PositionComponent with HasGameReference<Dashlande
           Path()
             ..moveTo(p1.x, p1.y) // Top-left of segment
             ..lineTo(p2.x, p2.y) // Top-right of segment
-            ..lineTo(p2.x + d2.x, p2.y + d2.y) // Bottom-right (deep underground)
+            ..lineTo(
+              p2.x + d2.x,
+              p2.y + d2.y,
+            ) // Bottom-right (deep underground)
             ..lineTo(p1.x + d1.x, p1.y + d1.y) // Bottom-left (deep underground)
             ..close();
 
@@ -79,7 +82,7 @@ class TerrainComponent extends PositionComponent with HasGameReference<Dashlande
 
     // 2. Draw Main Front Terrain Fill
     // Since the moon is a complete circle, the `points` array loops back to its start.
-    // By simply drawing a path through all the points and closing it, we draw a 
+    // By simply drawing a path through all the points and closing it, we draw a
     // massive solid polygon representing the inside volume of the entire moon!
     // This solid fill obscures the background parallax stars.
     final Path frontPath = Path();
@@ -138,19 +141,22 @@ class TerrainComponent extends PositionComponent with HasGameReference<Dashlande
     }
 
     // 4. Draw Deep Space Barrier
-    final barrierPaint = Paint()
-      ..color = Colors.red.withValues(alpha: 0.1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 20
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
-    
-    final innerBarrierPaint = Paint()
-      ..color = Colors.redAccent.withValues(alpha: 0.4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+    final barrierPaint =
+        Paint()
+          ..color = Colors.red.withValues(alpha: 0.1)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 20
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
 
-    canvas.drawCircle(Offset.zero, PhysicsConstants.moonRadius + 3000, barrierPaint);
-    canvas.drawCircle(Offset.zero, PhysicsConstants.moonRadius + 3000, innerBarrierPaint);
+    final innerBarrierPaint =
+        Paint()
+          ..color = Colors.redAccent.withValues(alpha: 0.4)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2;
+
+    final levelRadius = game.gameController.currentLevel!.radius;
+    canvas.drawCircle(Offset.zero, levelRadius + 3000, barrierPaint);
+    canvas.drawCircle(Offset.zero, levelRadius + 3000, innerBarrierPaint);
 
     // 5. Draw Pad Angles & Debug Visuals
     if (game.debugMode) {
@@ -160,11 +166,12 @@ class TerrainComponent extends PositionComponent with HasGameReference<Dashlande
       Vector2 direction = shipPos.normalized();
       double dashLength = 20.0;
       double dashSpace = 20.0;
-      
-      final dashPaint = Paint()
-        ..color = Colors.yellowAccent.withValues(alpha: 0.8)
-        ..strokeWidth = 2
-        ..style = PaintingStyle.stroke;
+
+      final dashPaint =
+          Paint()
+            ..color = Colors.yellowAccent.withValues(alpha: 0.8)
+            ..strokeWidth = 2
+            ..style = PaintingStyle.stroke;
 
       double currentDistance = 0.0;
       while (currentDistance < distance) {
@@ -181,14 +188,14 @@ class TerrainComponent extends PositionComponent with HasGameReference<Dashlande
         Vector2 p1 = points[segmentIdx];
         Vector2 p2 = points[(segmentIdx + 1) % (points.length - 1)];
         Vector2 mid = (p1 + p2) / 2;
-        
+
         double absoluteAngleDeg = padAngles[segmentIdx] ?? 0;
         double deltaDeg = padAngleDeltas[segmentIdx] ?? 0;
         double absoluteAngleRad = absoluteAngleDeg * pi / 180;
-        
+
         // Vector pointing OUT from the moon
         Vector2 normal = Vector2(sin(absoluteAngleRad), -cos(absoluteAngleRad));
-        
+
         // Draw the bicycle spike from the center of the moon outwards
         Vector2 spikeEnd = mid.normalized() * (mid.length + 150);
         canvas.drawLine(
@@ -201,9 +208,10 @@ class TerrainComponent extends PositionComponent with HasGameReference<Dashlande
 
         // Push text inward by 30 physics units so it sits directly below the line
         Vector2 textPos = mid - normal * 30;
-        
+
         final textSpan = TextSpan(
-          text: '$segmentIdx : ${deltaDeg > 0 ? '+' : ''}${deltaDeg.toStringAsFixed(1)}°',
+          text:
+              '$segmentIdx : ${deltaDeg > 0 ? '+' : ''}${deltaDeg.toStringAsFixed(1)}°',
           style: const TextStyle(
             color: Colors.greenAccent,
             fontSize: 16,
@@ -216,11 +224,14 @@ class TerrainComponent extends PositionComponent with HasGameReference<Dashlande
           textDirection: TextDirection.ltr,
         );
         textPainter.layout();
-        
+
         canvas.save();
         canvas.translate(textPos.x, textPos.y);
         canvas.rotate(absoluteAngleRad);
-        textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
+        textPainter.paint(
+          canvas,
+          Offset(-textPainter.width / 2, -textPainter.height / 2),
+        );
         canvas.restore();
       }
     }

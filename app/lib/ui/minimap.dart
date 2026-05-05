@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../physics/constants.dart';
 import '../game/models/telemetry_data.dart';
 import '../game/models/level_data.dart';
 
@@ -89,7 +88,7 @@ class _MinimapPainter extends CustomPainter {
     // The physics space extends slightly past the moon radius (up to +3000).
     // Let's use moonRadius + maxTerrainHeight + 1500 as the visible edge of the minimap.
     final double maxDrawRadius =
-        PhysicsConstants.moonRadius + PhysicsConstants.maxTerrainHeight + 1500;
+        levelData.radius + levelData.maxTerrainHeight + 1500;
 
     // The center of the CustomPaint canvas represents the origin (0,0), which is the center of the moon.
     final Offset center = Offset(size.width / 2, size.height / 2);
@@ -103,11 +102,7 @@ class _MinimapPainter extends CustomPainter {
           ..color = Colors.grey.shade900
           ..style = PaintingStyle.fill;
 
-    canvas.drawCircle(
-      center,
-      PhysicsConstants.moonRadius * scale,
-      moonCorePaint,
-    );
+    canvas.drawCircle(center, levelData.radius * scale, moonCorePaint);
 
     // Draw the terrain topology
     final Paint terrainOutlinePaint =
@@ -135,8 +130,6 @@ class _MinimapPainter extends CustomPainter {
         canvas.drawLine(drawP1, drawP2, terrainOutlinePaint);
       }
     }
-
-
 
     // Draw the ship's path
     if (path.length > 1) {

@@ -104,10 +104,7 @@ class DashlanderGame extends FlameGame
 
     landerState = LanderState(
       position: level.startPosition.clone(),
-      velocity: Vector2(
-        PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
-        PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
-      ), // Slight initial push
+      velocity: level.initialVelocity.clone(), // Slight initial push
       angle: 0,
       angularVelocity: 0,
       fuelMass: level.initialFuel,
@@ -151,10 +148,7 @@ class DashlanderGame extends FlameGame
     if (gameController.targetGhostReplay != null) {
       final ghostState = LanderState(
         position: level.startPosition.clone(),
-        velocity: Vector2(
-          PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
-          PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
-        ),
+        velocity: level.initialVelocity.clone(),
         angle: 0,
         angularVelocity: 0,
         fuelMass: level.initialFuel,
@@ -288,7 +282,7 @@ class DashlanderGame extends FlameGame
       // Dynamic Camera Zoom
       double altitude = max(
         0.0,
-        landerState.position.length - PhysicsConstants.moonRadius,
+        landerState.position.length - gameController.currentLevel!.radius,
       );
 
       // Only start zooming out once the player reaches a threshold altitude

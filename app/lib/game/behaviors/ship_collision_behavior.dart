@@ -34,13 +34,13 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
 
       // If the ship's bounding circle overlaps the line segment, a collision has occurred.
       if (dist < shipRadius) {
-        
         // Calculate the literal G-force of instantly hitting the ground in 1 frame (dt).
         // Since we go from current velocity to 0 in dt seconds, a = v / dt.
-        double speedMetersPerSecond = state.velocity.length / PhysicsConstants.pixelsPerMeter;
+        double speedMetersPerSecond =
+            state.velocity.length / PhysicsConstants.pixelsPerMeter;
         double impactAcceleration = speedMetersPerSecond / dt;
         double impactG = impactAcceleration / PhysicsConstants.standardGravity;
-        
+
         state.currentGForce = impactG;
         if (impactG > state.maxGForce) {
           state.maxGForce = impactG;
@@ -59,7 +59,8 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
         } else {
           // The ship touched raw, jagged lunar terrain. Instant explosion.
           crashed = true;
-          state.crashReason = 'Impacted raw jagged terrain. You missed the landing pad.';
+          state.crashReason =
+              'Impacted raw jagged terrain. You missed the landing pad.';
         }
       }
     }
@@ -69,12 +70,14 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
     // If it flies higher than an arbitrary outer boundary (+3000), it is lost in deep space.
     // If it glitches completely through the solid crust (-1000), it has fatally clipped the world.
     final double distance = state.position.length;
-    if (distance > PhysicsConstants.moonRadius + 3000) {
+    final levelRadius = game.gameController.currentLevel!.radius;
+    if (distance > levelRadius + 3000) {
       crashed = true;
       state.crashReason = 'Lost in deep space. You flew too high.';
-    } else if (distance < PhysicsConstants.moonRadius - 1000) {
+    } else if (distance < levelRadius - 1000) {
       crashed = true;
-      state.crashReason = 'Clipped through the solid crust. The ship was crushed.';
+      state.crashReason =
+          'Clipped through the solid crust. The ship was crushed.';
     }
 
     if (crashed || landed) {
@@ -86,7 +89,7 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
       } else {
         state.isLanded = true;
       }
-      
+
       if (!parent.isGhost) {
         game.triggerGameOver(landed && !crashed);
       }
@@ -100,18 +103,18 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
     final ab = b - a;
     // Vector from a to p (the point in question)
     final ap = p - a;
-    
+
     // Project ap onto ab to find the parameterized distance 't' along the line.
     // 't' represents the fraction of the way from 'a' to 'b'.
     double t = ap.dot(ab) / ab.length2;
-    
-    // Clamp 't' between 0.0 and 1.0 to ensure the closest point actually lies 
+
+    // Clamp 't' between 0.0 and 1.0 to ensure the closest point actually lies
     // ON the line segment, rather than on the infinite line extending past a or b.
     t = t.clamp(0.0, 1.0);
-    
+
     // Find the exact closest point on the clamped segment.
     final nearest = a + ab * t;
-    
+
     // Return the Euclidean distance from the point to that nearest spot.
     return (p - nearest).length;
   }

@@ -19,13 +19,71 @@ class LevelGenerator {
   }) {
     final chaos = Xoshiro128PP(seed);
 
-    final double radius = moonRadius ?? PhysicsConstants.moonRadius;
-    final int segments = terrainSegments ?? PhysicsConstants.terrainSegments;
-    final double maxHeight =
+    final double scaleFactor = chaos.nextDouble() * 2.0 - 1.0;
+
+    final double rawRadius = moonRadius ?? PhysicsConstants.moonRadius;
+    final double radius = applyVariance(
+      rawRadius,
+      PhysicsConstants.moonRadiusVariance,
+      scaleFactor,
+    );
+
+    final int rawSegments = terrainSegments ?? PhysicsConstants.terrainSegments;
+    final int segments =
+        applyVariance(
+          rawSegments.toDouble(),
+          PhysicsConstants.terrainSegmentsVariance,
+          scaleFactor,
+        ).round();
+
+    final double rawMaxHeight =
         maxTerrainHeight ?? PhysicsConstants.maxTerrainHeight;
-    final double freq = noiseFrequency ?? PhysicsConstants.noiseFrequency;
-    final int padsCount = numLandingPads ?? PhysicsConstants.numLandingPads;
-    final int padWidth = padWidthSegments ?? PhysicsConstants.padWidthSegments;
+    final double maxHeight = applyVariance(
+      rawMaxHeight,
+      PhysicsConstants.maxTerrainHeightVariance,
+      chaos.nextDouble() * 2.0 - 1.0,
+    );
+
+    final double rawFreq = noiseFrequency ?? PhysicsConstants.noiseFrequency;
+    final double freq = applyVariance(
+      rawFreq,
+      PhysicsConstants.noiseFrequencyVariance,
+      chaos.nextDouble() * 2.0 - 1.0,
+    );
+
+    final int rawPadsCount = numLandingPads ?? PhysicsConstants.numLandingPads;
+    final int padsCount = applyVariance(
+      rawPadsCount.toDouble(),
+      PhysicsConstants.numLandingPadsVariance,
+      chaos.nextDouble() * 2.0 - 1.0,
+    ).round().clamp(1, segments);
+
+    final int rawPadWidth =
+        padWidthSegments ?? PhysicsConstants.padWidthSegments;
+    final int padWidth = applyVariance(
+      rawPadWidth.toDouble(),
+      PhysicsConstants.padWidthSegmentsVariance,
+      chaos.nextDouble() * 2.0 - 1.0,
+    ).round().clamp(1, segments ~/ 4);
+
+    final double rawStartX = PhysicsConstants.initialVelocityX;
+    final double vX = applyVariance(
+      rawStartX,
+      PhysicsConstants.initialVelocityXVariance,
+      chaos.nextDouble() * 2.0 - 1.0,
+    );
+
+    final double rawStartY = PhysicsConstants.initialVelocityY;
+    final double vY = applyVariance(
+      rawStartY,
+      PhysicsConstants.initialVelocityYVariance,
+      chaos.nextDouble() * 2.0 - 1.0,
+    );
+
+    final Vector2 initialVelocity = Vector2(
+      vX * PhysicsConstants.pixelsPerMeter,
+      vY * PhysicsConstants.pixelsPerMeter,
+    );
 
     // Generate heights using a mixture of base sine waves (for large hills)
     // and chaotic noise (for small craters and jagged edges).
@@ -41,19 +99,64 @@ class LevelGenerator {
       heights[i] = h;
     }
 
+    // Helper to calculate the tilt of a potential pad
+    double getPadTilt(int p) {
+      double t1 = (p / segments) * 2 * pi;
+      double h1 = radius + heights[p];
+      double x1 = sin(t1) * h1;
+      double y1 = -cos(t1) * h1;
+      Vector2 pStart = Vector2(x1, y1);
+
+      int p2Idx = (p + padWidth) % segments;
+      double t2 = (p2Idx / segments) * 2 * pi;
+      double h2 = radius + heights[p2Idx];
+      double x2 = sin(t2) * h2;
+      double y2 = -cos(t2) * h2;
+      Vector2 pEnd = Vector2(x2, y2);
+
+      Vector2 diff = pEnd - pStart;
+      Vector2 normal = Vector2(-diff.y, diff.x).normalized();
+      Vector2 mid = (pStart + pEnd) / 2;
+      if (normal.dot(mid) < 0) normal = -normal;
+
+      double absAngleDeg = MathUtils.calculateAbsoluteAngleDeg(normal);
+      return MathUtils.calculateRelativeTiltDeg(
+        position: mid,
+        absoluteAngleDeg: absAngleDeg,
+      ).abs();
+    }
+
     // Choose pad indices
     List<int> padIndices = [];
     int padsToPlace = padsCount;
 
-    // Ensure one pad is near the start (index 0)
-    int startPadIndex = 5; // near the start
+    // Randomize where we look for the first pad so it can be much further away
+    // than just immediately in front of the player.
+    int minSearchIdx = 2;
+    int maxSearchIdx = (segments / 3).floor(); // Up to ~120 degrees away
+    
+    // Square the random number so it skews closer on average, but can still be far.
+    double distanceFactor = pow(chaos.nextDouble(), 2).toDouble();
+    int searchWindowStart = minSearchIdx + (distanceFactor * (maxSearchIdx - minSearchIdx)).floor();
+    
+    int startPadIndex = searchWindowStart;
+    double bestStartTilt = double.infinity;
+    // Scan a 10-segment window to find the flattest spot in this region
+    for (int i = searchWindowStart; i <= searchWindowStart + 10; i++) {
+      double tilt = getPadTilt(i);
+      if (tilt < bestStartTilt) {
+        bestStartTilt = tilt;
+        startPadIndex = i;
+      }
+    }
+
     if (padsToPlace > 0) {
       padIndices.add(startPadIndex);
       padsToPlace--;
     }
 
     // Prevent infinite loop if too many pads requested
-    int maxAttempts = padsCount * 10;
+    int maxAttempts = padsCount * 50;
     while (padsToPlace > 0 && maxAttempts > 0) {
       maxAttempts--;
       int idx = chaos.nextInt(segments - padWidth);
@@ -65,6 +168,18 @@ class LevelGenerator {
           break;
         }
       }
+
+      // Check tilt. Gradually relax the requirement if we're struggling to find spots.
+      if (valid) {
+        double allowedTilt = 10.0;
+        if (maxAttempts < padsCount * 25) allowedTilt = 15.0;
+        if (maxAttempts < padsCount * 10) allowedTilt = 25.0;
+
+        if (getPadTilt(idx) > allowedTilt) {
+          valid = false;
+        }
+      }
+
       if (valid) {
         padIndices.add(idx);
         padsToPlace--;
@@ -116,7 +231,14 @@ class LevelGenerator {
 
     // Start position slightly above surface at theta=0
     // The ship always starts just above the very "top" of the moon (angle 0).
-    double startR = radius + heights[0] + 300.0;
+    final double rawAltitude = PhysicsConstants.startAltitude;
+    final double altitude = applyVariance(
+      rawAltitude,
+      PhysicsConstants.startAltitudeVariance,
+      chaos.nextDouble() * 2.0 - 1.0,
+    );
+
+    double startR = radius + heights[0] + altitude;
     Vector2 startPosition = Vector2(0, -startR);
 
     // Compute pad angles
@@ -136,16 +258,44 @@ class LevelGenerator {
 
       // Calculate absolute angle of the pad's normal
       double absoluteAngleDeg = MathUtils.calculateAbsoluteAngleDeg(normal);
-      
+
       // Calculate delta. A delta of 0 means the pad is perfectly aligned with the moon's curvature.
       double deltaDeg = MathUtils.calculateRelativeTiltDeg(
         position: mid,
         absoluteAngleDeg: absoluteAngleDeg,
       );
-      
+
       padAngles[idx] = absoluteAngleDeg;
       padAngleDeltas[idx] = deltaDeg;
     }
+
+    // Calculate Difficulty Multiplier
+    double difficulty = 1.0;
+    
+    // 1. Landing Pads Count (Fewer pads = harder)
+    double padsRatio = PhysicsConstants.numLandingPads / padsCount;
+    difficulty += (padsRatio - 1.0) * 0.2; 
+    
+    // 2. Pad Width (Shorter pads = harder)
+    double padWidthRatio = PhysicsConstants.padWidthSegments / padWidth;
+    difficulty += (padWidthRatio - 1.0) * 0.2;
+    
+    // 3. Terrain Height (Higher terrain = harder)
+    double heightRatio = maxHeight / PhysicsConstants.maxTerrainHeight;
+    difficulty += (heightRatio - 1.0) * 0.15;
+    
+    // 4. Distance to first pad (Further away = harder)
+    double distanceRatio = searchWindowStart / maxSearchIdx;
+    difficulty += distanceRatio * 0.15; 
+    
+    // 5. Initial Velocity (Higher speed = harder)
+    double velocityMagnitude = initialVelocity.length;
+    double baseVelocityMagnitude = Vector2(PhysicsConstants.initialVelocityX, PhysicsConstants.initialVelocityY).length;
+    double velocityRatio = velocityMagnitude / baseVelocityMagnitude;
+    difficulty += (velocityRatio - 1.0) * 0.1;
+    
+    // Clamp between 0.5 and 1.5
+    difficulty = difficulty.clamp(0.5, 1.5);
 
     return LevelData(
       id: seed,
@@ -156,6 +306,18 @@ class LevelGenerator {
       padAngles: padAngles,
       padAngleDeltas: padAngleDeltas,
       startPosition: startPosition,
+      initialVelocity: initialVelocity,
+      radius: radius,
+      maxTerrainHeight: maxHeight,
+      difficultyMultiplier: difficulty,
     );
+  }
+
+  static double applyVariance(
+    double base,
+    double variance,
+    double randomFactor,
+  ) {
+    return base * (1.0 + (variance * randomFactor));
   }
 }

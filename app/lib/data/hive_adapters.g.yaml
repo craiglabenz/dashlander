@@ -21,7 +21,7 @@ types:
         index: 5
   ThrusterAction:
     typeId: 1
-    nextIndex: 3
+    nextIndex: 9
     fields:
       thruster:
         index: 0
@@ -29,6 +29,18 @@ types:
         index: 1
       timestampMs:
         index: 2
+      x:
+        index: 3
+      y:
+        index: 4
+      vx:
+        index: 5
+      vy:
+        index: 6
+      angle:
+        index: 7
+      angularVelocity:
+        index: 8
   ThrusterType:
     typeId: 2
     nextIndex: 3
