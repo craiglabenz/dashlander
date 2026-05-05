@@ -67,14 +67,16 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
 
     // Spherical out-of-bounds check:
     // We measure the absolute distance from the ship to the center of the moon (0,0).
-    // If it flies higher than an arbitrary outer boundary (+3000), it is lost in deep space.
-    // If it glitches completely through the solid crust (-1000), it has fatally clipped the world.
+    // If it flies higher than an arbitrary outer boundary, it is lost in deep space.
+    // If it glitches completely through the solid crust, it has fatally clipped the world.
     final double distance = state.position.length;
-    final levelRadius = game.gameController.currentLevel!.radius;
-    if (distance > levelRadius + 3000) {
+    final double levelRadius = game.gameController.currentLevel?.radius ??
+        PhysicsConstants.moonRadius;
+
+    if (distance > levelRadius + PhysicsConstants.deepSpaceBoundary) {
       crashed = true;
       state.crashReason = 'Lost in deep space. You flew too high.';
-    } else if (distance < levelRadius - 1000) {
+    } else if (distance < levelRadius - PhysicsConstants.crustBoundary) {
       crashed = true;
       state.crashReason =
           'Clipped through the solid crust. The ship was crushed.';

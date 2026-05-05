@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutter/animation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dashlander/game/game_controller.dart';
@@ -35,7 +36,7 @@ void main() {
 
       expect(breakdown.velocityScore, ScoreBreakdown.maxVelocityScore);
       expect(breakdown.tiltScore, ScoreBreakdown.maxTiltScore);
-      expect(breakdown.fuelScore, (100.0 / 200.0 * ScoreBreakdown.maxFuelScore).toInt());
+      expect(breakdown.fuelScore, (Curves.easeIn.transform(100.0 / 200.0) * ScoreBreakdown.maxFuelScore).toInt());
     });
 
     test('midpoint landing gives zero points', () {

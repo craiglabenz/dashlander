@@ -1,3 +1,4 @@
+import 'package:flutter/animation.dart';
 import '../../physics/lander_state.dart';
 import '../game_controller.dart';
 
@@ -25,9 +26,9 @@ class ScoreBreakdown {
   // ---------------------------------------------------------------------------
   // SCORING VALUES
   // ---------------------------------------------------------------------------
-  static const int maxVelocityScore = 1000;
-  static const int maxTiltScore = 500;
-  static const int maxFuelScore = 5000;
+  static const int maxVelocityScore = 5000;
+  static const int maxTiltScore = 2500;
+  static const int maxFuelScore = 2500;
 
   final int fuelScore;
   final int velocityScore;
@@ -51,23 +52,27 @@ class ScoreBreakdown {
     double maxFuel,
     double difficultyMultiplier,
   ) {
+    double applyCurve(double linearValue) {
+      if (linearValue > 0) {
+        return Curves.easeIn.transform(linearValue);
+      } else {
+        return -Curves.easeIn.transform(-linearValue);
+      }
+    }
+
     // Score based on percentage of fuel conserved
-    double fuelPercentage = (state.fuelMass / maxFuel).clamp(0.0, 1.0);
-    int fuelScore = (fuelPercentage * maxFuelScore).toInt();
+    double fuelAccuracy = (state.fuelMass / maxFuel).clamp(0.0, 1.0);
+    int fuelScore = (Curves.easeIn.transform(fuelAccuracy) * maxFuelScore).toInt();
 
-    // Midpoint Scoring Algorithm for Velocity
-    double velocityMidpoint = maxLandingVelocityY / 2;
-    double velocityScoreRaw =
-        ((velocityMidpoint - metrics.impactVelocityMetersPerSecond) /
-            velocityMidpoint) *
-        maxVelocityScore;
-    int velocityScore = velocityScoreRaw.toInt();
+    // Curved Scoring Algorithm for Velocity
+    double velocityAccuracy = (1.0 - (metrics.impactVelocityMetersPerSecond / maxLandingVelocityY)).clamp(0.0, 1.0);
+    double velocityLinearScore = velocityAccuracy * 2.0 - 1.0;
+    int velocityScore = (applyCurve(velocityLinearScore) * maxVelocityScore).toInt();
 
-    // Midpoint Scoring Algorithm for Tilt
-    double tiltMidpoint = maxLandingTiltDegrees / 2;
-    double tiltScoreRaw =
-        ((tiltMidpoint - metrics.finalTiltDeg) / tiltMidpoint) * maxTiltScore;
-    int tiltScore = tiltScoreRaw.toInt();
+    // Curved Scoring Algorithm for Tilt
+    double tiltAccuracy = (1.0 - (metrics.finalTiltDeg / maxLandingTiltDegrees)).clamp(0.0, 1.0);
+    double tiltLinearScore = tiltAccuracy * 2.0 - 1.0;
+    int tiltScore = (applyCurve(tiltLinearScore) * maxTiltScore).toInt();
 
     int score = fuelScore + velocityScore + tiltScore;
     int totalScore = score > 0 ? score : 0;

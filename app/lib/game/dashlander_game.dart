@@ -287,22 +287,21 @@ class DashlanderGame extends FlameGame
 
       // The distance from the center of the screen to the bottom edge is size.y / 2.
       // If the ship's altitude exceeds this, the surface will be off-screen.
-      // We start zooming out when the altitude reaches 60% of the visible distance
+      // We start zooming out when the altitude reaches the ratio of the visible distance
       // to keep the surface comfortably visible at the bottom of the screen.
       double minVisibleDistance = size.y / 2; // Zoom 1.0
-      double zoomStartAltitude = minVisibleDistance * 0.6;
+      double zoomStartAltitude = minVisibleDistance * PhysicsConstants.cameraZoomSurfaceRatio;
 
       if (altitude <= zoomStartAltitude) {
         camera.viewfinder.zoom = 1.0;
       } else {
-        // To keep the surface at the 60% mark on the screen, the total visible distance
-        // from the ship to the screen edge must be `altitude / 0.6`.
-        double targetVisibleDistance = altitude / 0.6;
+        // To keep the surface at the constant ratio mark on the screen, the total visible distance
+        // from the ship to the screen edge must be `altitude / ratio`.
+        double targetVisibleDistance = altitude / PhysicsConstants.cameraZoomSurfaceRatio;
 
         // Cap the maximum visible distance so the ship doesn't become invisibly small.
-        // The deep space boundary is around 3000 units. To keep the surface visible
-        // all the way to the boundary (3000 / 0.6), we need a max distance of ~5000.
-        double maxVisibleDistance = 5000.0;
+        // The deep space boundary is tracked perfectly by the constant.
+        double maxVisibleDistance = PhysicsConstants.maxCameraVisibleDistance;
         
         double currentVisibleDistance = min(targetVisibleDistance, maxVisibleDistance);
         camera.viewfinder.zoom = minVisibleDistance / currentVisibleDistance;

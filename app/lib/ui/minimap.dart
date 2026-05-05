@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../physics/constants.dart';
 import '../game/models/telemetry_data.dart';
 import '../game/models/level_data.dart';
 
@@ -85,16 +86,25 @@ class _MinimapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // The physics space extends slightly past the moon radius (up to +3000).
-    // Let's use moonRadius + maxTerrainHeight + 1500 as the visible edge of the minimap.
-    final double maxDrawRadius =
-        levelData.radius + levelData.maxTerrainHeight + 1500;
+    // The physics space extends slightly past the moon radius.
+    // We set the maxDrawRadius to exactly this deep space boundary so it fits
+    // perfectly within the square minimap widget.
+    final double maxDrawRadius = levelData.radius + PhysicsConstants.deepSpaceBoundary;
 
     // The center of the CustomPaint canvas represents the origin (0,0), which is the center of the moon.
     final Offset center = Offset(size.width / 2, size.height / 2);
 
     // How many pixels on the canvas equals 1 pixel in the physics space?
     final double scale = (size.width / 2) / maxDrawRadius;
+
+    // Draw the deep space boundary ring
+    final Paint boundaryPaint =
+        Paint()
+          ..color = Colors.redAccent.withValues(alpha: 0.2)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0;
+          
+    canvas.drawCircle(center, maxDrawRadius * scale, boundaryPaint);
 
     // Draw the moon's core (the base spherical shape beneath the terrain)
     final Paint moonCorePaint =

@@ -271,39 +271,41 @@ class LevelGenerator {
     }
 
     // Calculate Difficulty Multiplier
-    double difficulty = 1.0;
+    double difficulty = 0.9;
 
-    // 1. Landing Pads Count (Fewer pads = harder)
+    // 1. Distance to first pad (Further away = MUCH harder)
+    // distanceRatio is 0.0 to 1.0. The average distanceFactor (squared random) is ~0.33.
+    // Shift this so a close pad significantly reduces difficulty, and a far pad increases it.
+    double distanceRatio = searchWindowStart / maxSearchIdx;
+    difficulty += (distanceRatio - 0.33) * 1.0; // Extreme weight
+
+    // 2. Landing Pads Count (Fewer pads = harder, but only if you have to travel far!)
     // Normalizing around the base constant.
     int basePads = PhysicsConstants.numLandingPads;
-    difficulty += (basePads - padsCount) * 0.1;
+    // We multiply by distanceRatio so that fewer pads don't matter at all if the first pad is right next to you.
+    // And we reduce the overall weight significantly.
+    difficulty += (basePads - padsCount) * 0.03 * distanceRatio;
 
-    // 2. Pad Width (Shorter pads = harder)
+    // 3. Pad Width (Shorter pads = harder)
     int baseWidth = PhysicsConstants.padWidthSegments;
-    difficulty += (baseWidth - padWidth) * 0.1;
+    difficulty += (baseWidth - padWidth) * 0.15;
 
-    // 3. Terrain Height (Higher terrain = harder) - Reduced weight
+    // 4. Terrain Height (Higher terrain = harder) - Reduced weight
     double heightRatio = maxHeight / PhysicsConstants.maxTerrainHeight;
     difficulty += (heightRatio - 1.0) * 0.05;
-
-    // 4. Distance to first pad (Further away = harder)
-    // distanceRatio is 0.0 to 1.0. The average distanceFactor (squared random) is ~0.33.
-    // Shift this so a close pad reduces difficulty, and a far pad increases it.
-    double distanceRatio = searchWindowStart / maxSearchIdx;
-    difficulty += (distanceRatio - 0.33) * 0.3;
 
     // 5. Initial Velocity (Higher speed = harder)
     double velocityMagnitude = initialVelocity.length;
     double baseVelocityMagnitude =
         Vector2(
-          PhysicsConstants.initialVelocityX,
-          PhysicsConstants.initialVelocityY,
+          PhysicsConstants.initialVelocityX * PhysicsConstants.pixelsPerMeter,
+          PhysicsConstants.initialVelocityY * PhysicsConstants.pixelsPerMeter,
         ).length;
     double velocityRatio = velocityMagnitude / baseVelocityMagnitude;
     difficulty += (velocityRatio - 1.0) * 0.05;
 
-    // Clamp between 0.5 and 2
-    difficulty = difficulty.clamp(0.5, 2);
+    // Cap score penalty at 0.5
+    difficulty = max(difficulty, 0.5);
 
     return LevelData(
       id: seed,

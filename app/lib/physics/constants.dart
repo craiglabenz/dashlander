@@ -102,6 +102,23 @@ class PhysicsConstants {
   /// line segments.
   static const double shipRadius = 14.0;
 
+  /// The distance above the moon's surface at which the ship is considered
+  /// lost in deep space, triggering a game over.
+  static const double deepSpaceBoundary = 2000.0;
+
+  /// The distance below the moon's surface at which the ship is considered
+  /// completely crushed by the crust, triggering a game over.
+  static const double crustBoundary = 1000.0;
+
+  /// The proportion of the screen's visible distance from the center at which
+  /// the camera should start zooming out to ensure the surface stays visible.
+  static const double cameraZoomSurfaceRatio = 0.8;
+
+  /// The absolute maximum distance the camera is allowed to zoom out,
+  /// mathematically derived to perfectly keep the deep space boundary visible.
+  static const double maxCameraVisibleDistance =
+      deepSpaceBoundary / cameraZoomSurfaceRatio;
+
   // ---------------------------------------------------------------------------
   // INITIAL STATE
   // ---------------------------------------------------------------------------

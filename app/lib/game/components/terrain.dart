@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../dashlander_game.dart';
+import '../../physics/constants.dart';
 
 class TerrainComponent extends PositionComponent
     with HasGameReference<DashlanderGame> {
@@ -155,8 +156,8 @@ class TerrainComponent extends PositionComponent
           ..strokeWidth = 2;
 
     final levelRadius = game.gameController.currentLevel!.radius;
-    canvas.drawCircle(Offset.zero, levelRadius + 3000, barrierPaint);
-    canvas.drawCircle(Offset.zero, levelRadius + 3000, innerBarrierPaint);
+    canvas.drawCircle(Offset.zero, levelRadius + PhysicsConstants.deepSpaceBoundary, barrierPaint);
+    canvas.drawCircle(Offset.zero, levelRadius + PhysicsConstants.deepSpaceBoundary, innerBarrierPaint);
 
     // 5. Draw Pad Angles & Debug Visuals
     if (game.debugMode) {
