@@ -5,6 +5,8 @@ import '../components/particle_exhaust.dart';
 import '../../physics/physics_engine.dart';
 import '../../physics/constants.dart';
 import '../dashlander_game.dart';
+import 'package:flame_audio/flame_audio.dart';
+import '../../main.dart';
 
 class ShipCollisionBehavior extends Behavior<ShipComponent> {
   final PhysicsEngine physicsEngine;
@@ -70,8 +72,8 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
     // If it flies higher than an arbitrary outer boundary, it is lost in deep space.
     // If it glitches completely through the solid crust, it has fatally clipped the world.
     final double distance = state.position.length;
-    final double levelRadius = game.gameController.currentLevel?.radius ??
-        PhysicsConstants.moonRadius;
+    final double levelRadius =
+        game.gameController.currentLevel?.radius ?? PhysicsConstants.moonRadius;
 
     if (distance > levelRadius + PhysicsConstants.deepSpaceBoundary) {
       crashed = true;
@@ -122,6 +124,18 @@ class ShipCollisionBehavior extends Behavior<ShipComponent> {
   }
 
   void _createExplosion(DashlanderGame game, Vector2 pos) {
+    if (!game.gameController.isMuted.value) {
+      // 100ms delay prevents the perception that the explosion sound is
+      // happening before the visual explosion.
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (explosionPool != null) {
+          explosionPool!.start();
+        } else {
+          FlameAudio.play('explosion.mp3');
+        }
+      });
+    }
+
     for (int i = 0; i < 50; i++) {
       game.world.add(ParticleExhaust.explosion(position: pos));
     }

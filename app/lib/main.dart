@@ -25,6 +25,7 @@ import 'data/replay_repository.dart';
 import 'clean_audio_stub.dart' if (dart.library.html) 'clean_audio_web.dart';
 
 late FirebaseFirestore firestore;
+AudioPool? explosionPool;
 late ReplayRepository replayRepository;
 late SharedPreferences prefs;
 
@@ -53,8 +54,13 @@ void main() async {
       'engine-main-long.mp3',
       'engine-rcs-long.mp3',
     ]);
+    FlameAudio.createPool('explosion.mp3', minPlayers: 1, maxPlayers: 3).then((
+      pool,
+    ) {
+      explosionPool = pool;
+    });
   } catch (e) {
-    debugPrint("Failed to load background music: $e");
+    debugPrint("Failed to load audio: $e");
   }
 
   runApp(const DashlanderApp());
@@ -438,107 +444,107 @@ class _GameCoordinatorState extends State<GameCoordinator> {
       behavior: HitTestBehavior.translucent,
       child: Scaffold(
         body: Stack(
-        children: [
-          // 1. The Flame Game Layer
-          if (_game != null) GameWidget(game: _game!),
+          children: [
+            // 1. The Flame Game Layer
+            if (_game != null) GameWidget(game: _game!),
 
-          // 2. UI Overlays
-          if (_showLeaderboard)
-            LeaderboardScreen(
-              onBack: () => setState(() => _showLeaderboard = false),
-              onReplaySelected: (replay) {
-                // Find the level
-                final lvl = LevelGenerator.generate(seed: replay.levelSeed);
-                _startGame(lvl, targetGhostReplay: replay);
-              },
-              onWatchSelected: (replay) {
-                final lvl = LevelGenerator.generate(seed: replay.levelSeed);
-                _startGame(lvl, targetGhostReplay: replay, isWatching: true);
-              },
-            )
-          else if (status == GameStatus.menu)
-            MainMenu(
-              onPlayRandom: _playRandomSeed,
-              onEnterSeed: _promptForSeed,
-              onLeaderboard: () => setState(() => _showLeaderboard = true),
-            ),
+            // 2. UI Overlays
+            if (_showLeaderboard)
+              LeaderboardScreen(
+                onBack: () => setState(() => _showLeaderboard = false),
+                onReplaySelected: (replay) {
+                  // Find the level
+                  final lvl = LevelGenerator.generate(seed: replay.levelSeed);
+                  _startGame(lvl, targetGhostReplay: replay);
+                },
+                onWatchSelected: (replay) {
+                  final lvl = LevelGenerator.generate(seed: replay.levelSeed);
+                  _startGame(lvl, targetGhostReplay: replay, isWatching: true);
+                },
+              )
+            else if (status == GameStatus.menu)
+              MainMenu(
+                onPlayRandom: _playRandomSeed,
+                onEnterSeed: _promptForSeed,
+                onLeaderboard: () => setState(() => _showLeaderboard = true),
+              ),
 
-          if ((status == GameStatus.playing ||
-                  status == GameStatus.won ||
-                  status == GameStatus.lost) &&
-              _game != null)
-            HudOverlay(
-              controller: _controller,
-              onExit: () {
-                _game = null;
-                _controller.reset();
-              },
-            ),
+            if ((status == GameStatus.playing ||
+                    status == GameStatus.won ||
+                    status == GameStatus.lost) &&
+                _game != null)
+              HudOverlay(
+                controller: _controller,
+                onExit: () {
+                  _game = null;
+                  _controller.reset();
+                },
+              ),
 
-          if ((status == GameStatus.won || status == GameStatus.lost) &&
-              _game != null)
-            GameOverModal(
-              controller: _controller,
-              onRetry:
-                  () => _startGame(
-                    _controller.currentLevel!,
-                    config: _controller.sandboxConfig,
-                    targetGhostReplay: _controller.targetGhostReplay,
-                  ),
-              onMenu: () {
-                _game = null;
-                _controller.reset();
-              },
-              onNext: _playRandomSeed,
-            ),
+            if ((status == GameStatus.won || status == GameStatus.lost) &&
+                _game != null)
+              GameOverModal(
+                controller: _controller,
+                onRetry:
+                    () => _startGame(
+                      _controller.currentLevel!,
+                      config: _controller.sandboxConfig,
+                      targetGhostReplay: _controller.targetGhostReplay,
+                    ),
+                onMenu: () {
+                  _game = null;
+                  _controller.reset();
+                },
+                onNext: _playRandomSeed,
+              ),
 
-          // 3. Global Overlays
-          Positioned(
-            top: 16,
-            right: 16,
-            child: SafeArea(
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 500),
-                opacity: _isMuteVisible ? 1.0 : 0.0,
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _toggleMute,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.cyan.shade900.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.cyanAccent.withValues(alpha: 0.3),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.cyanAccent.withValues(alpha: 0.05),
-                            blurRadius: 10,
-                            spreadRadius: 2,
+            // 3. Global Overlays
+            Positioned(
+              top: 16,
+              right: 16,
+              child: SafeArea(
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 500),
+                  opacity: _isMuteVisible ? 1.0 : 0.0,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _toggleMute,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.cyan.shade900.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.cyanAccent.withValues(alpha: 0.3),
                           ),
-                        ],
-                      ),
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: _controller.isMuted,
-                        builder: (context, isMuted, child) {
-                          return Icon(
-                            isMuted ? Icons.volume_off : Icons.volume_up,
-                            color: Colors.cyanAccent,
-                          );
-                        },
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.cyanAccent.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: _controller.isMuted,
+                          builder: (context, isMuted, child) {
+                            return Icon(
+                              isMuted ? Icons.volume_off : Icons.volume_up,
+                              color: Colors.cyanAccent,
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
