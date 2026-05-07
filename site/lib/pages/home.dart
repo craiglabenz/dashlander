@@ -33,7 +33,7 @@ class HomeState extends State<Home> {
             'A low-fidelity, high-stakes vector lunar landing simulation. Manage your fuel, calculate your trajectory, and find the neon safe zones before gravity takes over.',
           ),
         ]),
-        a(href: '#gallery', classes: 'btn', [Component.text('Initiate Sequence')]),
+        a(href: '/app/', classes: 'btn', [Component.text('Initiate Sequence')]),
       ]),
 
       section(classes: 'game-states', [
