@@ -50,7 +50,7 @@ class _MainMenuState extends State<MainMenu> {
             ),
             const SizedBox(height: 16),
             Text(
-              '2.5D PHYSICS SIMULATION',
+              'RCS METEOR LANDER',
               style: GoogleFonts.shareTechMono(
                 color: Colors.cyan.shade200,
                 letterSpacing: 4,
@@ -118,7 +118,12 @@ class _MenuButtonState extends State<_MenuButton> {
                     : Colors.transparent,
             boxShadow:
                 isHovered
-                    ? [BoxShadow(color: widget.color.withValues(alpha: 0.4), blurRadius: 15)]
+                    ? [
+                      BoxShadow(
+                        color: widget.color.withValues(alpha: 0.4),
+                        blurRadius: 15,
+                      ),
+                    ]
                     : [],
           ),
           child: Text(
