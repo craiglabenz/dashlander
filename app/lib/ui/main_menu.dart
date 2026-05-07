@@ -118,13 +118,13 @@ class _MenuButtonState extends State<_MenuButton> {
                     : Colors.transparent,
             boxShadow:
                 isHovered
-                    ? [BoxShadow(color: widget.color, blurRadius: 15)]
+                    ? [BoxShadow(color: widget.color.withValues(alpha: 0.4), blurRadius: 15)]
                     : [],
           ),
           child: Text(
             widget.label,
             style: GoogleFonts.shareTechMono(
-              color: widget.color,
+              color: isHovered ? Colors.white : widget.color,
               fontSize: 18,
               fontWeight: FontWeight.bold,
               letterSpacing: 4,
