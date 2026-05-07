@@ -5,6 +5,8 @@
 // Generated with jaspr_builder
 
 import 'package:jaspr/server.dart';
+import 'package:dashlander_site/constants/theme.dart' as _theme;
+import 'package:dashlander_site/pages/home.dart' as _home;
 
 /// Default [ServerOptions] for use with your Jaspr project.
 ///
@@ -22,4 +24,8 @@ import 'package:jaspr/server.dart';
 ///   runApp(...);
 /// }
 /// ```
-ServerOptions get defaultServerOptions => ServerOptions();
+ServerOptions get defaultServerOptions => ServerOptions(
+  clientId: 'main.client.dart.js',
+  clients: {_home.Home: ClientTarget<_home.Home>('home')},
+  styles: () => [..._theme.styles],
+);

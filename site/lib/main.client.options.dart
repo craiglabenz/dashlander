@@ -6,6 +6,8 @@
 
 import 'package:jaspr/client.dart';
 
+import 'package:dashlander_site/pages/home.dart' deferred as _home;
+
 /// Default [ClientOptions] for use with your Jaspr project.
 ///
 /// Use this to initialize Jaspr **before** calling [runApp].
@@ -13,7 +15,7 @@ import 'package:jaspr/client.dart';
 /// Example:
 /// ```dart
 /// import 'main.client.options.dart';
-/// 
+///
 /// void main() {
 ///   Jaspr.initializeApp(
 ///     options: defaultClientOptions,
@@ -22,4 +24,8 @@ import 'package:jaspr/client.dart';
 ///   runApp(...);
 /// }
 /// ```
-ClientOptions get defaultClientOptions => ClientOptions();
+ClientOptions get defaultClientOptions => ClientOptions(
+  clients: {
+    'home': ClientLoader((p) => _home.Home(), loader: _home.loadLibrary),
+  },
+);
