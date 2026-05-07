@@ -22,12 +22,15 @@ body {
     color: var(--teal);
     font-family: 'Share Tech Mono', monospace;
     overflow-x: hidden;
-    background-image: 
+    background-image:
         radial-gradient(circle at 15% 50%, rgba(0, 255, 213, 0.03) 0%, transparent 50%),
         radial-gradient(circle at 85% 30%, rgba(255, 0, 255, 0.03) 0%, transparent 50%);
 }
 
-h1, h2, h3, .brand {
+h1,
+h2,
+h3,
+.brand {
     font-family: 'Orbitron', sans-serif;
     text-transform: uppercase;
 }
@@ -37,10 +40,12 @@ h1, h2, h3, .brand {
     color: var(--magenta);
     text-shadow: 0 0 5px var(--magenta), 0 0 15px var(--magenta);
 }
+
 .text-teal {
     color: var(--teal);
     text-shadow: 0 0 5px var(--teal), 0 0 15px var(--teal);
 }
+
 .text-yellow {
     color: var(--yellow);
     text-shadow: 0 0 5px var(--yellow), 0 0 15px var(--yellow);
@@ -66,6 +71,8 @@ nav {
 
 /* HERO SECTION */
 .hero {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -73,6 +80,19 @@ nav {
     text-align: center;
     padding: 100px 20px;
     min-height: 70vh;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('home-bg.png') center/cover no-repeat;
+    opacity: 0.15;
+    z-index: -1;
+    border-bottom: 1px dashed rgba(0, 255, 213, 0.2);
 }
 
 .hero h1 {
@@ -133,14 +153,25 @@ nav {
 }
 
 /* Card specific neon colors */
-.card.gameplay { border-color: var(--magenta); box-shadow: 0 0 15px rgba(255, 0, 255, 0.2); }
-.card.touchdown { border-color: var(--teal); box-shadow: 0 0 15px rgba(0, 255, 213, 0.2); }
-.card.catastrophe { border-color: var(--red); box-shadow: 0 0 15px rgba(255, 51, 51, 0.2); }
+.card.gameplay {
+    border-color: var(--magenta);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+}
+
+.card.touchdown {
+    border-color: var(--teal);
+    box-shadow: 0 0 15px rgba(0, 255, 213, 0.2);
+}
+
+.card.catastrophe {
+    border-color: var(--red);
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
+}
 
 .card h3 {
     font-size: 1.5rem;
     margin-bottom: 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 10px;
 }
 
@@ -156,11 +187,12 @@ nav {
     list-style: none;
     font-size: 0.9rem;
 }
+
 .stats-list li {
     display: flex;
     justify-content: space-between;
     margin-bottom: 8px;
-    border-bottom: 1px dashed rgba(255,255,255,0.1);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
     padding-bottom: 4px;
 }
 
@@ -187,6 +219,7 @@ nav {
     .grid-container {
         grid-template-columns: 1fr 1fr;
     }
+
     .grid-item-wide {
         grid-column: span 2;
     }
@@ -198,7 +231,7 @@ nav {
     overflow: hidden;
     position: relative;
     background: #000;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
@@ -220,7 +253,7 @@ nav {
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0, 0, 0, 0.8);
     padding: 10px;
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -239,5 +272,13 @@ footer {
 }
 
 /* UTILITY */
-.text-red { color: var(--red); text-shadow: 0 0 5px var(--red); }
-.play-link { text-decoration: none; font-weight: bold; font-family: 'Orbitron', sans-serif; }
+.text-red {
+    color: var(--red);
+    text-shadow: 0 0 5px var(--red);
+}
+
+.play-link {
+    text-decoration: none;
+    font-weight: bold;
+    font-family: 'Orbitron', sans-serif;
+}
