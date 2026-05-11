@@ -2,7 +2,7 @@
 set -e
 
 echo "Building Flutter app..."
-# ./build_flutter.sh
+./build_flutter.sh
 
 echo "Building Jaspr site..."
 jaspr build
