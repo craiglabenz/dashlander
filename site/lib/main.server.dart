@@ -23,6 +23,7 @@ void main() {
   runApp(Document(
     title: 'DASHLANDER | Master the Landing',
     head: [
+      link(href: 'favicon.png', rel: 'icon', type: 'image/png'),
       link(href: 'styles.css', rel: 'stylesheet'),
     ],
     body: App(),

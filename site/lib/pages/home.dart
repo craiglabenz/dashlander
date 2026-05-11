@@ -19,7 +19,7 @@ class HomeState extends State<Home> {
           span(classes: 'text-teal', [Component.text('LANDER')]),
         ]),
         div([
-          a(href: '#', classes: 'text-yellow play-link', [Component.text('PLAY V1.0')]),
+          a(href: '/app/', classes: 'text-yellow play-link', [Component.text('PLAY V1.0')]),
         ]),
       ]),
 
