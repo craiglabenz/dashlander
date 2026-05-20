@@ -202,7 +202,7 @@ class DashlanderGame extends FlameGame
         background: JoystickHUDBackground(
           radius: 80,
           paint: Paint()..color = Colors.white.withValues(alpha: 0.15),
-          getShipAngle: () => landerState.angle,
+          getShipAngle: () => landerState.angle - camera.viewfinder.angle,
         ),
         margin: const EdgeInsets.only(right: 40, bottom: 40),
       );
@@ -269,8 +269,11 @@ class DashlanderGame extends FlameGame
         // 0 is straight UP, positive is clockwise (right), negative is counter-clockwise (left)
         final joystickAngle = atan2(delta.x, -delta.y);
         
-        // Factor in the ship's tilt so that UP on the dial is aligned with the ship's nose:
-        double relativeAngle = joystickAngle - landerState.angle;
+        // Factor in the ship's screen-space visual tilt (accounting for camera rotation)
+        // so that UP on the dial is aligned with the ship's nose as seen on the screen:
+        final cameraAngle = atan2(landerState.position.x, -landerState.position.y);
+        final screenSpaceShipAngle = landerState.angle - cameraAngle;
+        double relativeAngle = joystickAngle - screenSpaceShipAngle;
         
         // Normalize the relative angle to the range [-pi, pi] to ensure continuous wrapping
         while (relativeAngle < -pi) {
