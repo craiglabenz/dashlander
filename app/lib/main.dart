@@ -23,6 +23,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'data/hive_adapters.dart';
 import 'data/replay_repository.dart';
 import 'clean_audio_stub.dart' if (dart.library.html) 'clean_audio_web.dart';
+import 'game/behaviors/ship_audio_behavior.dart';
 
 late FirebaseFirestore firestore;
 AudioPool? explosionPool;
@@ -102,6 +103,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
   bool _bgmStarted = false;
 
   void _onFirstInteraction() {
+    ShipAudioBehavior.warmUp();
     if (!_bgmStarted && !_controller.isMuted.value) {
       _bgmStarted = true;
       FlameAudio.bgm.play('background.mp3');
@@ -122,10 +124,15 @@ class _GameCoordinatorState extends State<GameCoordinator> {
     }
   }
 
+  void _onInvertControlsChanged() {
+    prefs.setBool('invert_controls', _controller.invertControls.value);
+  }
+
   @override
   void initState() {
     super.initState();
-    _controller.invertControls.value = prefs.getBool('invert_controls') ?? false;
+    _controller.invertControls.value =
+        prefs.getBool('invert_controls') ?? false;
     _controller.invertControls.addListener(_onInvertControlsChanged);
     _controller.status.addListener(() async {
       final status = _controller.status.value;
@@ -309,6 +316,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
     GameReplay? targetGhostReplay,
     bool isWatching = false,
   }) {
+    ShipAudioBehavior.warmUp();
     _controller.reset();
     _controller.currentLevel = level;
     _controller.sandboxConfig = config;
@@ -470,6 +478,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
                 onPlayRandom: _playRandomSeed,
                 onEnterSeed: _promptForSeed,
                 onLeaderboard: () => setState(() => _showLeaderboard = true),
+                invertControls: _controller.invertControls,
               ),
 
             if ((status == GameStatus.playing ||

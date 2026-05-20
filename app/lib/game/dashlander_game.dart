@@ -431,6 +431,30 @@ class DashlanderGame extends FlameGame
   }
 
   @override
+  void onRemove() {
+    for (final ship in world.children.whereType<ShipComponent>()) {
+      for (final audio in ship.children.whereType<ShipAudioBehavior>()) {
+        audio.stopAndDispose();
+      }
+    }
+    super.onRemove();
+  }
+
+  @override
+  set paused(bool value) {
+    super.paused = value;
+    for (final ship in world.children.whereType<ShipComponent>()) {
+      for (final audio in ship.children.whereType<ShipAudioBehavior>()) {
+        if (value) {
+          audio.pauseAudio();
+        } else {
+          audio.resumeAudio();
+        }
+      }
+    }
+  }
+
+  @override
   void render(Canvas canvas) {
     if (_bloomProgram == null || size.x <= 0 || size.y <= 0) {
       super.render(canvas);
