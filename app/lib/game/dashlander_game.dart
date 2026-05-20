@@ -72,8 +72,6 @@ class DashlanderGame extends FlameGame
       debugPrint("Failed to load bloom shader: $e");
     }
 
-
-
     // 1. Add background
     add(ParallaxStars()..priority = -9);
 
@@ -128,10 +126,12 @@ class DashlanderGame extends FlameGame
           PlayerInputBehavior(),
           PhysicsBehavior(physicsEngine: physicsEngine),
           ExhaustBehavior(
-            hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
+            hasFuel:
+                () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
           ),
           ShipAudioBehavior(
-            hasFuel: () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
+            hasFuel:
+                () => landerState.fuelMass > 0 || physicsEngine.infiniteFuel,
             isMuted: () => gameController.isMuted.value,
           ),
           ShipCollisionBehavior(physicsEngine: physicsEngine),
@@ -199,9 +199,10 @@ class DashlanderGame extends FlameGame
           radius: 30,
           paint: Paint()..color = Colors.white.withValues(alpha: 0.8),
         ),
-        background: CircleComponent(
+        background: JoystickHUDBackground(
           radius: 80,
-          paint: Paint()..color = Colors.white.withValues(alpha: 0.2),
+          paint: Paint()..color = Colors.white.withValues(alpha: 0.15),
+          getShipAngle: () => landerState.angle,
         ),
         margin: const EdgeInsets.only(right: 40, bottom: 40),
       );
@@ -212,21 +213,6 @@ class DashlanderGame extends FlameGame
   @override
   // ignore: must_call_super
   void update(double dt) {
-    if (joystick != null) {
-      final jUp = joystick!.relativeDelta.y < -0.2;
-      final jLeft = joystick!.relativeDelta.x < -0.2;
-      final jRight = joystick!.relativeDelta.x > 0.2;
-
-      if (jUp != _isJoystickUp ||
-          jLeft != _isJoystickLeft ||
-          jRight != _isJoystickRight) {
-        _isJoystickUp = jUp;
-        _isJoystickLeft = jLeft;
-        _isJoystickRight = jRight;
-        _updateCombinedInputState();
-      }
-    }
-
     _accumulator += dt;
     if (_accumulator > 0.1) _accumulator = 0.1; // clamp to prevent death spiral
 
@@ -238,8 +224,11 @@ class DashlanderGame extends FlameGame
 
   void _updateCombinedInputState() {
     bool newUp = _isKeyboardUp || _isJoystickUp;
-    bool newLeft = _isKeyboardLeft || _isJoystickLeft;
-    bool newRight = _isKeyboardRight || _isJoystickRight;
+    bool rawLeft = _isKeyboardLeft || _isJoystickLeft;
+    bool rawRight = _isKeyboardRight || _isJoystickRight;
+
+    bool newLeft = gameController.invertControls.value ? rawRight : rawLeft;
+    bool newRight = gameController.invertControls.value ? rawLeft : rawRight;
 
     if (newUp != isUpPressed ||
         newLeft != isLeftPressed ||
@@ -266,6 +255,64 @@ class DashlanderGame extends FlameGame
   }
 
   void _fixedUpdate(double dt) {
+    if (joystick != null) {
+      final delta = joystick!.relativeDelta;
+      if (delta.length < 0.15) {
+        if (_isJoystickUp || _isJoystickLeft || _isJoystickRight) {
+          _isJoystickUp = false;
+          _isJoystickLeft = false;
+          _isJoystickRight = false;
+          _updateCombinedInputState();
+        }
+      } else {
+        // Calculate joystick angle in screen space:
+        // 0 is straight UP, positive is clockwise (right), negative is counter-clockwise (left)
+        final joystickAngle = atan2(delta.x, -delta.y);
+        
+        // Factor in the ship's tilt so that UP on the dial is aligned with the ship's nose:
+        double relativeAngle = joystickAngle - landerState.angle;
+        
+        // Normalize the relative angle to the range [-pi, pi] to ensure continuous wrapping
+        while (relativeAngle < -pi) {
+          relativeAngle += 2 * pi;
+        }
+        while (relativeAngle > pi) {
+          relativeAngle -= 2 * pi;
+        }
+        
+        final angleDeg = relativeAngle * 180 / pi;
+
+        if (angleDeg.abs() <= 30) {
+          // Zone 1: Straight UP (+/- 30 deg) -> Main thruster only
+          _isJoystickUp = true;
+          _isJoystickLeft = false;
+          _isJoystickRight = false;
+        } else if (angleDeg > 30 && angleDeg <= 90) {
+          // Zone 2: Up-Right (30 to 90 deg) -> Main thruster + Right RCS (turn clockwise)
+          _isJoystickUp = true;
+          _isJoystickLeft = false;
+          _isJoystickRight = true;
+        } else if (angleDeg < -30 && angleDeg >= -90) {
+          // Zone 3: Up-Left (-90 to -30 deg) -> Main thruster + Left RCS (turn counter-clockwise)
+          _isJoystickUp = true;
+          _isJoystickLeft = true;
+          _isJoystickRight = false;
+        } else if (angleDeg > 90 && angleDeg <= 180) {
+          // Zone 4: Bottom-Right (90 to 180 deg) -> Right RCS only
+          _isJoystickUp = false;
+          _isJoystickLeft = false;
+          _isJoystickRight = true;
+        } else if (angleDeg < -90 && angleDeg >= -180) {
+          // Zone 5: Bottom-Left (-180 to -90 deg) -> Left RCS only
+          _isJoystickUp = false;
+          _isJoystickLeft = true;
+          _isJoystickRight = false;
+        }
+
+        _updateCombinedInputState();
+      }
+    }
+
     super.update(dt);
     // Only update active game logic if we're not game over
     if (gameController.status.value == GameStatus.playing) {
@@ -300,20 +347,25 @@ class DashlanderGame extends FlameGame
       // We start zooming out when the altitude reaches the ratio of the visible distance
       // to keep the surface comfortably visible at the bottom of the screen.
       double minVisibleDistance = size.y / 2; // Zoom 1.0
-      double zoomStartAltitude = minVisibleDistance * PhysicsConstants.cameraZoomSurfaceRatio;
+      double zoomStartAltitude =
+          minVisibleDistance * PhysicsConstants.cameraZoomSurfaceRatio;
 
       if (altitude <= zoomStartAltitude) {
         camera.viewfinder.zoom = 1.0;
       } else {
         // To keep the surface at the constant ratio mark on the screen, the total visible distance
         // from the ship to the screen edge must be `altitude / ratio`.
-        double targetVisibleDistance = altitude / PhysicsConstants.cameraZoomSurfaceRatio;
+        double targetVisibleDistance =
+            altitude / PhysicsConstants.cameraZoomSurfaceRatio;
 
         // Cap the maximum visible distance so the ship doesn't become invisibly small.
         // The deep space boundary is tracked perfectly by the constant.
         double maxVisibleDistance = PhysicsConstants.maxCameraVisibleDistance;
-        
-        double currentVisibleDistance = min(targetVisibleDistance, maxVisibleDistance);
+
+        double currentVisibleDistance = min(
+          targetVisibleDistance,
+          maxVisibleDistance,
+        );
         camera.viewfinder.zoom = minVisibleDistance / currentVisibleDistance;
       }
     }
@@ -405,5 +457,66 @@ class DashlanderGame extends FlameGame
       // Fallback if toImageSync fails (e.g. on unsupported platforms)
       canvas.drawPicture(picture);
     }
+  }
+}
+
+class JoystickHUDBackground extends CircleComponent {
+  final double Function() getShipAngle;
+
+  JoystickHUDBackground({
+    required super.radius,
+    required super.paint,
+    required this.getShipAngle,
+  });
+
+  @override
+  void render(Canvas canvas) {
+    // 1. Draw the transparent background circle first
+    super.render(canvas);
+
+    final center = Offset(radius, radius);
+    final shipAngle = getShipAngle();
+
+    // High-tech sci-fi theme paints
+    final paintZoneDivider = Paint()
+      ..color = Colors.cyanAccent.withValues(alpha: 0.3)
+      ..strokeWidth = 1.5;
+
+    final paintNose = Paint()
+      ..color = Colors.pinkAccent.withValues(alpha: 0.8)
+      ..strokeWidth = 2.5;
+
+    // Sector boundary angles relative to the ship's nose:
+    // Zone 1 (Main only): [-30, 30] deg -> boundaries at +/-30 deg
+    // Zone 2/3 (Main + RCS): [30, 90] / [-90, -30] deg -> boundaries at +/-90 deg
+    // Zone 4/5 (RCS only): [90, 180] / [-180, -90] deg -> boundary at 180 deg
+    final boundaries = [
+      shipAngle - 30 * pi / 180,
+      shipAngle + 30 * pi / 180,
+      shipAngle - 90 * pi / 180,
+      shipAngle + 90 * pi / 180,
+      shipAngle + 180 * pi / 180,
+    ];
+
+    void drawRay(double angle, Paint paint, {double lengthFactor = 1.0}) {
+      final dx = sin(angle) * radius * lengthFactor;
+      final dy = -cos(angle) * radius * lengthFactor;
+      canvas.drawLine(center, center + Offset(dx, dy), paint);
+    }
+
+    // 2. Draw partition boundaries
+    for (final angle in boundaries) {
+      drawRay(angle, paintZoneDivider, lengthFactor: 0.95);
+    }
+
+    // 3. Draw ship's nose reference ray (center of the main thruster zone)
+    drawRay(shipAngle, paintNose, lengthFactor: 1.0);
+
+    // 4. Draw an inner concentric tech reticle ring
+    final paintReticle = Paint()
+      ..color = Colors.cyanAccent.withValues(alpha: 0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    canvas.drawCircle(center, radius * 0.4, paintReticle);
   }
 }

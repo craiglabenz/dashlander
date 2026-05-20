@@ -34,6 +34,7 @@ class GameController {
   );
   final ValueNotifier<GameStatus> status = ValueNotifier(GameStatus.menu);
   final ValueNotifier<bool> isMuted = ValueNotifier(false);
+  final ValueNotifier<bool> invertControls = ValueNotifier(false);
 
   // Game results
   int finalScore = 0;

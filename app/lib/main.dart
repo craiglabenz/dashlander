@@ -125,6 +125,8 @@ class _GameCoordinatorState extends State<GameCoordinator> {
   @override
   void initState() {
     super.initState();
+    _controller.invertControls.value = prefs.getBool('invert_controls') ?? false;
+    _controller.invertControls.addListener(_onInvertControlsChanged);
     _controller.status.addListener(() async {
       final status = _controller.status.value;
 
@@ -164,6 +166,7 @@ class _GameCoordinatorState extends State<GameCoordinator> {
 
   @override
   void dispose() {
+    _controller.invertControls.removeListener(_onInvertControlsChanged);
     _muteTimer?.cancel();
     super.dispose();
   }
