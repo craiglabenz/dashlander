@@ -51,13 +51,25 @@ _GameReplay _$GameReplayFromJson(Map<String, dynamic> json) => _GameReplay(
   userId: json['userId'] as String,
   score: (json['score'] as num).toInt(),
   levelSeed: (json['levelSeed'] as num).toInt(),
-  actions: (json['actions'] as List<dynamic>)
-      .map(
-        (e) =>
-            const ThrusterActionConverter().fromJson(e as Map<String, dynamic>),
-      )
-      .toList(),
+  actions:
+      (json['actions'] as List<dynamic>)
+          .map(
+            (e) => const ThrusterActionConverter().fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
   durationMs: (json['durationMs'] as num).toInt(),
+  isWin: json['isWin'] as bool?,
+  remainingFuel: (json['remainingFuel'] as num?)?.toDouble(),
+  impactVelocity: (json['impactVelocity'] as num?)?.toDouble(),
+  horizontalVelocity: (json['horizontalVelocity'] as num?)?.toDouble(),
+  finalTilt: (json['finalTilt'] as num?)?.toDouble(),
+  fuelScore: (json['fuelScore'] as num?)?.toInt(),
+  velocityScore: (json['velocityScore'] as num?)?.toInt(),
+  tiltScore: (json['tiltScore'] as num?)?.toInt(),
+  difficultyMultiplier: (json['difficultyMultiplier'] as num?)?.toDouble(),
+  totalScore: (json['totalScore'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$GameReplayToJson(_GameReplay instance) =>
@@ -66,8 +78,17 @@ Map<String, dynamic> _$GameReplayToJson(_GameReplay instance) =>
       'userId': instance.userId,
       'score': instance.score,
       'levelSeed': instance.levelSeed,
-      'actions': instance.actions
-          .map(const ThrusterActionConverter().toJson)
-          .toList(),
+      'actions':
+          instance.actions.map(const ThrusterActionConverter().toJson).toList(),
       'durationMs': instance.durationMs,
+      'isWin': instance.isWin,
+      'remainingFuel': instance.remainingFuel,
+      'impactVelocity': instance.impactVelocity,
+      'horizontalVelocity': instance.horizontalVelocity,
+      'finalTilt': instance.finalTilt,
+      'fuelScore': instance.fuelScore,
+      'velocityScore': instance.velocityScore,
+      'tiltScore': instance.tiltScore,
+      'difficultyMultiplier': instance.difficultyMultiplier,
+      'totalScore': instance.totalScore,
     };

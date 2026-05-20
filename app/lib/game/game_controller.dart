@@ -204,7 +204,19 @@ class GameController {
     }
 
     if (replayRecorder != null && !isWatching) {
-      lastReplay = replayRecorder.finalizeReplay(score: finalScore);
+      lastReplay = replayRecorder.finalizeReplay(
+        score: finalScore,
+        isWin: newStatus == GameStatus.won,
+        remainingFuel: state.fuelMass,
+        impactVelocity: finalMetrics?.impactVelocityMetersPerSecond,
+        horizontalVelocity: finalMetrics?.horizontalVelocityMetersPerSecond,
+        finalTilt: finalMetrics?.finalTiltDeg,
+        fuelScore: finalScoreBreakdown?.fuelScore,
+        velocityScore: finalScoreBreakdown?.velocityScore,
+        tiltScore: finalScoreBreakdown?.tiltScore,
+        difficultyMultiplier: finalScoreBreakdown?.difficultyMultiplier,
+        totalScore: finalScoreBreakdown?.totalScore,
+      );
     }
 
     // It is important that these lines remain the last in this function, as

@@ -34,6 +34,18 @@ abstract class GameReplay with _$GameReplay {
     @ThrusterActionConverter() //
     required List<ThrusterAction> actions,
     required int durationMs,
+
+    // Original run metrics
+    bool? isWin,
+    double? remainingFuel,
+    double? impactVelocity,
+    double? horizontalVelocity,
+    double? finalTilt,
+    int? fuelScore,
+    int? velocityScore,
+    int? tiltScore,
+    double? difficultyMultiplier,
+    int? totalScore,
   }) = _GameReplay;
 
   factory GameReplay.fromJson(Map<String, dynamic> json) =>

@@ -20,9 +20,19 @@ class GameOverModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isWin = controller.status.value == GameStatus.won;
     final state = controller.finalState;
     if (state == null) return const SizedBox.shrink();
+
+    final metrics = controller.finalMetrics;
+    if (metrics == null) return const SizedBox.shrink();
+
+    final replay = controller.targetGhostReplay;
+    final bool isWatching = controller.isWatching;
+
+    // Determine isWin
+    final bool isWin = (isWatching && replay?.isWin != null)
+        ? replay!.isWin!
+        : (controller.status.value == GameStatus.won);
 
     final Color primaryColor = isWin ? Colors.cyanAccent : Colors.redAccent;
     final String title = isWin ? 'TOUCHDOWN' : 'CATASTROPHE';
@@ -31,8 +41,48 @@ class GameOverModal extends StatelessWidget {
             ? 'Flawless execution, Commander.'
             : state.crashReason ?? 'Structural integrity compromised.';
 
-    final metrics = controller.finalMetrics;
-    if (metrics == null) return const SizedBox.shrink();
+    // Determine finalScore
+    final int finalScore = (isWatching && replay != null)
+        ? replay.score
+        : controller.finalScore;
+
+    // Determine other metrics
+    final double impactVelocity = (isWatching && replay?.impactVelocity != null)
+        ? replay!.impactVelocity!
+        : metrics.impactVelocityMetersPerSecond;
+
+    final double horizontalVelocity = (isWatching && replay?.horizontalVelocity != null)
+        ? replay!.horizontalVelocity!
+        : metrics.horizontalVelocityMetersPerSecond;
+
+    final double finalTilt = (isWatching && replay?.finalTilt != null)
+        ? replay!.finalTilt!
+        : metrics.finalTiltDeg;
+
+    final double remainingFuel = (isWatching && replay?.remainingFuel != null)
+        ? replay!.remainingFuel!
+        : state.fuelMass;
+
+    // Scores
+    final int velocityScore = (isWatching && replay?.velocityScore != null)
+        ? replay!.velocityScore!
+        : (controller.finalScoreBreakdown?.velocityScore ?? 0);
+
+    final int tiltScore = (isWatching && replay?.tiltScore != null)
+        ? replay!.tiltScore!
+        : (controller.finalScoreBreakdown?.tiltScore ?? 0);
+
+    final int fuelScore = (isWatching && replay?.fuelScore != null)
+        ? replay!.fuelScore!
+        : (controller.finalScoreBreakdown?.fuelScore ?? 0);
+
+    final int baseScore = (isWatching && replay?.totalScore != null)
+        ? replay!.totalScore!
+        : (controller.finalScoreBreakdown?.totalScore ?? 0);
+
+    final double difficultyMultiplier = (isWatching && replay?.difficultyMultiplier != null)
+        ? replay!.difficultyMultiplier!
+        : (controller.finalScoreBreakdown?.difficultyMultiplier ?? 1.00);
 
     return Container(
       color: Colors.black.withValues(alpha: 0.8),
@@ -91,7 +141,7 @@ class GameOverModal extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${controller.finalScore}',
+                        '$finalScore',
                         style: GoogleFonts.shareTechMono(
                           color: Colors.white,
                           fontSize: 36,
@@ -99,7 +149,8 @@ class GameOverModal extends StatelessWidget {
                           letterSpacing: 4,
                         ),
                       ),
-                      if (controller.targetGhostReplay != null && !controller.isWatching) ...[
+                      if (controller.targetGhostReplay != null &&
+                          !controller.isWatching) ...[
                         const SizedBox(height: 8),
                         Divider(
                           color: Colors.cyan.shade700.withValues(alpha: 0.5),
@@ -137,10 +188,10 @@ class GameOverModal extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  '${controller.finalScore >= controller.targetGhostReplay!.score ? '+' : ''}${controller.finalScore - controller.targetGhostReplay!.score}',
+                                  '${finalScore >= controller.targetGhostReplay!.score ? '+' : ''}${finalScore - controller.targetGhostReplay!.score}',
                                   style: GoogleFonts.shareTechMono(
                                     color:
-                                        controller.finalScore >=
+                                        finalScore >=
                                                 controller
                                                     .targetGhostReplay!
                                                     .score
@@ -160,26 +211,19 @@ class GameOverModal extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
               ],
-              _buildStatRow(
-                'Landing Pad',
-                state.padIndex != null
-                    ? 'Segment ${state.padIndex}'
-                    : 'Off-pad Crash',
-                Colors.white70,
-              ),
               if (!isWin) ...[
                 _buildStatRow(
                   'Vert. Velocity',
-                  '${metrics.impactVelocityMetersPerSecond.toStringAsFixed(1)} m/s',
-                  metrics.impactVelocityMetersPerSecond >
+                  '${impactVelocity.toStringAsFixed(1)} m/s',
+                  impactVelocity >
                           ScoreBreakdown.maxLandingVelocityY
                       ? Colors.redAccent
                       : Colors.greenAccent,
                 ),
                 _buildStatRow(
                   'Horiz. Velocity',
-                  '${metrics.horizontalVelocityMetersPerSecond.abs().toStringAsFixed(1)} m/s',
-                  metrics.horizontalVelocityMetersPerSecond.abs() >
+                  '${horizontalVelocity.abs().toStringAsFixed(1)} m/s',
+                  horizontalVelocity.abs() >
                           ScoreBreakdown.maxLandingVelocityX
                       ? Colors.redAccent
                       : Colors.greenAccent,
@@ -187,43 +231,43 @@ class GameOverModal extends StatelessWidget {
               ] else ...[
                 _buildStatRow(
                   'Impact Velocity',
-                  '${metrics.impactVelocityMetersPerSecond.toStringAsFixed(1)} m/s',
-                  metrics.impactVelocityMetersPerSecond >
+                  '${impactVelocity.toStringAsFixed(1)} m/s',
+                  impactVelocity >
                           ScoreBreakdown.maxLandingVelocityY
                       ? Colors.redAccent
                       : Colors.greenAccent,
                   impactText:
                       isWin
-                          ? '${controller.finalScoreBreakdown!.velocityScore >= 0 ? '+' : ''}${controller.finalScoreBreakdown?.velocityScore ?? 0}'
+                          ? '${velocityScore >= 0 ? '+' : ''}$velocityScore'
                           : null,
                   impactColor:
-                      (controller.finalScoreBreakdown?.velocityScore ?? 0) >= 0
+                      velocityScore >= 0
                           ? Colors.greenAccent
                           : Colors.redAccent,
                 ),
               ],
               _buildStatRow(
                 'Tilt Delta',
-                '${metrics.finalTiltDeg.toStringAsFixed(1)}°',
-                metrics.finalTiltDeg > ScoreBreakdown.maxLandingTiltDegrees
+                '${finalTilt.toStringAsFixed(1)}°',
+                finalTilt > ScoreBreakdown.maxLandingTiltDegrees
                     ? Colors.redAccent
                     : Colors.greenAccent,
                 impactText:
                     isWin
-                        ? '${controller.finalScoreBreakdown!.tiltScore >= 0 ? '+' : ''}${controller.finalScoreBreakdown?.tiltScore ?? 0}'
+                        ? '${tiltScore >= 0 ? '+' : ''}$tiltScore'
                         : null,
                 impactColor:
-                    (controller.finalScoreBreakdown?.tiltScore ?? 0) >= 0
+                    tiltScore >= 0
                         ? Colors.greenAccent
                         : Colors.redAccent,
               ),
               _buildStatRow(
                 'Remaining Fuel',
-                '${state.fuelMass.floor()} kg',
+                '${remainingFuel.floor()} kg',
                 Colors.cyanAccent,
                 impactText:
                     isWin
-                        ? '+${controller.finalScoreBreakdown?.fuelScore ?? 0}'
+                        ? '+$fuelScore'
                         : null,
                 impactColor: Colors.greenAccent,
               ),
@@ -233,12 +277,12 @@ class GameOverModal extends StatelessWidget {
                 const SizedBox(height: 8),
                 _buildStatRow(
                   'Base Score',
-                  '${controller.finalScoreBreakdown?.totalScore ?? 0}',
+                  '$baseScore',
                   Colors.white70,
                 ),
                 _buildStatRow(
                   'Difficulty Multiplier',
-                  'x${controller.finalScoreBreakdown?.difficultyMultiplier.toStringAsFixed(2) ?? "1.00"}',
+                  'x${difficultyMultiplier.toStringAsFixed(2)}',
                   Colors.orangeAccent,
                 ),
               ],
@@ -269,7 +313,9 @@ class GameOverModal extends StatelessWidget {
                       onPressed: onNext,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.cyanAccent,
-                        side: BorderSide(color: Colors.cyanAccent.withValues(alpha: 0.5)),
+                        side: BorderSide(
+                          color: Colors.cyanAccent.withValues(alpha: 0.5),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: Text(

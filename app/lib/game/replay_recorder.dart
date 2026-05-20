@@ -103,13 +103,35 @@ class ReplayRecorder {
     ));
   }
 
-  GameReplay finalizeReplay({required int score}) {
+  GameReplay finalizeReplay({
+    required int score,
+    bool? isWin,
+    double? remainingFuel,
+    double? impactVelocity,
+    double? horizontalVelocity,
+    double? finalTilt,
+    int? fuelScore,
+    int? velocityScore,
+    int? tiltScore,
+    double? difficultyMultiplier,
+    int? totalScore,
+  }) {
     return GameReplay(
       userId: userId,
       score: score,
       levelSeed: levelSeed,
       actions: List.unmodifiable(_actions),
       durationMs: (_elapsedTimeSeconds * 1000).toInt(),
+      isWin: isWin,
+      remainingFuel: remainingFuel,
+      impactVelocity: impactVelocity,
+      horizontalVelocity: horizontalVelocity,
+      finalTilt: finalTilt,
+      fuelScore: fuelScore,
+      velocityScore: velocityScore,
+      tiltScore: tiltScore,
+      difficultyMultiplier: difficultyMultiplier,
+      totalScore: totalScore,
     );
   }
 }

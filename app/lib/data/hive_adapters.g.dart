@@ -23,13 +23,23 @@ class GameReplayAdapter extends TypeAdapter<GameReplay> {
       levelSeed: (fields[3] as num).toInt(),
       actions: (fields[4] as List).cast<ThrusterAction>(),
       durationMs: (fields[5] as num).toInt(),
+      isWin: fields[6] as bool?,
+      remainingFuel: (fields[7] as num?)?.toDouble(),
+      impactVelocity: (fields[8] as num?)?.toDouble(),
+      horizontalVelocity: (fields[9] as num?)?.toDouble(),
+      finalTilt: (fields[10] as num?)?.toDouble(),
+      fuelScore: (fields[11] as num?)?.toInt(),
+      velocityScore: (fields[12] as num?)?.toInt(),
+      tiltScore: (fields[13] as num?)?.toInt(),
+      difficultyMultiplier: (fields[14] as num?)?.toDouble(),
+      totalScore: (fields[15] as num?)?.toInt(),
     );
   }
 
   @override
   void write(BinaryWriter writer, GameReplay obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +51,27 @@ class GameReplayAdapter extends TypeAdapter<GameReplay> {
       ..writeByte(4)
       ..write(obj.actions)
       ..writeByte(5)
-      ..write(obj.durationMs);
+      ..write(obj.durationMs)
+      ..writeByte(6)
+      ..write(obj.isWin)
+      ..writeByte(7)
+      ..write(obj.remainingFuel)
+      ..writeByte(8)
+      ..write(obj.impactVelocity)
+      ..writeByte(9)
+      ..write(obj.horizontalVelocity)
+      ..writeByte(10)
+      ..write(obj.finalTilt)
+      ..writeByte(11)
+      ..write(obj.fuelScore)
+      ..writeByte(12)
+      ..write(obj.velocityScore)
+      ..writeByte(13)
+      ..write(obj.tiltScore)
+      ..writeByte(14)
+      ..write(obj.difficultyMultiplier)
+      ..writeByte(15)
+      ..write(obj.totalScore);
   }
 
   @override

@@ -302,7 +302,8 @@ as double,
 /// @nodoc
 mixin _$GameReplay {
 
- String get id; String get userId; int get score; int get levelSeed;@ThrusterActionConverter() List<ThrusterAction> get actions; int get durationMs;
+ String get id; String get userId; int get score; int get levelSeed;@ThrusterActionConverter() List<ThrusterAction> get actions; int get durationMs;// Original run metrics
+ bool? get isWin; double? get remainingFuel; double? get impactVelocity; double? get horizontalVelocity; double? get finalTilt; int? get fuelScore; int? get velocityScore; int? get tiltScore; double? get difficultyMultiplier; int? get totalScore;
 /// Create a copy of GameReplay
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -315,16 +316,16 @@ $GameReplayCopyWith<GameReplay> get copyWith => _$GameReplayCopyWithImpl<GameRep
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameReplay&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelSeed, levelSeed) || other.levelSeed == levelSeed)&&const DeepCollectionEquality().equals(other.actions, actions)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameReplay&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelSeed, levelSeed) || other.levelSeed == levelSeed)&&const DeepCollectionEquality().equals(other.actions, actions)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs)&&(identical(other.isWin, isWin) || other.isWin == isWin)&&(identical(other.remainingFuel, remainingFuel) || other.remainingFuel == remainingFuel)&&(identical(other.impactVelocity, impactVelocity) || other.impactVelocity == impactVelocity)&&(identical(other.horizontalVelocity, horizontalVelocity) || other.horizontalVelocity == horizontalVelocity)&&(identical(other.finalTilt, finalTilt) || other.finalTilt == finalTilt)&&(identical(other.fuelScore, fuelScore) || other.fuelScore == fuelScore)&&(identical(other.velocityScore, velocityScore) || other.velocityScore == velocityScore)&&(identical(other.tiltScore, tiltScore) || other.tiltScore == tiltScore)&&(identical(other.difficultyMultiplier, difficultyMultiplier) || other.difficultyMultiplier == difficultyMultiplier)&&(identical(other.totalScore, totalScore) || other.totalScore == totalScore));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,score,levelSeed,const DeepCollectionEquality().hash(actions),durationMs);
+int get hashCode => Object.hash(runtimeType,id,userId,score,levelSeed,const DeepCollectionEquality().hash(actions),durationMs,isWin,remainingFuel,impactVelocity,horizontalVelocity,finalTilt,fuelScore,velocityScore,tiltScore,difficultyMultiplier,totalScore);
 
 @override
 String toString() {
-  return 'GameReplay(id: $id, userId: $userId, score: $score, levelSeed: $levelSeed, actions: $actions, durationMs: $durationMs)';
+  return 'GameReplay(id: $id, userId: $userId, score: $score, levelSeed: $levelSeed, actions: $actions, durationMs: $durationMs, isWin: $isWin, remainingFuel: $remainingFuel, impactVelocity: $impactVelocity, horizontalVelocity: $horizontalVelocity, finalTilt: $finalTilt, fuelScore: $fuelScore, velocityScore: $velocityScore, tiltScore: $tiltScore, difficultyMultiplier: $difficultyMultiplier, totalScore: $totalScore)';
 }
 
 
@@ -335,7 +336,7 @@ abstract mixin class $GameReplayCopyWith<$Res>  {
   factory $GameReplayCopyWith(GameReplay value, $Res Function(GameReplay) _then) = _$GameReplayCopyWithImpl;
 @useResult
 $Res call({
- String id, String userId, int score, int levelSeed,@ThrusterActionConverter() List<ThrusterAction> actions, int durationMs
+ String id, String userId, int score, int levelSeed,@ThrusterActionConverter() List<ThrusterAction> actions, int durationMs, bool? isWin, double? remainingFuel, double? impactVelocity, double? horizontalVelocity, double? finalTilt, int? fuelScore, int? velocityScore, int? tiltScore, double? difficultyMultiplier, int? totalScore
 });
 
 
@@ -352,7 +353,7 @@ class _$GameReplayCopyWithImpl<$Res>
 
 /// Create a copy of GameReplay
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? score = null,Object? levelSeed = null,Object? actions = null,Object? durationMs = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? score = null,Object? levelSeed = null,Object? actions = null,Object? durationMs = null,Object? isWin = freezed,Object? remainingFuel = freezed,Object? impactVelocity = freezed,Object? horizontalVelocity = freezed,Object? finalTilt = freezed,Object? fuelScore = freezed,Object? velocityScore = freezed,Object? tiltScore = freezed,Object? difficultyMultiplier = freezed,Object? totalScore = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -360,7 +361,17 @@ as String,score: null == score ? _self.score : score // ignore: cast_nullable_to
 as int,levelSeed: null == levelSeed ? _self.levelSeed : levelSeed // ignore: cast_nullable_to_non_nullable
 as int,actions: null == actions ? _self.actions : actions // ignore: cast_nullable_to_non_nullable
 as List<ThrusterAction>,durationMs: null == durationMs ? _self.durationMs : durationMs // ignore: cast_nullable_to_non_nullable
-as int,
+as int,isWin: freezed == isWin ? _self.isWin : isWin // ignore: cast_nullable_to_non_nullable
+as bool?,remainingFuel: freezed == remainingFuel ? _self.remainingFuel : remainingFuel // ignore: cast_nullable_to_non_nullable
+as double?,impactVelocity: freezed == impactVelocity ? _self.impactVelocity : impactVelocity // ignore: cast_nullable_to_non_nullable
+as double?,horizontalVelocity: freezed == horizontalVelocity ? _self.horizontalVelocity : horizontalVelocity // ignore: cast_nullable_to_non_nullable
+as double?,finalTilt: freezed == finalTilt ? _self.finalTilt : finalTilt // ignore: cast_nullable_to_non_nullable
+as double?,fuelScore: freezed == fuelScore ? _self.fuelScore : fuelScore // ignore: cast_nullable_to_non_nullable
+as int?,velocityScore: freezed == velocityScore ? _self.velocityScore : velocityScore // ignore: cast_nullable_to_non_nullable
+as int?,tiltScore: freezed == tiltScore ? _self.tiltScore : tiltScore // ignore: cast_nullable_to_non_nullable
+as int?,difficultyMultiplier: freezed == difficultyMultiplier ? _self.difficultyMultiplier : difficultyMultiplier // ignore: cast_nullable_to_non_nullable
+as double?,totalScore: freezed == totalScore ? _self.totalScore : totalScore // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -445,10 +456,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId,  int score,  int levelSeed, @ThrusterActionConverter()  List<ThrusterAction> actions,  int durationMs)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId,  int score,  int levelSeed, @ThrusterActionConverter()  List<ThrusterAction> actions,  int durationMs,  bool? isWin,  double? remainingFuel,  double? impactVelocity,  double? horizontalVelocity,  double? finalTilt,  int? fuelScore,  int? velocityScore,  int? tiltScore,  double? difficultyMultiplier,  int? totalScore)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GameReplay() when $default != null:
-return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs);case _:
+return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs,_that.isWin,_that.remainingFuel,_that.impactVelocity,_that.horizontalVelocity,_that.finalTilt,_that.fuelScore,_that.velocityScore,_that.tiltScore,_that.difficultyMultiplier,_that.totalScore);case _:
   return orElse();
 
 }
@@ -466,10 +477,10 @@ return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId,  int score,  int levelSeed, @ThrusterActionConverter()  List<ThrusterAction> actions,  int durationMs)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId,  int score,  int levelSeed, @ThrusterActionConverter()  List<ThrusterAction> actions,  int durationMs,  bool? isWin,  double? remainingFuel,  double? impactVelocity,  double? horizontalVelocity,  double? finalTilt,  int? fuelScore,  int? velocityScore,  int? tiltScore,  double? difficultyMultiplier,  int? totalScore)  $default,) {final _that = this;
 switch (_that) {
 case _GameReplay():
-return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs);case _:
+return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs,_that.isWin,_that.remainingFuel,_that.impactVelocity,_that.horizontalVelocity,_that.finalTilt,_that.fuelScore,_that.velocityScore,_that.tiltScore,_that.difficultyMultiplier,_that.totalScore);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -486,10 +497,10 @@ return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId,  int score,  int levelSeed, @ThrusterActionConverter()  List<ThrusterAction> actions,  int durationMs)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId,  int score,  int levelSeed, @ThrusterActionConverter()  List<ThrusterAction> actions,  int durationMs,  bool? isWin,  double? remainingFuel,  double? impactVelocity,  double? horizontalVelocity,  double? finalTilt,  int? fuelScore,  int? velocityScore,  int? tiltScore,  double? difficultyMultiplier,  int? totalScore)?  $default,) {final _that = this;
 switch (_that) {
 case _GameReplay() when $default != null:
-return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs);case _:
+return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,_that.durationMs,_that.isWin,_that.remainingFuel,_that.impactVelocity,_that.horizontalVelocity,_that.finalTilt,_that.fuelScore,_that.velocityScore,_that.tiltScore,_that.difficultyMultiplier,_that.totalScore);case _:
   return null;
 
 }
@@ -501,7 +512,7 @@ return $default(_that.id,_that.userId,_that.score,_that.levelSeed,_that.actions,
 @JsonSerializable()
 
 class _GameReplay implements GameReplay {
-  const _GameReplay({this.id = '', required this.userId, required this.score, required this.levelSeed, @ThrusterActionConverter() required final  List<ThrusterAction> actions, required this.durationMs}): _actions = actions;
+  const _GameReplay({this.id = '', required this.userId, required this.score, required this.levelSeed, @ThrusterActionConverter() required final  List<ThrusterAction> actions, required this.durationMs, this.isWin, this.remainingFuel, this.impactVelocity, this.horizontalVelocity, this.finalTilt, this.fuelScore, this.velocityScore, this.tiltScore, this.difficultyMultiplier, this.totalScore}): _actions = actions;
   factory _GameReplay.fromJson(Map<String, dynamic> json) => _$GameReplayFromJson(json);
 
 @override@JsonKey() final  String id;
@@ -516,6 +527,17 @@ class _GameReplay implements GameReplay {
 }
 
 @override final  int durationMs;
+// Original run metrics
+@override final  bool? isWin;
+@override final  double? remainingFuel;
+@override final  double? impactVelocity;
+@override final  double? horizontalVelocity;
+@override final  double? finalTilt;
+@override final  int? fuelScore;
+@override final  int? velocityScore;
+@override final  int? tiltScore;
+@override final  double? difficultyMultiplier;
+@override final  int? totalScore;
 
 /// Create a copy of GameReplay
 /// with the given fields replaced by the non-null parameter values.
@@ -530,16 +552,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GameReplay&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelSeed, levelSeed) || other.levelSeed == levelSeed)&&const DeepCollectionEquality().equals(other._actions, _actions)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GameReplay&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelSeed, levelSeed) || other.levelSeed == levelSeed)&&const DeepCollectionEquality().equals(other._actions, _actions)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs)&&(identical(other.isWin, isWin) || other.isWin == isWin)&&(identical(other.remainingFuel, remainingFuel) || other.remainingFuel == remainingFuel)&&(identical(other.impactVelocity, impactVelocity) || other.impactVelocity == impactVelocity)&&(identical(other.horizontalVelocity, horizontalVelocity) || other.horizontalVelocity == horizontalVelocity)&&(identical(other.finalTilt, finalTilt) || other.finalTilt == finalTilt)&&(identical(other.fuelScore, fuelScore) || other.fuelScore == fuelScore)&&(identical(other.velocityScore, velocityScore) || other.velocityScore == velocityScore)&&(identical(other.tiltScore, tiltScore) || other.tiltScore == tiltScore)&&(identical(other.difficultyMultiplier, difficultyMultiplier) || other.difficultyMultiplier == difficultyMultiplier)&&(identical(other.totalScore, totalScore) || other.totalScore == totalScore));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,score,levelSeed,const DeepCollectionEquality().hash(_actions),durationMs);
+int get hashCode => Object.hash(runtimeType,id,userId,score,levelSeed,const DeepCollectionEquality().hash(_actions),durationMs,isWin,remainingFuel,impactVelocity,horizontalVelocity,finalTilt,fuelScore,velocityScore,tiltScore,difficultyMultiplier,totalScore);
 
 @override
 String toString() {
-  return 'GameReplay(id: $id, userId: $userId, score: $score, levelSeed: $levelSeed, actions: $actions, durationMs: $durationMs)';
+  return 'GameReplay(id: $id, userId: $userId, score: $score, levelSeed: $levelSeed, actions: $actions, durationMs: $durationMs, isWin: $isWin, remainingFuel: $remainingFuel, impactVelocity: $impactVelocity, horizontalVelocity: $horizontalVelocity, finalTilt: $finalTilt, fuelScore: $fuelScore, velocityScore: $velocityScore, tiltScore: $tiltScore, difficultyMultiplier: $difficultyMultiplier, totalScore: $totalScore)';
 }
 
 
@@ -550,7 +572,7 @@ abstract mixin class _$GameReplayCopyWith<$Res> implements $GameReplayCopyWith<$
   factory _$GameReplayCopyWith(_GameReplay value, $Res Function(_GameReplay) _then) = __$GameReplayCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String userId, int score, int levelSeed,@ThrusterActionConverter() List<ThrusterAction> actions, int durationMs
+ String id, String userId, int score, int levelSeed,@ThrusterActionConverter() List<ThrusterAction> actions, int durationMs, bool? isWin, double? remainingFuel, double? impactVelocity, double? horizontalVelocity, double? finalTilt, int? fuelScore, int? velocityScore, int? tiltScore, double? difficultyMultiplier, int? totalScore
 });
 
 
@@ -567,7 +589,7 @@ class __$GameReplayCopyWithImpl<$Res>
 
 /// Create a copy of GameReplay
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? score = null,Object? levelSeed = null,Object? actions = null,Object? durationMs = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? score = null,Object? levelSeed = null,Object? actions = null,Object? durationMs = null,Object? isWin = freezed,Object? remainingFuel = freezed,Object? impactVelocity = freezed,Object? horizontalVelocity = freezed,Object? finalTilt = freezed,Object? fuelScore = freezed,Object? velocityScore = freezed,Object? tiltScore = freezed,Object? difficultyMultiplier = freezed,Object? totalScore = freezed,}) {
   return _then(_GameReplay(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -575,7 +597,17 @@ as String,score: null == score ? _self.score : score // ignore: cast_nullable_to
 as int,levelSeed: null == levelSeed ? _self.levelSeed : levelSeed // ignore: cast_nullable_to_non_nullable
 as int,actions: null == actions ? _self._actions : actions // ignore: cast_nullable_to_non_nullable
 as List<ThrusterAction>,durationMs: null == durationMs ? _self.durationMs : durationMs // ignore: cast_nullable_to_non_nullable
-as int,
+as int,isWin: freezed == isWin ? _self.isWin : isWin // ignore: cast_nullable_to_non_nullable
+as bool?,remainingFuel: freezed == remainingFuel ? _self.remainingFuel : remainingFuel // ignore: cast_nullable_to_non_nullable
+as double?,impactVelocity: freezed == impactVelocity ? _self.impactVelocity : impactVelocity // ignore: cast_nullable_to_non_nullable
+as double?,horizontalVelocity: freezed == horizontalVelocity ? _self.horizontalVelocity : horizontalVelocity // ignore: cast_nullable_to_non_nullable
+as double?,finalTilt: freezed == finalTilt ? _self.finalTilt : finalTilt // ignore: cast_nullable_to_non_nullable
+as double?,fuelScore: freezed == fuelScore ? _self.fuelScore : fuelScore // ignore: cast_nullable_to_non_nullable
+as int?,velocityScore: freezed == velocityScore ? _self.velocityScore : velocityScore // ignore: cast_nullable_to_non_nullable
+as int?,tiltScore: freezed == tiltScore ? _self.tiltScore : tiltScore // ignore: cast_nullable_to_non_nullable
+as int?,difficultyMultiplier: freezed == difficultyMultiplier ? _self.difficultyMultiplier : difficultyMultiplier // ignore: cast_nullable_to_non_nullable
+as double?,totalScore: freezed == totalScore ? _self.totalScore : totalScore // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

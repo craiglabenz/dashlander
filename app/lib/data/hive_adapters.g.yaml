@@ -5,7 +5,7 @@ nextTypeId: 3
 types:
   GameReplay:
     typeId: 0
-    nextIndex: 6
+    nextIndex: 16
     fields:
       id:
         index: 0
@@ -19,6 +19,26 @@ types:
         index: 4
       durationMs:
         index: 5
+      isWin:
+        index: 6
+      remainingFuel:
+        index: 7
+      impactVelocity:
+        index: 8
+      horizontalVelocity:
+        index: 9
+      finalTilt:
+        index: 10
+      fuelScore:
+        index: 11
+      velocityScore:
+        index: 12
+      tiltScore:
+        index: 13
+      difficultyMultiplier:
+        index: 14
+      totalScore:
+        index: 15
   ThrusterAction:
     typeId: 1
     nextIndex: 9
