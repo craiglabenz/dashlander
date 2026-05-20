@@ -35,3 +35,6 @@ migrate_working_dir/
 
 # Firebase related
 .firebase/
+
+# Flutter build
+web/app/
