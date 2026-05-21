@@ -278,10 +278,20 @@ class LevelGenerator {
       double distDeg = (dist / segments) * 360.0;
       double multiplier = 0.5 + (distDeg / 180.0) * 1.5; // 0.5 to 2.0 based on distance
       
+      // Factor in the landing pad length to the difficulty multiplier
+      if (padWidth == 1) {
+        multiplier *= 1.5; // difficulty boost
+      } else if (padWidth == 3) {
+        multiplier *= 0.75; // difficulty penalty
+      } else if (padWidth > 3) {
+        multiplier *= 0.5; // even more penalty
+      }
+
       for (int i = 0; i < padWidth; i++) {
         padMultipliers[(p + i) % segments] = multiplier;
       }
     }
+
 
     return LevelData(
       id: seed,

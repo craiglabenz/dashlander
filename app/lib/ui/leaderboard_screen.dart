@@ -66,7 +66,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                               color: Colors.cyanAccent,
                               shadows: [
                                 BoxShadow(
-                                  color: Colors.cyanAccent.withValues(alpha: 0.8),
+                                  color: Colors.cyanAccent.withValues(
+                                    alpha: 0.8,
+                                  ),
                                   blurRadius: 15,
                                 ),
                               ],
@@ -119,8 +121,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   // Sort by score descending
                   replays.sort((a, b) => b.score.compareTo(a.score));
 
-                  final String? currentInitials =
-                      prefs.getString('user_name');
+                  final String? currentInitials = prefs.getString('user_name');
 
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(
@@ -182,9 +183,10 @@ class _LeaderboardRowState extends State<_LeaderboardRow> {
         final scoreFontSize = isMobile ? 18.0 : 28.0;
         final detailsFontSize = isMobile ? 11.0 : 14.0;
         final rankWidth = isMobile ? 35.0 : 50.0;
-        final buttonPadding = isMobile
-            ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
-            : const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+        final buttonPadding =
+            isMobile
+                ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
+                : const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
         final buttonFontSize = isMobile ? 12.0 : 14.0;
 
         Widget buildWatchButton() {
@@ -225,7 +227,7 @@ class _LeaderboardRowState extends State<_LeaderboardRow> {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'REPLAY',
+                  'CHALLENGE',
                   style: GoogleFonts.shareTechMono(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -245,17 +247,21 @@ class _LeaderboardRowState extends State<_LeaderboardRow> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               border: Border.all(
-                color: widget.isMine
-                    ? Colors.amberAccent
-                    : (isHovered ? Colors.pinkAccent : Colors.cyan.shade900),
+                color:
+                    widget.isMine
+                        ? Colors.amberAccent
+                        : (isHovered
+                            ? Colors.pinkAccent
+                            : Colors.cyan.shade900),
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(8),
-              color: widget.isMine
-                  ? Colors.amber.withValues(alpha: 0.1)
-                  : (isHovered
-                      ? Colors.pinkAccent.withValues(alpha: 0.1)
-                      : Colors.transparent),
+              color:
+                  widget.isMine
+                      ? Colors.amber.withValues(alpha: 0.1)
+                      : (isHovered
+                          ? Colors.pinkAccent.withValues(alpha: 0.1)
+                          : Colors.transparent),
             ),
             child: Row(
               children: [
@@ -278,7 +284,8 @@ class _LeaderboardRowState extends State<_LeaderboardRow> {
                         widget.replay.userId + (widget.isMine ? ' (YOU)' : ''),
                         style: GoogleFonts.shareTechMono(
                           fontSize: nameFontSize,
-                          color: widget.isMine ? Colors.amberAccent : Colors.white,
+                          color:
+                              widget.isMine ? Colors.amberAccent : Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
