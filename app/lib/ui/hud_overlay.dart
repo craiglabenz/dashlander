@@ -26,163 +26,151 @@ class HudOverlay extends StatelessWidget {
                 child: SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 800),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.teal.shade900.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.teal.shade800.withValues(alpha: 0.6),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 12.0,
-                          ),
-                          child: Row(
-                            children: [
-                              // Pause / Exit button
-                              Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: onExit,
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(8),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Colors.white70,
-                                      size: 20,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 800),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.teal.shade900.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.teal.shade800.withValues(alpha: 0.6),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 12.0,
+                              ),
+                              child: Row(
+                                children: [
+                                  // Pause / Exit button
+                                  Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: onExit,
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.white70,
+                                          size: 20,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 3,
+                                          child: _buildFuelGauge(
+                                            data.fuel,
+                                            data.maxFuel,
+                                            scale,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: _buildTelemetryItem(
+                                            'V.SPD',
+                                            '${data.vY.toStringAsFixed(1)} m/s',
+                                            data.vY >
+                                                    ScoreBreakdown
+                                                        .maxLandingVelocityY
+                                                ? Colors.redAccent
+                                                : Colors.cyanAccent,
+                                            scale,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: _buildTelemetryItem(
+                                            'H.SPD',
+                                            '${data.vX.abs().toStringAsFixed(1)} m/s',
+                                            data.vX.abs() >
+                                                    ScoreBreakdown
+                                                        .maxLandingVelocityX
+                                                ? Colors.redAccent
+                                                : Colors.cyanAccent,
+                                            scale,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: _buildTelemetryItem(
+                                            'TILT',
+                                            '${data.tilt.toStringAsFixed(1)}°',
+                                            data.tilt >
+                                                    ScoreBreakdown
+                                                        .maxLandingTiltDegrees
+                                                ? Colors.redAccent
+                                                : Colors.cyanAccent,
+                                            scale,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: _buildTelemetryItem(
+                                            'ALT',
+                                            '${data.height.toStringAsFixed(1)} m',
+                                            Colors.cyanAccent,
+                                            scale,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 3,
-                                      child: _buildFuelGauge(
-                                        data.fuel,
-                                        data.maxFuel,
-                                        scale,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: _buildTelemetryItem(
-                                        'V.SPD',
-                                        '${data.vY.toStringAsFixed(1)} m/s',
-                                        data.vY >
-                                                ScoreBreakdown
-                                                    .maxLandingVelocityY
-                                            ? Colors.redAccent
-                                            : Colors.cyanAccent,
-                                        scale,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: _buildTelemetryItem(
-                                        'H.SPD',
-                                        '${data.vX.abs().toStringAsFixed(1)} m/s',
-                                        data.vX.abs() >
-                                                ScoreBreakdown
-                                                    .maxLandingVelocityX
-                                            ? Colors.redAccent
-                                            : Colors.cyanAccent,
-                                        scale,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: _buildTelemetryItem(
-                                        'TILT',
-                                        '${data.tilt.toStringAsFixed(1)}°',
-                                        data.tilt >
-                                                ScoreBreakdown
-                                                    .maxLandingTiltDegrees
-                                            ? Colors.redAccent
-                                            : Colors.cyanAccent,
-                                        scale,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: _buildTelemetryItem(
-                                        'ALT',
-                                        '${data.height.toStringAsFixed(1)} m',
-                                        Colors.cyanAccent,
-                                        scale,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              if (data.debugModeEnabled)
-                Positioned(
-                  top: 100, // Just below the HUD
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.shade900.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.purpleAccent.withValues(alpha: 0.5),
+                        if (data.debugModeEnabled) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.shade900.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.purpleAccent.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Text(
+                              'INDEX BELOW: ${data.terrainIndexBelow}',
+                              style: GoogleFonts.shareTechMono(
+                                color: Colors.purpleAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 8),
+                        Minimap(
+                          telemetry: data,
+                          levelData: controller.currentLevel!,
+                          size: 90,
                         ),
-                      ),
-                      child: Text(
-                        'INDEX BELOW: ${data.terrainIndexBelow}',
-                        style: GoogleFonts.shareTechMono(
-                          color: Colors.purpleAccent,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16.0, bottom: 4.0),
-                        child: Text(
+                        const SizedBox(height: 4),
+                        Text(
                           'SEED: ${controller.currentLevel!.id}',
                           style: GoogleFonts.shareTechMono(
                             color: Colors.greenAccent,
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-
-                      Minimap(
-                        telemetry: data,
-                        levelData: controller.currentLevel!,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

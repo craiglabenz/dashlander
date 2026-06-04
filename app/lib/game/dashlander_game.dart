@@ -44,7 +44,8 @@ class DashlanderGame extends FlameGame
   ui.FragmentProgram? _bloomProgram;
   ui.FragmentShader? _bloomShader;
 
-  JoystickComponent? joystick;
+  JoystickComponent? leftJoystick;
+  JoystickComponent? rightJoystick;
 
   bool _isKeyboardLeft = false;
   bool _isKeyboardRight = false;
@@ -194,19 +195,31 @@ class DashlanderGame extends FlameGame
         (defaultTargetPlatform == TargetPlatform.iOS ||
             defaultTargetPlatform == TargetPlatform.android ||
             (kIsWeb && size.x < 800))) {
-      joystick = JoystickComponent(
+      leftJoystick = JoystickComponent(
         knob: CircleComponent(
-          radius: 30,
-          paint: Paint()..color = Colors.white.withValues(alpha: 0.8),
+          radius: 25,
+          paint: Paint()..color = Colors.cyanAccent.withValues(alpha: 0.7),
         ),
-        background: JoystickHUDBackground(
-          radius: 80,
-          paint: Paint()..color = Colors.white.withValues(alpha: 0.15),
-          getShipAngle: () => landerState.angle - camera.viewfinder.angle,
+        background: ThrusterJoystickBackground(
+          radius: 60,
+          paint: Paint()..color = Colors.cyanAccent.withValues(alpha: 0.05),
+        ),
+        margin: const EdgeInsets.only(left: 40, bottom: 40),
+      );
+      camera.viewport.add(leftJoystick!);
+
+      rightJoystick = JoystickComponent(
+        knob: CircleComponent(
+          radius: 25,
+          paint: Paint()..color = Colors.pinkAccent.withValues(alpha: 0.7),
+        ),
+        background: RcsJoystickBackground(
+          radius: 60,
+          paint: Paint()..color = Colors.pinkAccent.withValues(alpha: 0.05),
         ),
         margin: const EdgeInsets.only(right: 40, bottom: 40),
       );
-      camera.viewport.add(joystick!);
+      camera.viewport.add(rightJoystick!);
     }
   }
 
@@ -255,65 +268,31 @@ class DashlanderGame extends FlameGame
   }
 
   void _fixedUpdate(double dt) {
-    if (joystick != null) {
-      final delta = joystick!.relativeDelta;
-      if (delta.length < 0.15) {
-        if (_isJoystickUp || _isJoystickLeft || _isJoystickRight) {
-          _isJoystickUp = false;
-          _isJoystickLeft = false;
-          _isJoystickRight = false;
-          _updateCombinedInputState();
-        }
-      } else {
-        // Calculate joystick angle in screen space:
-        // 0 is straight UP, positive is clockwise (right), negative is counter-clockwise (left)
-        final joystickAngle = atan2(delta.x, -delta.y);
-        
-        // Factor in the ship's screen-space visual tilt (accounting for camera rotation)
-        // so that UP on the dial is aligned with the ship's nose as seen on the screen:
-        final cameraAngle = atan2(landerState.position.x, -landerState.position.y);
-        final screenSpaceShipAngle = landerState.angle - cameraAngle;
-        double relativeAngle = joystickAngle - screenSpaceShipAngle;
-        
-        // Normalize the relative angle to the range [-pi, pi] to ensure continuous wrapping
-        while (relativeAngle < -pi) {
-          relativeAngle += 2 * pi;
-        }
-        while (relativeAngle > pi) {
-          relativeAngle -= 2 * pi;
-        }
-        
-        final angleDeg = relativeAngle * 180 / pi;
+    bool changed = false;
 
-        if (angleDeg.abs() <= 30) {
-          // Zone 1: Straight UP (+/- 30 deg) -> Main thruster only
-          _isJoystickUp = true;
-          _isJoystickLeft = false;
-          _isJoystickRight = false;
-        } else if (angleDeg > 30 && angleDeg <= 90) {
-          // Zone 2: Up-Right (30 to 90 deg) -> Main thruster + Right RCS (turn clockwise)
-          _isJoystickUp = true;
-          _isJoystickLeft = false;
-          _isJoystickRight = true;
-        } else if (angleDeg < -30 && angleDeg >= -90) {
-          // Zone 3: Up-Left (-90 to -30 deg) -> Main thruster + Left RCS (turn counter-clockwise)
-          _isJoystickUp = true;
-          _isJoystickLeft = true;
-          _isJoystickRight = false;
-        } else if (angleDeg > 90 && angleDeg <= 180) {
-          // Zone 4: Bottom-Right (90 to 180 deg) -> Right RCS only
-          _isJoystickUp = false;
-          _isJoystickLeft = false;
-          _isJoystickRight = true;
-        } else if (angleDeg < -90 && angleDeg >= -180) {
-          // Zone 5: Bottom-Left (-180 to -90 deg) -> Left RCS only
-          _isJoystickUp = false;
-          _isJoystickLeft = true;
-          _isJoystickRight = false;
-        }
-
-        _updateCombinedInputState();
+    if (leftJoystick != null) {
+      final leftDelta = leftJoystick!.relativeDelta;
+      final bool newUp = leftDelta.y < -0.15;
+      if (_isJoystickUp != newUp) {
+        _isJoystickUp = newUp;
+        changed = true;
       }
+    }
+
+    if (rightJoystick != null) {
+      final rightDelta = rightJoystick!.relativeDelta;
+      final bool newLeft = rightDelta.x < -0.15;
+      final bool newRight = rightDelta.x > 0.15;
+
+      if (_isJoystickLeft != newLeft || _isJoystickRight != newRight) {
+        _isJoystickLeft = newLeft;
+        _isJoystickRight = newRight;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      _updateCombinedInputState();
     }
 
     super.update(dt);
@@ -487,63 +466,87 @@ class DashlanderGame extends FlameGame
   }
 }
 
-class JoystickHUDBackground extends CircleComponent {
-  final double Function() getShipAngle;
-
-  JoystickHUDBackground({
+class ThrusterJoystickBackground extends CircleComponent {
+  ThrusterJoystickBackground({
     required super.radius,
     required super.paint,
-    required this.getShipAngle,
   });
 
   @override
   void render(Canvas canvas) {
-    // 1. Draw the transparent background circle first
     super.render(canvas);
 
     final center = Offset(radius, radius);
-    final shipAngle = getShipAngle();
 
-    // High-tech sci-fi theme paints
-    final paintZoneDivider = Paint()
-      ..color = Colors.cyanAccent.withValues(alpha: 0.3)
+    // Outer ring matching theme
+    final paintRing = Paint()
+      ..color = Colors.cyanAccent.withValues(alpha: 0.25)
+      ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
+    canvas.drawCircle(center, radius, paintRing);
 
-    final paintNose = Paint()
-      ..color = Colors.pinkAccent.withValues(alpha: 0.8)
-      ..strokeWidth = 2.5;
-
-    // Sector boundary angles relative to the ship's nose:
-    // Zone 1 (Main only): [-30, 30] deg -> boundaries at +/-30 deg
-    // Zone 2/3 (Main + RCS): [30, 90] / [-90, -30] deg -> boundaries at +/-90 deg
-    // Zone 4/5 (RCS only): [90, 180] / [-180, -90] deg -> boundary at 180 deg
-    final boundaries = [
-      shipAngle - 30 * pi / 180,
-      shipAngle + 30 * pi / 180,
-      shipAngle - 90 * pi / 180,
-      shipAngle + 90 * pi / 180,
-      shipAngle + 180 * pi / 180,
-    ];
-
-    void drawRay(double angle, Paint paint, {double lengthFactor = 1.0}) {
-      final dx = sin(angle) * radius * lengthFactor;
-      final dy = -cos(angle) * radius * lengthFactor;
-      canvas.drawLine(center, center + Offset(dx, dy), paint);
-    }
-
-    // 2. Draw partition boundaries
-    for (final angle in boundaries) {
-      drawRay(angle, paintZoneDivider, lengthFactor: 0.95);
-    }
-
-    // 3. Draw ship's nose reference ray (center of the main thruster zone)
-    drawRay(shipAngle, paintNose, lengthFactor: 1.0);
-
-    // 4. Draw an inner concentric tech reticle ring
-    final paintReticle = Paint()
+    // Vertical thrust track
+    final paintTrack = Paint()
       ..color = Colors.cyanAccent.withValues(alpha: 0.15)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-    canvas.drawCircle(center, radius * 0.4, paintReticle);
+      ..strokeWidth = 2.0;
+    canvas.drawLine(center, Offset(radius, radius * 0.2), paintTrack);
+
+    // Up arrow icon
+    final paintArrow = Paint()
+      ..color = Colors.cyanAccent.withValues(alpha: 0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    final path = Path()
+      ..moveTo(radius - 8, radius * 0.35)
+      ..lineTo(radius, radius * 0.2)
+      ..lineTo(radius + 8, radius * 0.35);
+    canvas.drawPath(path, paintArrow);
+  }
+}
+
+class RcsJoystickBackground extends CircleComponent {
+  RcsJoystickBackground({
+    required super.radius,
+    required super.paint,
+  });
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+
+    final center = Offset(radius, radius);
+
+    // Outer ring matching theme
+    final paintRing = Paint()
+      ..color = Colors.pinkAccent.withValues(alpha: 0.25)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    canvas.drawCircle(center, radius, paintRing);
+
+    // Horizontal RCS track
+    final paintTrack = Paint()
+      ..color = Colors.pinkAccent.withValues(alpha: 0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawLine(Offset(radius * 0.2, radius), Offset(radius * 1.8, radius), paintTrack);
+
+    // Left and right arrow icons
+    final paintArrow = Paint()
+      ..color = Colors.pinkAccent.withValues(alpha: 0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final leftPath = Path()
+      ..moveTo(radius * 0.35, radius - 8)
+      ..lineTo(radius * 0.2, radius)
+      ..lineTo(radius * 0.35, radius + 8);
+    canvas.drawPath(leftPath, paintArrow);
+
+    final rightPath = Path()
+      ..moveTo(radius * 1.65, radius - 8)
+      ..lineTo(radius * 1.8, radius)
+      ..lineTo(radius * 1.65, radius + 8);
+    canvas.drawPath(rightPath, paintArrow);
   }
 }
